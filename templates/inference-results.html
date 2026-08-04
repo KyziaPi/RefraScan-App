@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+
+{% block title %}
+RefraScan - Inference Results
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="/static/css/inference-results.css" />
+{% endblock %}
+
+{% block main %}
+		<div class="inference-engine-results-results section1">
+			<h2 class="inference-engine-results-subtitle1">Pre-Screening Results</h2>
+			
+			<div class="screening-result-table-container">
+				<div class="screening-result-table-container-container1">
+					<p class="screening-result-table-container-text screening-result-table-container-text-left"><b class="bold">ID:</b> 000004</p>
+					<p class="screening-result-table-container-text1 text3">File Name:<span class="sub-text"> 0004.jpg</span></p>
+					<p class="screening-result-table-container-text screening-result-table-container-text-right"><b class="bold">Date:</b> 04-18-2026</p>
+				</div>
+				
+				<div class="screening-result-table-container-container2">
+					<p>
+						Predicted Classification:<span class="sub-text"> Myopia (94.2%)</span>
+					</p>
+					<p>Risk Score:<span class="sub-text"> 97.9%</span></p>
+					<p class="text1">
+						<b class="bold">Screening:</b> Refer for eye examination
+					</p>
+				</div>
+			</div>
+			
+			<div class="inference-engine-results-container1">
+				<div class="inference-engine-results-container2">
+					<h2 class="subtitle">Probability Breakdown</h2>
+					
+					<div class="inference-engine-results-container3">
+						<div class="container-a container1">
+							<div class="container-container1">
+								<p class="container-text1">Myopia</p>
+								<p class="container-text2">94.2%</p>
+							</div>
+							
+							<div class="container-container2">
+								<div class="container-container3"></div>
+							</div>
+						</div>
+						
+						<div class="container-a container2">
+							<div class="container-container1">
+								<p class="container-text1">Hyperopia</p>
+								<p class="container-text2">3.7%</p>
+							</div>
+							
+							<div class="container-container2">
+								<div class="container-container3"></div>
+							</div>
+						</div>
+						
+						<div class="container-a container3">
+							<div class="container-container1">
+								<p class="container-text1">Normal</p>
+								<p class="container-text2">2.1%</p>
+							</div>
+							
+							<div class="container-container2">
+								<div class="container-container3"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="inference-engine-results-container4">
+					<h2 class="subtitle">Interpretability</h2>
+					
+					<div class="inference-engine-results-container5">
+						<div class="inference-engine-results-container6">
+							<p>Original Image</p>
+							
+							<div class="original-img-container">
+								<img src="static/assets/sample-fundus.png" class="original-img-container-img-selected" />
+							</div>
+						</div>
+						
+						<div class="inference-engine-results-container7">
+							<p>Attention Heatmap</p>
+							
+							<div class="attention-heatmap-container">
+								<div class="attention-heatmap-container-circle"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="inference-engine-results-container8">
+				<p class="inference-engine-results-text-paragraph3">Note:</p>
+				<p class="inference-engine-results-text-paragraph4">
+					The heatmap highlights retinal regions prioritized by the EfficientNetB3 architecture.
+				</p>
+			</div>
+		</div>
+{% endblock %}

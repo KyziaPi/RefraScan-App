@@ -1,0 +1,83 @@
+.inference-engine-body-a {
+	display: flex;
+	flex-direction: column;
+	background-color: #f9fafb;
+	margin-top: 7rem;
+}
+
+.inference-engine-main-content {
+	gap: 4.8rem;
+	color: #0a0a0a;
+	padding-bottom: 14.7rem;
+}
+
+
+
+/* input-group */
+
+.input-group {
+	width: 100%;
+	max-width: 84.8rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2.5rem;
+	padding: 0 2.1rem;
+}
+
+.input-age-container {
+	margin-left: -0.1rem;
+	width: 14.6rem;
+	text-align: center;
+	background-color: unset;
+	padding: 1.5rem 4.8rem;
+	border: 2px solid #d1d5dc;
+	border-radius: 10px;
+}
+/* end input-group*/
+
+
+.inference-engine-title {
+	width: 100%;
+	max-width: 84.9rem;
+}
+
+.inference-insert-img {
+	margin-top: 0.3rem;
+	width: 100%;
+	max-width: 84.8rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.8rem;
+	--min-font-size: 1.6; --max-font-size: 2; font-size: var(--interpolate);
+	font-weight: 400;
+	line-height: 1.4;
+	padding: 6.2rem 6.3rem 6.6rem 6.3rem;
+	border: 4px dashed #d1d5dc;
+	border-radius: 10px;
+}
+
+.inference-insert-img-text-paragraph4 {
+	color: #6a7282;
+}
+
+.input-group1 .input-group-btn-main {
+	width: 20.1rem;
+	font-weight: 500;
+}
+
+
+
+/** breakpoints (margin / paddings) **/
+
+@media screen and (max-width: 1024px) {
+	.inference-insert-img {
+		padding-inline: var(--margin-md);
+	}
+}
+
+@media screen and (max-width: 576px) {
+	.inference-insert-img {
+		padding-inline: var(--margin-sm);
+	}
+}

@@ -1,0 +1,319 @@
+.inference-engine-results-results {
+	container: inference-engine-results-results / inline-size;
+	gap: 3rem;
+	color: #0a0a0a;
+	padding-bottom: 6.4rem;
+}
+
+.inference-engine-results-subtitle1 {
+	width: 100%;
+	max-width: 97.7rem;
+	--min-font-size: 2; --max-font-size: 3; font-size: var(--interpolate);
+	font-weight: 500;
+	line-height: 1.2;
+}
+
+.screening-result-table-container {
+	container: screening-result-table-container / inline-size;
+	margin-top: 0.5rem;
+	width: 100%;
+	max-width: 97.6rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1.8rem;
+	line-height: 1.5;
+	background-color: #fff;
+	padding: 2.2rem 2.4rem 2.6rem 2.4rem;
+	border-radius: 10px;
+}
+
+.screening-result-table-container-container1 {
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	gap: 16.9rem;
+	font-size: 1.6rem;
+	font-weight: 400;
+	padding: 0 2.3rem;
+}
+
+.screening-result-table-container-text {
+	text-align: center;
+}
+
+.screening-result-table-container-text-left {
+	margin-left: 1.9rem;
+}
+
+.screening-result-table-container-text1 {
+	margin-left: 4rem;
+	text-align: center;
+}
+
+.screening-result-table-container-container2 {
+	display: flex;
+	flex-direction: column;
+	gap: 0.8rem;
+	--min-font-size: 1.5; --max-font-size: 1.6; font-size: var(--interpolate);
+	font-weight: 600;
+	padding: 1.4rem 2.3rem 0 2.3rem;
+	border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.inference-engine-results-container1 {
+	width: 100%;
+	max-width: 97.6rem;
+	display: flex;
+	align-items: flex-start;
+	gap: 2.9rem;
+}
+
+.inference-engine-results-container2 {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 2.4rem;
+	flex-grow: 1;
+	text-align: left;
+}
+
+.inference-engine-results-container3 {
+	margin-right: 0.3rem;
+	display: flex;
+	flex-direction: column;
+	gap: 2.2rem;
+	font-size: 1.6rem;
+	line-height: 1.5;
+}
+
+
+
+/* container-a */
+
+.container-a {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.container-container1 {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+}
+
+.container-text1 {
+	font-weight: 500;
+	text-align: left;
+}
+
+.container-text2 {
+	font-weight: 600;
+	text-align: left;
+}
+
+.container-container2 {
+	background-color: #e5e7eb;
+	border-radius: 3.402820018375656e+38px;
+}
+
+.container-container3 {
+	height: 3.2rem;
+	border-radius: 3.402820018375656e+38px;
+}
+/* end container-a*/
+
+
+.container1 .container-text2 {
+	margin-right: -0.5rem;
+}
+
+.container1 .container-container2 {
+	padding-right: 2.7rem;
+}
+
+.container1 .container-container3 {
+	background-color: #00bc7d;
+}
+
+.container2 {
+	gap: 0.8rem;
+}
+
+.container2 .container-text1 {
+	margin-top: 0.2rem;
+}
+
+.container2 .container-text2 {
+	margin-right: -0.3rem;
+}
+
+.container2 .container-container2 {
+	padding-right: 45.5rem;
+}
+
+.container2 .container-container3 {
+	background-color: #ad46ff;
+}
+
+.container3 .container-text2 {
+	margin-right: -0.2rem;
+}
+
+.container3 .container-container2 {
+	padding-right: 46.2rem;
+}
+
+.container3 .container-container3 {
+	background-color: #f0b100;
+}
+
+.inference-engine-results-container4 {
+	container: inference-engine-results-container4 / inline-size;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 2.4rem;
+	flex-grow: 1;
+	text-align: left;
+}
+
+.inference-engine-results-container5 {
+	display: flex;
+	align-items: flex-start;
+	gap: 1.6rem;
+	font-size: 1.6rem;
+	font-weight: 400;
+	line-height: 1.5;
+}
+
+.inference-engine-results-container6 {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	flex-grow: 1;
+	text-align: center;
+}
+
+.original-img-container {
+	background-color: #000;
+	padding: 4.2rem 0.1rem;
+	border: 2px solid #d1d5dc;
+	border-radius: 10px;
+}
+
+.original-img-container-img-selected {
+	border-radius: 4.99px;
+}
+
+.inference-engine-results-container7 {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	flex-grow: 1;
+	text-align: center;
+}
+
+.attention-heatmap-container {
+	background: linear-gradient(135deg, #1c398e 0%, #1447e6 50%, #2b7fff 100%) top left / auto auto no-repeat;
+	padding: 10.2rem 8.8rem;
+	border: 2px solid #d1d5dc;
+	border-radius: 10px;
+}
+
+.attention-heatmap-container-circle {
+	filter: blur(24px);
+	opacity: 0.8;
+	width: 4.8rem; height: 4.8rem;
+	background-color: #fff085;
+	border-radius: 50%;
+}
+
+.inference-engine-results-container8 {
+	margin-top: 0.2rem;
+	width: 100%;
+	max-width: 97.6rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.8rem;
+	color: #4a5565;
+	font-size: 1.4rem;
+	line-height: 1.429;
+	text-align: left;
+	background-color: #f3f4f6;
+	padding: 1.5rem 1.6rem 1.7rem 1.6rem;
+	border-radius: 10px;
+}
+
+.inference-engine-results-text-paragraph3 {
+	font-weight: 600;
+}
+
+.inference-engine-results-text-paragraph4 {
+	font-weight: 400;
+}
+
+
+
+/** breakpoints (margin / paddings) **/
+
+@media screen and (max-width: 1024px) {
+	.screening-result-table-container {
+		padding-inline: var(--margin-sm);
+	}
+	.screening-result-table-container-container1 {
+		padding-inline: 0;
+	}
+	.screening-result-table-container-container2 {
+		padding-inline: var(--margin-sm);
+	}
+	.inference-engine-results-container3 {
+		margin-inline: 0;
+	}
+}
+
+
+
+/* container queries (flex rows) */
+
+@container screening-result-table-container (width < 792px) {
+	.screening-result-table-container-container1 {
+		flex-direction: column;
+		align-items: center;
+		gap: 1.3rem;
+	}
+	.screening-result-table-container-container1 > * {
+		margin-left: unset !important;
+		text-align: center;
+	}
+}
+
+@container inference-engine-results-results (width < 975px) {
+	.inference-engine-results-container1 {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 4.1rem;
+	}
+	.inference-engine-results-container1 > .inference-engine-results-container2 {
+		width: 100%;
+	}
+	.inference-engine-results-container1 > .inference-engine-results-container4 {
+		width: 100%;
+	}
+}
+
+@container inference-engine-results-container4 (width < 471px) {
+	.inference-engine-results-container5 {
+		flex-direction: column;
+		align-items: center;
+		gap: 1.01rem;
+	}
+	.inference-engine-results-container5 > .inference-engine-results-container6 {
+		width: 100%;
+	}
+	.inference-engine-results-container5 > .inference-engine-results-container7 {
+		width: 100%;
+	}
+}

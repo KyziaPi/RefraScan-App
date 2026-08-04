@@ -1,0 +1,170 @@
+.body-a-main-content {
+	color: #0a0a0a;
+	padding-bottom: 6.4rem;
+}
+
+.body-a-about {
+	container: body-a-about / inline-size;
+	width: 100%;
+	max-width: 128rem;
+	display: flex;
+	flex-direction: column;
+	gap: 3.2rem;
+}
+
+.body-a-row {
+	margin: 1.9rem 2.4rem 0 2.4rem;
+	display: flex;
+	align-items: flex-start;
+	gap: 3.2rem;
+}
+
+.card-abt1 {
+	min-height: 30.3rem;
+	justify-content: center;
+	gap: 2.6rem;
+	flex-grow: 1;
+	text-align: left;
+}
+
+.card-abt-subtitle1 {
+	margin-top: 0.3rem;
+}
+
+.card-abt-container1 {
+	display: flex;
+	flex-direction: column;
+	gap: 1.6rem;
+	font-size: 1.6rem;
+	font-weight: 400;
+	line-height: 1.5;
+}
+
+.card-abt2 {
+	min-height: 30.3rem;
+	justify-content: center;
+	gap: 2.4rem;
+	flex-grow: 1;
+	text-align: left;
+}
+
+.card-abt-subtitle2 {
+	margin-top: -0.1rem;
+}
+
+.card-abt-numbered {
+	display: flex;
+	flex-direction: column;
+	gap: 1.6rem;
+	font-size: 1.6rem;
+	font-weight: 400;
+	line-height: 1.5;
+}
+
+.card-abt-text-integrate {
+	margin-top: 0.2rem;
+}
+
+.body-a-row-bottom {
+	margin: 0 2.4rem;
+	display: flex;
+	align-items: flex-start;
+	gap: 3.2rem;
+}
+
+.card-abt3 {
+	min-height: 32.7rem;
+	gap: 2.4rem;
+	flex-grow: 1;
+	text-align: left;
+	padding-top: 3rem;
+	padding-bottom: 3rem;
+}
+
+.card-abt-container2 {
+	display: flex;
+	flex-direction: column;
+	gap: 1.6rem;
+	font-size: 1.6rem;
+	font-weight: 400;
+	line-height: 1.5;
+}
+
+.card-abt4 {
+	min-height: 32.7rem;
+	gap: 2.4rem;
+	flex-grow: 1;
+	text-align: left;
+	padding-top: 3rem;
+	padding-bottom: 3rem;
+}
+
+.card-abt-container3 {
+	display: flex;
+	flex-direction: column;
+	gap: 1.6rem;
+	font-size: 1.6rem;
+	font-weight: 400;
+	line-height: 1.5;
+}
+
+.card-abt-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.8rem;
+}
+
+
+
+/** breakpoints (margin / paddings) **/
+
+@media screen and (max-width: 1280px) {
+	.body-a-row {
+		margin-inline: 0;
+	}
+	.body-a-row-bottom {
+		margin-inline: 0;
+	}
+}
+
+
+
+/* container queries (flex rows) */
+
+@container body-a-about (width < 1151px) {
+	.body-a-row {
+		margin-left: 0; margin-right: 0;
+		flex-direction: column;
+		align-items: center;
+		gap: 3.8rem;
+	}
+	.body-a-about > * {
+		margin-left: 0; margin-right: 0;
+	}
+	.body-a-row > * {
+		text-align: center;
+	}
+	.body-a-row > .card-abt1 {
+		width: 100%;
+	}
+	.body-a-row > .card-abt2 {
+		width: 100%;
+	}
+}
+
+@container body-a-about (width < 1151px) {
+	.body-a-row-bottom {
+		flex-direction: column;
+		align-items: center;
+		gap: 4.2rem;
+	}
+	.body-a-row-bottom > * {
+		text-align: center;
+	}
+	.body-a-row-bottom > .card-abt3 {
+		width: 100%;
+	}
+	.body-a-row-bottom > .card-abt4 {
+		width: 100%;
+	}
+}

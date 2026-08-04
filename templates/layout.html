@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/static/css/reset.css" />
+	<link rel="stylesheet" href="/static/css/global.css" />
+    {% block additional_css %}{% endblock %}
+
+    <title>{% block title %}{% endblock %}</title>
+
+</head>
+
+<body>
+    <header class="header-a header1">
+		<div class="header-container-main">
+			<div class="header-container-left">
+				<div class="header-container-left-link">
+					<div class="header-container-left-circle circle-white">
+						<img src="/static/assets/logo.png" class="logo" />
+					</div>
+					
+					<a class="header-refrascan" href="/">RefraScan</a>
+				</div>
+				
+				<a class="header-about link" href="/about-the-study">About the Study</a>
+			</div>
+			
+			<div class="header-container-right">
+				<a class="header-patient-records" href="/patient-records">Patient Records</a>
+				<a class="header-inference-history" href="/inference-history">History</a>
+			</div>
+		</div>
+	</header>
+    
+    <div class="main-body">
+	{% block main %}{% endblock %}
+    </div>
+</body>
+
+</html>

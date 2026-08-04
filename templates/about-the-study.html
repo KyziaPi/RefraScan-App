@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+
+{% block title %}
+RefraScan - About The Study
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="/static/css/about-the-study.css" />
+{% endblock %}
+
+{% block main %}
+
+		<div class="body-a-main-content section2">
+			<div class="body-a-about">
+				<h1 class="title">About the Study</h1>
+				
+				<div class="body-a-row">
+					<div class="card-abt1 card">
+						<h2 class="card-abt-subtitle1 subtitle">Project Overview</h2>
+						
+						<div class="card-abt-container1">
+							<p class="text-a">
+								<b class="bold">Title:</b> An EfficientNetB3-Based Deep Learning Clinical Decision Support Application for Fundus Image-Based Refractive Error Classification
+							</p>
+							<p class="text-a">
+								A clinical decision support tool intended to assist medical professionals by providing pre-screening results for a more efficient assessment of refractive errors in the Philippine setting
+							</p>
+						</div>
+					</div>
+					
+					<div class="card-abt2 card">
+						<h2 class="card-abt-subtitle2 subtitle">Clinical Objective</h2>
+						
+						<div class="card-abt-numbered">
+							<p>
+								Classify fundus images into Myopia, Hyperopia, or Normal Vision.
+							</p>
+							<p class="text-a card-abt-text-integrate">
+								Integrate Spatial Attention mechanisms to increase diagnostic transparency.
+							</p>
+							<p class="text-a">
+								Provide a deployable screening tool utilizing fundus images as a multi-purpose pre-screening tool.
+							</p>
+						</div>
+					</div>
+				</div>
+				
+				<div class="body-a-row-bottom">
+					<div class="card-abt3 card">
+						<h2 class="subtitle">Technical Framework</h2>
+						
+						<div class="card-abt-container2">
+							<p><b class="bold">Architecture:</b> EfficientNetB3</p>
+							<p>
+								<b class="bold">Dataset:</b> PAPILA and The Lasik Surgery Clinic - AUFMC
+							</p>
+							<p>
+								<b class="bold">Framework:</b> Flask and Tensorflow
+							</p>
+						</div>
+					</div>
+					
+					<div class="card-abt4 card">
+						<h2 class="subtitle">Academic Affiliation</h2>
+						
+						<div class="card-abt-container3">
+							<p class="text3">
+								Angeles University Foundation, B.S. Computer Science:
+							</p>
+							
+							<div class="card-abt-list">
+								<p>Aquino, Katrine Ingrid O.</p>
+								<p>Villanueva, Anne Beatriz M.</p>
+								<p>Garcia, Yuan Miguel</p>
+								<p>Gueco, Yerika Elaine S.</p>
+							</div>
+							
+							<p>
+								<b class="bold">Thesis Adviser:</b> Esquivel, James A.
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+{% endblock %}

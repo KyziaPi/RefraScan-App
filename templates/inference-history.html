@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+
+{% block title %}
+RefraScan - Inference History
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="/static/css/inference-history.css" />
+{% endblock %}
+
+{% block main %}
+		<div class="root-main-content section2">
+			<div class="root-history">
+				<h1 class="root-title title">Screening History</h1>
+				
+				<div class="history-search-main-container">
+					<div class="history-search-container">
+						<p class="history-search-container-text">Search</p>
+						<img src="static/assets/search-icon.png" class="history-search-container-icon" />
+					</div>
+					
+					<div class="history-filter-container history-filter-container1">
+						<div class="history-filter-dropbox">
+							<img src="static/assets/filter-dropbox-icon.png" class="history-filter-dropbox-icon" />
+						</div>
+						
+						<div class="history-filter-container-label">
+							<p class="history-filter-container-text">Filter By Class</p>
+						</div>
+					</div>
+					
+					<div class="history-filter-container history-filter-container2">
+						<div class="history-filter-dropbox">
+							<img src="static/assets/filter-dropbox-icon.png" class="history-filter-dropbox-icon" />
+						</div>
+						
+						<div class="history-filter-container-label">
+							<p class="history-filter-container-text">Filter By Screening</p>
+						</div>
+					</div>
+				</div>
+				
+				<div class="history-table-wrapper">
+					<div class="history-table-container">
+							<div class="root-table-header">
+								<p class="root-text">ID</p>
+								<p class="root-text">File Name</p>
+								<p class="root-text">Date</p>
+								<p class="root-text">Prediction</p>
+								<p class="root-text">Confidence</p>
+								<p class="root-text">Screening</p>
+								<p class="root-text">Action</p>
+							</div>
+
+						<div class="root-table-body">
+							<div class="table-row">
+								<p class="table-row-text">003</p>
+								<p class="table-row-text">aquino_right_eye.jpg</p>
+								<p class="table-row-text">04-06-2026</p>
+								<p class="table-row-text">Myopia</p>
+								<p class="table-row-text">94.2%</p>
+								<p class="table-row-text">Refer for eye examination</p>
+								<div class="table-row-buttons">
+									<button><img src="static/assets/row-view.png" alt="View"></button>
+									<button><img src="static/assets/row-delete.png" alt="Delete"></button>
+								</div>
+							</div>
+							
+							<div class="table-row">
+								<p class="table-row-text">002</p>
+								<p class="table-row-text">gueco_right_eye.jpg</p>
+								<p class="table-row-text">04-05-2026</p>
+								<p class="table-row-text">Normal</p>
+								<p class="table-row-text">91.5%</p>
+								<p class="table-row-text">No action needed</p>
+								<div class="table-row-buttons">
+									<button><img src="static/assets/row-view.png" alt="View"></button>
+									<button><img src="static/assets/row-delete.png" alt="Delete"></button>
+								</div>
+							</div>
+							
+							<div class="table-row">
+								<p class="table-row-text">001</p>
+								<p class="table-row-text">gueco_left_eye.jpg</p>
+								<p class="table-row-text">04-05-2026</p	>
+								<p class="table-row-text">Hyperopia</p>
+								<p class="table-row-text">45.0%</p>
+								<p class="table-row-text">Keep monitoring</p>
+								<div class="table-row-buttons">
+									<button><img src="static/assets/row-view.png" alt="View"></button>
+									<button><img src="static/assets/row-delete.png" alt="Delete"></button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<button class="btn-main root-btn-main hover-bright">Export History</button>
+			</div>
+		</div>
+{% endblock %}
