@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block title %}
+RefraScan - Inference Engine
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="/static/css/inference-engine.css" />
+{% endblock %}
+
+{% block main %}
+
+		<div class="inference-engine-main-content section1">
+			<h1 class="inference-engine-title title">
+				Fundus Image-Based Refractive Error Classification
+			</h1>
+			
+			<div class="inference-insert-img">
+				<p>Drag and Drop an Image Here</p>
+				<p>or</p>
+				<p>Click and Choose an Image</p>
+				<p class="inference-insert-img-text-paragraph4 text1">(supports .jpg, .png, .jpeg)</p>
+			</div>
+			
+			<div class="input-group input-group1">
+				<input class="input-age-container text2" value="Age" />
+				<a class="btn-main input-group-btn-main hover-bright" href="/inference-results">Start Analysis</a>
+			</div>
+		</div>
+{% endblock %}

@@ -1,0 +1,1292 @@
+body {
+	text-align: left;
+}
+
+.input-group-container-a {
+	height: 4.2rem;
+	flex-shrink: 0;
+	background-color: unset;
+	border: 1px solid #d1d5dc;
+	border-radius: 10px;
+}
+
+
+
+/* input-group-container-b */
+
+.input-group-container-b {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.5rem;
+	flex-grow: 1;
+	text-align: left;
+}
+
+.input-group-container-text3 {
+	align-self: stretch;
+	color: #0a0a0a;
+	font-size: 1.4rem;
+	font-weight: 500;
+	line-height: 1.429;
+}
+
+.container-text-input {
+	width: 17.6rem;
+	color: rgba(10, 10, 10, 0.5);
+	font-size: 1.6rem;
+	font-style: normal;
+	font-weight: 400;
+	line-height: normal;
+	letter-spacing: 0rem;
+	text-align: left;
+}
+/* end input-group-container-b*/
+
+
+.patient-table-text-table-cell {
+	margin-bottom: -0.1rem;
+	width: 7.5rem;
+	flex-shrink: 0;
+	text-align: right;
+	padding: 1.1rem 1.2rem 1.4rem 1rem;
+	border-left: 2px solid #e5e7eb;
+}
+
+.patient-table-container {
+	width: 4.4rem;
+	flex-shrink: 0;
+}
+
+
+/* header-b */
+
+.header-b {
+	container: header-b / inline-size;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	font-weight: 400;
+	background-color: #536c78;
+	padding: 1.6rem 2.4rem;
+}
+
+.header-container1 {
+	width: 100%;
+	max-width: 128rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding-right: 0.2rem;
+}
+
+.header-container2 {
+	width: 30.8rem;
+	display: flex;
+	align-items: center;
+	gap: 3.2rem;
+	flex-shrink: 0;
+}
+
+.header-link1 {
+	display: flex;
+	align-items: center;
+	gap: 1.2rem;
+	flex-grow: 1;
+	color: #fff;
+	font-size: 2rem;
+	line-height: 1.4;
+}
+
+.header-circle {
+	flex-shrink: 0;
+}
+
+.header-text {
+	margin-right: -0.6rem; margin-top: -0.4rem;
+	flex-grow: 1;
+	text-align: left;
+}
+
+.header-link2 {
+	margin-top: -0.4rem;
+	text-align: left;
+}
+/* end header-b*/
+
+
+.patient-records-main-content {
+	margin-bottom: -35.8rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	background-color: #fff;
+	padding: 6.4rem 2.3rem 6.3rem 2.3rem;
+}
+
+.patient-records-patient {
+	container: patient-records-patient / inline-size;
+	width: 100%;
+	max-width: 128rem;
+	display: flex;
+	flex-direction: column;
+	gap: 3.2rem;
+	padding-left: 2.4rem;
+	padding-right: 1.5rem;
+}
+
+
+
+/* patient-records-header */
+
+.patient-records-header {
+	container: patient-records-header / inline-size;
+	margin-right: 0.9rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.patient-records-header-heading {
+	margin: -0.2rem 0;
+	display: flex;
+	align-items: center;
+	gap: 2rem;
+}
+
+.patient-records-header-title {
+	color: #0a0a0a;
+	font-size: 3.6rem;
+	font-weight: 500;
+	line-height: 1.111;
+	text-align: left;
+}
+
+.btn1 {
+	display: flex;
+	justify-content: center;
+	gap: 2.9rem;
+	color: rgba(10, 10, 10, 0.5);
+	font-size: 1.6rem;
+	font-style: normal;
+	font-weight: 400;
+	line-height: normal;
+	letter-spacing: 0rem;
+	text-align: unset;
+	padding: 1.5rem 1rem 1.5rem 1.4rem;
+	border: 2px solid #d1d5dc;
+	border-radius: 10px;
+}
+
+.btn-label {
+	margin-left: 0.2rem;
+	text-align: left;
+}
+
+.btn-icon1 {
+	margin-top: 0.1rem;
+	width: 1.7rem;
+	flex-shrink: 0;
+}
+
+.patient-records-header-container {
+	container: patient-records-header-container / inline-size;
+	width: 38.2rem;
+	display: flex;
+	align-items: flex-start;
+	gap: 1.6rem;
+	flex-shrink: 0;
+	color: #fff;
+	font-size: 1.6rem;
+	font-weight: 500;
+	line-height: 1.5;
+}
+
+
+
+/* card-btn */
+
+.card-btn {
+	min-height: 4.8rem;
+	display: flex;
+	align-items: flex-start;
+	gap: 0.5rem;
+	flex-grow: 1;
+	padding-right: 1.8rem;
+	border-radius: 10px;
+}
+
+.card-btn-icon {
+	min-width: 0;
+	flex-grow: 1;
+	max-width: 1em;
+}
+
+.card-btn-text {
+	margin-top: 1rem;
+	flex-shrink: 0;
+	text-align: center;
+}
+/* end card-btn*/
+
+/* end patient-records-header*/
+
+
+
+
+/* patient-table */
+
+.patient-table {
+	box-shadow: 0px 1px 2px -1px rgba(0, 0, 0, 0.1),0px 1px 3px 0px rgba(0, 0, 0, 0.1);
+	display: flex;
+	flex-direction: column;
+	color: #0a0a0a;
+	background-color: #fff;
+	padding-bottom: 0.1rem;
+	border-radius: 10px;
+	overflow: hidden;
+}
+
+.patient-table-table {
+	margin-right: -0.9rem;
+	display: flex;
+	flex-direction: column;
+	padding-right: 0.9rem;
+}
+
+.patient-table-header {
+	container: patient-table-header / inline-size;
+	margin-right: 1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1.3rem;
+	font-weight: 700;
+	padding-top: 1.5rem;
+	border-bottom: 2px solid #e5e7eb;
+}
+
+.patient-table-row-top {
+	margin-left: 12rem;
+	display: flex;
+	align-items: flex-start;
+	align-self: start;
+	font-size: 1.6rem;
+	line-height: 1.5;
+}
+
+.patient-table-text-header-cell {
+	margin: -1.5rem 0;
+	flex-shrink: 0;
+	text-align: center;
+	padding: 1rem 1rem 1.2rem 1rem;
+	border-left: 2px solid #e5e7eb;
+	border-bottom: 2px solid #e5e7eb;
+}
+
+.patient-table-text-header1 {
+	margin: -0.3rem 0 -1.5rem -12rem;
+	width: 34.5rem;
+	flex-shrink: 0;
+	text-align: center;
+	padding: 0 1.1rem 1rem 1.1rem;
+	border-bottom: 2px solid #e5e7eb;
+}
+
+.patient-table-row1 {
+	container: patient-table-row1 / inline-size;
+	margin-right: 0.7rem; margin-bottom: -0.1rem;
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+}
+
+.patient-table-row2 {
+	margin-top: 0.1rem;
+	display: flex;
+	align-items: center;
+	font-size: 1.4rem;
+	line-height: 1.429;
+	background-color: #f9fafb;
+	border: 2px solid #e5e7eb;
+}
+
+
+
+/* header-cell */
+
+.header-cell {
+	margin: -0.1rem 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1.7rem 0;
+}
+
+.header-cell-text {
+	text-align: left;
+}
+
+.header-cell-icon {
+	width: 2rem;
+	flex-shrink: 0;
+}
+/* end header-cell*/
+
+
+.patient-table-text-header4 {
+	margin-left: -0.2rem;
+	width: 8rem;
+	flex-shrink: 0;
+	text-align: center;
+	padding: 0.7rem 1rem 0.7rem 0.8rem;
+	border-left: 2px solid #e5e7eb;
+}
+
+.patient-table-header-cell1 {
+	margin: -0.2rem 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1.8rem 1.1rem;
+}
+
+.patient-table-text-age {
+	text-align: left;
+}
+
+.patient-table-icon1 {
+	width: 2rem;
+	flex-shrink: 0;
+}
+
+.patient-table-header-cell2 {
+	margin: -0.2rem 0;
+	width: 7.8rem;
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+	padding: 0.8rem 0.5rem 0.8rem 0.3rem;
+	border-left: 2px solid #e5e7eb;
+}
+
+.patient-table-text-visual-acuity1 {
+	flex-grow: 1;
+	text-align: left;
+}
+
+.patient-table-icon2 {
+	width: 2rem;
+	flex-shrink: 0;
+}
+
+.patient-table-header-cell3 {
+	margin: -0.1rem 0;
+	width: 7.9rem;
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+	padding: 0.7rem 0.7rem 0.7rem 0.5rem;
+	border-left: 2px solid #e5e7eb;
+}
+
+.patient-table-text-visual-acuity2 {
+	flex-grow: 1;
+	text-align: left;
+}
+
+.patient-table-icon3 {
+	width: 2rem;
+	flex-shrink: 0;
+}
+
+.patient-table-text-header5 {
+	margin: -0.6rem -0.1rem 0 -0.9rem;
+	width: 7.7rem;
+	flex-shrink: 0;
+	font-size: 1.6rem;
+	line-height: 1.5;
+	text-align: right;
+}
+
+.patient-table-body {
+	container: patient-table-body / inline-size;
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	font-size: 1.6rem;
+	font-weight: 400;
+	line-height: 1.5;
+}
+
+.patient-table-row3 {
+	justify-content: center;
+	gap: 0.4rem;
+}
+
+.patient-table-text-cell1 {
+	margin-left: -0.6rem; margin-top: 1.1rem;
+	width: 5.3rem;
+	flex-shrink: 0;
+	text-align: left;
+}
+
+.patient-table-text-cell2 {
+	margin-left: 2.8rem; margin-top: 1.1rem;
+	width: 3rem;
+	flex-shrink: 0;
+	text-align: left;
+}
+
+.patient-table-text-cell3 {
+	margin-left: 2.4rem; margin-top: 1.1rem;
+	width: 6rem;
+	flex-shrink: 0;
+	text-align: right;
+}
+
+.patient-table-text-cell4 {
+	margin-left: 1.1rem; margin-top: 1.1rem;
+	width: 10.7rem;
+	flex-shrink: 0;
+	text-align: right;
+}
+
+.patient-table-text-cell6 {
+	margin-left: 1.2rem; margin-top: 1.1rem;
+	width: 4.6rem;
+	flex-shrink: 0;
+	text-align: left;
+}
+
+.patient-table-text-cell7 {
+	margin-left: 2.8rem; margin-top: 1.1rem;
+	width: 5.5rem;
+	flex-shrink: 0;
+	text-align: left;
+}
+
+.patient-table-text-cell8 {
+	margin-left: 2.8rem; margin-top: 1.1rem;
+	width: 2.8rem;
+	flex-shrink: 0;
+	text-align: left;
+}
+
+.patient-table-text-cell9 {
+	margin-left: 2.8rem; margin-top: 1.1rem;
+	width: 7.4rem;
+	flex-shrink: 0;
+	text-align: left;
+}
+
+.patient-table-text-cell11 {
+	margin-left: 1.2rem; margin-top: 1.1rem;
+	width: 4.6rem;
+	flex-shrink: 0;
+	text-align: left;
+}
+
+.patient-table-text-cell12 {
+	margin-left: 2.8rem; margin-top: 1.1rem;
+	width: 5.5rem;
+	flex-shrink: 0;
+	text-align: left;
+}
+
+.patient-table-text-cell13 {
+	margin-left: 2.8rem; margin-top: 1.1rem;
+	width: 2.8rem;
+	flex-shrink: 0;
+	text-align: left;
+}
+
+.patient-table-text-cell14 {
+	margin-left: 2.8rem; margin-top: 1.1rem;
+	width: 7.3rem;
+	flex-shrink: 0;
+	text-align: left;
+}
+
+.patient-table-row4 {
+	justify-content: center;
+}
+
+.patient-table-text-cell15 {
+	margin-left: -0.6rem; margin-top: 1.1rem;
+	width: 5.3rem;
+	flex-shrink: 0;
+	text-align: left;
+}
+
+.patient-table-text-cell16 {
+	margin-left: 3.2rem; margin-top: 1.1rem;
+	width: 3rem;
+	flex-shrink: 0;
+	text-align: left;
+}
+
+.patient-table-text-cell17 {
+	margin-left: 3.2rem; margin-top: 1.1rem;
+	width: 5rem;
+	flex-shrink: 0;
+	text-align: left;
+}
+
+.patient-table-text-cell18 {
+	margin-left: 2rem; margin-top: 1.1rem;
+	width: 10.7rem;
+	flex-shrink: 0;
+	text-align: right;
+}
+
+.patient-table-text-cell20 {
+	margin-top: 1.1rem;
+	width: 7.8rem;
+	flex-shrink: 0;
+	text-align: center;
+}
+
+.patient-table-text-cell21 {
+	margin-left: 1.6rem; margin-top: 1.1rem;
+	width: 5.5rem;
+	flex-shrink: 0;
+	text-align: left;
+}
+
+.patient-table-text-cell22 {
+	margin-left: 1.6rem; margin-top: 1.1rem;
+	width: 6rem;
+	flex-shrink: 0;
+	text-align: center;
+}
+
+.patient-table-text-cell23 {
+	margin-top: 1.1rem;
+	width: 10.6rem;
+	flex-shrink: 0;
+	text-align: center;
+}
+
+.patient-table-text-cell25 {
+	margin-left: 1.6rem; margin-top: 1.1rem;
+	width: 4.6rem;
+	flex-shrink: 0;
+	text-align: left;
+}
+
+.patient-table-text-cell26 {
+	margin-left: 3.2rem; margin-top: 1.1rem;
+	width: 5.5rem;
+	flex-shrink: 0;
+	text-align: left;
+}
+
+.patient-table-text-cell27 {
+	margin-left: 1.6rem; margin-top: 1.1rem;
+	width: 6rem;
+	flex-shrink: 0;
+	text-align: center;
+}
+
+.patient-table-text-cell28 {
+	margin-left: 1.1rem; margin-top: 1.1rem;
+	width: 8.3rem;
+	flex-shrink: 0;
+	text-align: right;
+}
+/* end patient-table*/
+
+
+.patient-records-header1 .card-btn1 {
+	width: 84%;
+	background-color: #00a63e;
+	padding-left: 2.6rem;
+}
+
+.patient-records-header1 .card-btn1 .card-btn-icon {
+	margin-top: 1.6rem;
+}
+
+.patient-records-header1 .card-btn1 .card-btn-text {
+	width: 8.9rem;
+}
+
+.patient-records-header1 .card-btn2 {
+	width: 116%;
+	background-color: #536c78;
+	padding-left: 2.7rem;
+}
+
+.patient-records-header1 .card-btn2 .card-btn-icon {
+	margin-top: 1.7rem;
+}
+
+.patient-records-header1 .card-btn2 .card-btn-text {
+	width: 12.8rem;
+}
+
+.patient-records-container1 {
+	box-shadow: 0px 4px 6px -4px rgba(0, 0, 0, 0.1),0px 10px 15px -3px rgba(0, 0, 0, 0.1);
+	margin-right: 0.9rem;
+	display: flex;
+	flex-direction: column;
+	gap: 2.3rem;
+	background-color: #fff;
+	padding: 2.4rem;
+	border-radius: 10px;
+}
+
+.patient-records-subtitle {
+	color: #0a0a0a;
+	--min-font-size: 1.8; --max-font-size: 2.4; font-size: var(--interpolate);
+	font-weight: 500;
+	line-height: 1.333;
+}
+
+.patient-records-form {
+	container: patient-records-form / inline-size;
+	display: flex;
+	flex-direction: column;
+	gap: 2.3rem;
+}
+
+.patient-records-container2 {
+	display: flex;
+	align-items: flex-start;
+	gap: 1.6rem;
+	color: #0a0a0a;
+	font-size: 1.4rem;
+	font-weight: 500;
+	line-height: 1.429;
+}
+
+.input-group-container6 {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 0.9rem;
+	flex-grow: 1;
+	text-align: left;
+}
+
+.input-group-container7 {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 0.9rem;
+	flex-grow: 1;
+	text-align: left;
+}
+
+.input-group-container8 {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 0.9rem;
+	flex-grow: 1;
+	text-align: left;
+}
+
+.input-group-container-sex {
+	height: 3.9rem;
+}
+
+.input-group-container9 {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 0.9rem;
+	flex-grow: 1;
+	text-align: left;
+}
+
+.patient-records-container3 {
+	margin-top: 0.1rem;
+	display: flex;
+	align-items: flex-start;
+	gap: 2.4rem;
+}
+
+
+
+/* card-a */
+
+.card-a {
+	width: 100%;
+	min-height: 30.2rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1.6rem;
+	flex-grow: 1;
+	padding: 1.5rem;
+	border: 2px solid #e5e7eb;
+	border-radius: 10px;
+}
+
+.card-text-heading {
+	color: #0a0a0a;
+	font-size: 1.8rem;
+	font-weight: 600;
+	line-height: 1.556;
+	text-align: center;
+}
+
+.card-container1 {
+	container: card-container1 / inline-size;
+	margin: 0 0.1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1.1rem;
+	text-align: left;
+}
+
+.input-group-container1 {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	text-align: left;
+}
+
+.input-group-container-text1 {
+	color: #0a0a0a;
+}
+
+.input-group-container-text2 {
+	text-align: left;
+	padding-bottom: 1.1rem;
+}
+
+.card-container2 {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.8rem;
+}
+
+.card-container3 {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	color: #0a0a0a;
+	font-weight: 500;
+}
+
+.patient-img-container {
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	gap: 0.9rem;
+	font-size: 1.6rem;
+	line-height: 1.5;
+	padding: 0.6rem 1.4rem 1rem 1.4rem;
+	border: 2px dashed #d1d5dc;
+	border-radius: 10px;
+}
+
+.patient-image-container-icon {
+	margin-top: 0.7rem;
+	width: 1.3rem;
+	flex-shrink: 0;
+}
+
+.patient-img-container-text {
+	text-align: left;
+}
+/* end card-a*/
+
+
+.card2 .patient-image-container-icon {
+	margin-left: 0.5rem;
+}
+
+.card3 .patient-image-container-icon {
+	margin-left: 0.6rem;
+}
+
+.patient-records-container4 {
+	display: flex;
+	align-items: flex-start;
+	gap: 2.4rem;
+}
+
+
+
+/* container-b */
+
+.container-b {
+	container: container-b / inline-size;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 0.9rem;
+	flex-grow: 1;
+	text-align: left;
+}
+
+.container-text3 {
+	color: #0a0a0a;
+	font-size: 1.4rem;
+	font-weight: 500;
+	line-height: 1.429;
+}
+
+.input-group-container5 {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.8rem;
+	color: rgba(10, 10, 10, 0.5);
+	font-size: 1.6rem;
+	font-weight: 400;
+	line-height: normal;
+}
+
+.input-group-container-text4 {
+	min-height: 4.2rem;
+	flex-grow: 1;
+	color: unset;
+	text-align: left;
+}
+
+.btn2 {
+	width: 4.8rem; height: 4.2rem;
+	flex-shrink: 0;
+	text-align: unset;
+	background-color: #536c78;
+	padding: 1.3rem 1.6rem;
+	border-radius: 10px;
+}
+/* end container-b*/
+
+
+.patient-records-container5 {
+	margin-top: 0.9rem;
+	display: flex;
+	align-items: flex-start;
+	justify-content: flex-end;
+	gap: 1.6rem;
+	font-size: 1.6rem;
+	font-weight: 500;
+	line-height: 1.5;
+}
+
+.patient-records-btn {
+	min-height: 4.2rem;
+	display: flex;
+	justify-content: center;
+	flex-shrink: 0;
+	font-style: normal;
+	letter-spacing: 0rem;
+	text-align: center;
+	padding: 0 0.7rem;
+	border-radius: 10px;
+}
+
+.patient-records-btn1 {
+	width: 9.6rem;
+	color: #0a0a0a;
+	padding-top: 0.6rem;
+	padding-bottom: 0.6rem;
+	border: 1px solid #d1d5dc;
+}
+
+.patient-records-btn2 {
+	width: 13.4rem;
+	color: #fff;
+	background-color: #536c78;
+	padding-top: 0.7rem;
+	padding-bottom: 0.7rem;
+}
+
+.patient-table1 .patient-table-text-header2 {
+	width: 40.6rem;
+}
+
+.patient-table1 .patient-table-text-header3 {
+	margin-left: -0.1rem; margin-right: -15.6rem;
+	width: 40.8rem;
+	border-right: 2px solid #e5e7eb;
+}
+
+.patient-table1 .header-cell1 {
+	padding-left: 2.1rem;
+	padding-right: 2.1rem;
+}
+
+.patient-table1 .header-cell2 {
+	padding-left: 2.7rem;
+	padding-right: 2.7rem;
+}
+
+.patient-table1 .header-cell3 {
+	justify-content: flex-start;
+	padding-left: 0.3rem;
+	padding-right: 0.3rem;
+}
+
+.patient-table1 .header-cell4 {
+	justify-content: flex-start;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
+}
+
+.patient-table1 .header-cell5 {
+	justify-content: flex-start;
+	padding-left: 0.4rem;
+	padding-right: 0.4rem;
+}
+
+.patient-table1 .header-cell6 {
+	padding-left: 1rem;
+	padding-right: 1rem;
+}
+
+.patient-table1 .header-cell7 {
+	padding-left: 0.6rem;
+	padding-right: 0.6rem;
+}
+
+.patient-table1 .header-cell8 {
+	justify-content: flex-start;
+	padding-left: 0.2rem;
+	padding-right: 0.2rem;
+}
+
+.patient-table1 .header-cell9 {
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
+}
+
+.patient-table1 .header-cell10 {
+	margin-right: -0.6rem;
+	padding-left: 1rem;
+	padding-right: 1rem;
+}
+
+.patient-table1 .patient-table-text-cell10 {
+	margin-left: 1.2rem;
+}
+
+.patient-table1 .patient-table-container1 {
+	margin-left: 2.8rem; margin-top: 1.6rem;
+}
+
+.patient-table1 .patient-table-text-cell19 {
+	margin-left: 0.4rem;
+}
+
+.patient-table-row-buttons {
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.patient-table-row-buttons button {
+	display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25em;
+    background: none;
+    border: none;
+}
+
+.patient-table-row-buttons img {
+	width: 1.25em;
+    height: 1.25em;
+    object-fit: contain;
+}
+
+.patient-table1 .patient-table-container2 {
+	margin-left: 2.7rem; margin-top: 1.5rem;
+}
+
+
+
+/** breakpoints (margin / paddings) **/
+
+@media screen and (max-width: 1280px) {
+	.patient-records-main-content {
+		padding-inline: var(--margin-sm);
+	}
+	.patient-records-patient {
+		padding-inline: 0;
+	}
+	.patient-records-header {
+		margin-inline: 0;
+	}
+	.patient-table-table {
+		padding-inline: 0;
+		margin-inline: 0;
+	}
+	.patient-table-header {
+		margin-inline: 0;
+	}
+	.patient-table-text-header1 {
+		margin-inline: 0;
+	}
+	.patient-table-row1 {
+		margin-inline: 0;
+	}
+	.patient-records-container1 {
+		padding-inline: var(--margin-sm);
+		margin-inline: 0;
+	}
+	.patient-table1 .patient-table-text-header3 {
+		margin-inline: 0;
+	}
+}
+
+
+
+/* container queries (flex rows) */
+
+@container header-b (width < 507px) {
+	.header-container1 {
+		flex-direction: column;
+		align-items: center;
+		gap: 1.4rem;
+	}
+	.header-container1 > * {
+		text-align: center;
+	}
+	.header-container1 > .header-container2 {
+		width: 100%;
+		max-width: 308px;
+	}
+}
+
+@container patient-records-patient (width < 828px) {
+	.patient-records-header {
+		margin-left: 0; margin-right: 0;
+		flex-direction: column;
+		align-items: center;
+		gap: 1.4rem;
+	}
+	.patient-records-patient > * {
+		margin-left: 0; margin-right: 0;
+	}
+	.patient-records-header > * {
+		margin-top: unset !important;
+		text-align: center;
+	}
+	.patient-records-header > .patient-records-header-container {
+		width: 100%;
+		max-width: 382px;
+		justify-content: center;
+	}
+}
+
+@container patient-records-header (width < 438px) {
+	.patient-records-header-heading {
+		flex-direction: column;
+		align-items: center;
+		gap: 1.4rem;
+	}
+	.patient-records-header-heading > * {
+		text-align: center;
+	}
+}
+
+@container patient-records-header (width < 380px) {
+	.patient-records-header-container {
+		flex-direction: column;
+		align-items: center;
+		gap: 1.4rem;
+	}
+	.patient-records-header-container > .card-btn1 {
+		width: 100%;
+	}
+	.patient-records-header-container > .card-btn2 {
+		width: 100%;
+	}
+}
+
+@container patient-records-header-container (width < 147px) {
+	.card-btn {
+		flex-direction: column;
+		align-items: center;
+		gap: 1.3rem;
+		padding: 7px 8px;
+	}
+	.card-btn > * {
+		margin-top: unset !important;
+		text-align: center;
+	}
+	.card-btn > .card-btn-icon {
+		width: 100%;
+	}
+}
+
+@container patient-table-header (width < 1000px) {
+	.patient-table-row-top {
+		margin-left: 0;
+		flex-direction: column;
+		align-items: center;
+		gap: 1.4rem;
+	}
+	.patient-table-header > * {
+		margin-left: 0; margin-right: 0;
+	}
+	.patient-table-row-top > * {
+		margin-left: unset !important; margin-right: unset !important; margin-top: unset !important;
+		text-align: center;
+	}
+	.patient-table-row-top > .patient-table-text-header1 {
+		width: 100%;
+		max-width: 345px;
+	}
+	.patient-table-row-top > .patient-table-text-header2 {
+		width: 100%;
+		max-width: 406px;
+	}
+	.patient-table-row-top > .patient-table-text-header3 {
+		width: 100%;
+		max-width: 408px;
+	}
+}
+
+@container patient-table-header (width < 1229px) {
+	.patient-table-row1 {
+		flex-direction: column;
+		align-items: center;
+		gap: 1.4rem;
+	}
+	.patient-table-row1 > * {
+		margin-left: unset !important; margin-right: unset !important; margin-top: unset !important;
+		text-align: center;
+	}
+}
+
+@container patient-table-row1 (width < 1156px) {
+	.patient-table-row2 {
+		flex-direction: column;
+		align-items: center;
+		gap: 1.4rem;
+		padding: 23px 8px;
+	}
+	.patient-table-row1 > * {
+		margin-left: 0; margin-right: 0;
+	}
+	.patient-table-row2 > * {
+		margin-left: unset !important; margin-right: unset !important; margin-top: unset !important;
+		text-align: center;
+	}
+}
+
+@container patient-table-body (width < 1225px) {
+	.patient-table-row3 {
+		flex-direction: column;
+		align-items: center;
+		gap: 1.3rem;
+	}
+	.patient-table-row3 > * {
+		margin-left: unset !important; margin-top: unset !important;
+		text-align: center;
+	}
+}
+
+@container patient-table-body (width < 1226px) {
+	.patient-table-row4 {
+		flex-direction: column;
+		align-items: center;
+		gap: 1.3rem;
+	}
+	.patient-table-row4 > * {
+		margin-left: unset !important; margin-top: unset !important;
+		text-align: center;
+	}
+}
+
+@container patient-records-form (width < 1183px) {
+	.patient-records-container2 {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.92rem;
+	}
+	.patient-records-container2 > .input-group-container6 {
+		width: 100%;
+	}
+	.patient-records-container2 > .input-group-container7 {
+		width: 100%;
+	}
+	.patient-records-container2 > .input-group-container8 {
+		width: 100%;
+	}
+	.patient-records-container2 > .input-group-container9 {
+		width: 100%;
+	}
+}
+
+@container patient-records-form (width < 1183px) {
+	.patient-records-container3 {
+		flex-direction: column;
+		align-items: center;
+		gap: 3.8rem;
+	}
+	.patient-records-container3 > * {
+		text-align: center;
+	}
+	.patient-records-container3 > .card2 {
+		width: 100%;
+	}
+	.patient-records-container3 > .card2 > * {
+		text-align: unset;
+	}
+	.patient-records-container3 > .card3 {
+		width: 100%;
+	}
+	.patient-records-container3 > .card3 > * {
+		text-align: unset;
+	}
+}
+
+@container card-container1 (width < 543px) {
+	.card-container2 {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.52rem;
+	}
+	.card-container2 > * {
+		margin-left: unset !important;
+	}
+	.card-container2 > .input-group-container2 {
+		width: 100%;
+	}
+	.card-container2 > .input-group-container3 {
+		width: 100%;
+	}
+	.card-container2 > .input-group-container4 {
+		width: 100%;
+	}
+}
+
+@container patient-records-form (width < 1183px) {
+	.patient-records-container4 {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.92rem;
+	}
+	.patient-records-container4 > .container1 {
+		width: 100%;
+	}
+	.patient-records-container4 > .container2 {
+		width: 100%;
+	}
+}
+
+@container container-b (width < 579px) {
+	.input-group-container5 {
+		flex-direction: column;
+		align-items: center;
+		gap: 1.4rem;
+	}
+	.input-group-container5 > * {
+		text-align: center;
+	}
+	.input-group-container5 > .input-group-container-text4 {
+		width: 100%;
+	}
+	.input-group-container5 > .btn2 {
+		align-items: center;
+	}
+}
