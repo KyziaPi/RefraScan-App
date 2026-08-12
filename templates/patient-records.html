@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+
+{% block title %}
+RefraScan - LASIK Patient Records
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="/static/css/patient-records.css" />
+{% endblock %}
+
+{% block main %}
+<div class="patient-records-main-content">
+	<div class="patient-records-patient">
+		<div class="patient-records-header patient-records-header1">
+			<div class="patient-records-header-heading">
+				<h1 class="patient-records-header-title">Patient Records</h1>
+				
+				<button class="btn1">
+					<input type="text" class="btn-label remove-highlight" placeholder="Search ID or Name" />
+					<img src="static/assets/search-icon.png" class="btn-icon1" />
+				</button>
+			</div>
+			
+			<form class="patient-records-header-container" action="/add-patient" method="get">
+				<button type="button" class="card-btn card-btn3">
+					<img src="static/assets/import-icon.png" class="card-btn-icon" />
+					<p class="card-btn-text">Import CSV</p>
+				</button>
+				<button type="button" class="card-btn card-btn1" data-popup="export-csv-popup">
+					<img src="static/assets/export-icon.png" class="card-btn-icon" />
+					<p class="card-btn-text">Export CSV</p>
+				</button>
+				<button type="submit" class="card-btn card-btn2">
+					<img src="static/assets/add-icon.png" class="card-btn-icon" />
+					<p class="card-btn-text">Add Patient Record</p>
+				</button>
+			</form>
+		</div>
+		
+		<div id="sec-history-table" class="history-table-wrapper">
+			<div class="history-table-container">
+				<div class="root-table-header">
+					<p class="root-text">Patient ID</p>
+					<p class="root-text">Date & Time</p>
+					<p class="root-text">Full Name</p>
+					<p class="root-text">Age</p>
+					<p class="root-text">Referred From</p>
+					<p class="root-text">Action</p>
+				</div>
+
+				<div class="root-table-body">
+					<div class="table-row">
+						<p class="table-row-text">000003</p>
+						<p class="table-row-text">2026-06-04 17:11:45</p>
+						<p class="table-row-text">Aquino, Katrine Ingrid O.</p>								
+						<p class="table-row-text">23</p>
+						<p class="table-row-text">Carlomagno D. Torres, MD</p>
+						<form class="table-row-buttons">
+							<button formaction="/patient-record-detailed" formmethod="get"><img src="static/assets/row-view.png" alt="View"></button>
+							<button formaction="/add-patient" formmethod="get"><img src="static/assets/row-edit.png" alt="Edit"></button>
+							<button type="button" data-popup="delete-confirmation-popup"><img src="static/assets/row-delete.png" alt="Delete"></button>
+						</form>
+					</div>
+					
+					<div class="table-row">
+						<p class="table-row-text">000002</p>
+						<p class="table-row-text">2026-06-04 17:11:45</p>
+						<p class="table-row-text">Gueco, Yerika Elaine S.</p>
+						<p class="table-row-text">20</p>
+						<p class="table-row-text">Armand P. Contreras, MD</p>
+						<form class="table-row-buttons">
+							<button formaction="/patient-record-detailed" formmethod="get"><img src="static/assets/row-view.png" alt="View"></button>
+							<button formaction="/add-patient" formmethod="get"><img src="static/assets/row-edit.png" alt="Edit"></button>
+							<button type="button" data-popup="delete-confirmation-popup"><img src="static/assets/row-delete.png" alt="Delete"></button>
+						</form>
+					</div>
+					
+					<div class="table-row">
+						<p class="table-row-text">000001</p>
+						<p class="table-row-text">2026-06-04 17:11:45</p>
+						<p class="table-row-text">Villanueva, Anne Beatriz M.</p>
+						<p class="table-row-text">21</p>
+						<p class="table-row-text">Maria Rae Celia M. Angeles, MD</p>
+						<form class="table-row-buttons">
+							<button formaction="/patient-record-detailed" formmethod="get"><img src="static/assets/row-view.png" alt="View"></button>
+							<button formaction="/add-patient" formmethod="get"><img src="static/assets/row-edit.png" alt="Edit"></button>
+							<button type="button" data-popup="delete-confirmation-popup"><img src="static/assets/row-delete.png" alt="Delete"></button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% include "popup.html" %}
+{% endblock %}

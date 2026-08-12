@@ -6,6 +6,7 @@
 	<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="/static/css/reset.css" />
 	<link rel="stylesheet" href="/static/css/global.css" />
+	<script src="{{ url_for('static', filename='js/global.js') }}"></script>
     {% block additional_css %}{% endblock %}
 
     <title>{% block title %}{% endblock %}</title>
@@ -13,23 +14,23 @@
 </head>
 
 <body>
-    <header class="header-a header1">
-		<div class="header-container-main">
-			<div class="header-container-left">
-				<div class="header-container-left-link">
-					<div class="header-container-left-circle circle-white">
+	    <header class="site-header">
+		<div class="site-header__inner">
+			<div class="site-header__brand">
+				<div class="site-header__brand-link">
+					<div class="site-header__brand-icon circle-white">
 						<img src="/static/assets/logo.png" class="logo" />
 					</div>
 					
-					<a class="header-refrascan" href="/">RefraScan</a>
+					<a class="site-header__brand-name" href="/">RefraScan</a>
 				</div>
 				
-				<a class="header-about link" href="/about-the-study">About the Study</a>
+				<a class="site-header__about-link link" href="/about-the-study">About the Study</a>
 			</div>
 			
-			<div class="header-container-right">
-				<a class="header-patient-records" href="/patient-records">Patient Records</a>
-				<a class="header-inference-history" href="/inference-history">History</a>
+			<div class="site-header__nav">
+				<a class="site-header__nav-link" href="/patient-records">Patient Records</a>
+				<a class="site-header__nav-link" href="/inference-history">History</a>
 			</div>
 		</div>
 	</header>

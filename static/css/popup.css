@@ -1,0 +1,298 @@
+/* =========================================================
+   POPUP
+========================================================= */
+
+.popup-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    padding: 2rem;
+
+    background-color: rgba(0, 0, 0, 0.45);
+    font-size: 1.5rem;
+}
+
+.popup-overlay.active {
+    display: flex;
+}
+
+
+/* Popup Container */
+
+.popup-container {
+    width: 100%;
+    max-width: 50rem;
+
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+
+    box-shadow: var(
+        --card-shadow,
+        0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -4px rgba(0, 0, 0, 0.1)
+    );
+
+    overflow: hidden;
+}
+
+
+/* Header */
+
+.popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 1.5rem 1.8rem;
+
+    background: var(--color-brand-strong);
+    color: var(--color-surface);
+}
+
+.popup-header h2 {
+    margin: 0;
+
+    font-size: 1.2em;
+    font-weight: 700;
+}
+
+
+/* Close Button */
+
+.popup-close {
+    width: 3rem;
+    height: 3rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    color: var(--color-surface);
+    background: transparent;
+
+    border: 0;
+    border-radius: 6px;
+
+    font-size: 2.2rem;
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+.popup-close:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+
+/* Content */
+
+.popup-content {
+    padding: 2rem 1.8rem;
+
+    color: var(--color-text-strong);
+}
+
+.popup-content p {
+    margin: 0;
+
+    font-size: 1em;
+    line-height: 1.5;
+}
+
+
+/* Follow-up Textarea */
+
+.popup-textarea {
+    width: 100%;
+    min-height: 12rem;
+
+    margin-top: 1rem;
+    padding: 1rem;
+
+    box-sizing: border-box;
+
+    color: var(--color-text-strong);
+    background-color: var(--color-surface);
+
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+
+    font: inherit;
+    resize: vertical;
+}
+
+.popup-textarea:focus {
+    outline: none;
+    border-color: var(--color-brand);
+}
+
+
+/* Actions */
+
+.popup-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+
+    padding: 1.2rem 1.8rem;
+
+    background-color: var(--color-surface-soft);
+
+    border-top: 1px solid var(--color-border);
+}
+
+
+/* Buttons */
+
+.popup-actions .btn-primary,
+.popup-actions .btn-secondary,
+.popup-actions .btn-danger {
+    min-width: 8rem;
+}
+
+
+/* Delete Confirmation */
+
+.popup-delete-confirmation .popup-header {
+    background-color: var(--color-danger);
+}
+
+/* =========================================================
+   EXPORT CSV POPUP SPECIFIC STYLES
+========================================================= */
+
+/* Large Container for Multi-field Layout */
+.popup-container-large {
+    max-width: 70rem;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.popup-form {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex: 1;
+}
+
+/* Scrollable Container Body */
+.popup-scrollable {
+    overflow-y: auto;
+    padding: 1.5rem 1.8rem;
+    max-height: 60vh;
+}
+
+.export-subtitle {
+    margin-bottom: 0.8rem;
+    font-size: 0.95em;
+    color: var(--color-text-muted);
+}
+
+/* Select/Deselect All Actions */
+.export-global-actions {
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--color-border-soft);
+    font-size: 0.9em;
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: var(--color-brand);
+    cursor: pointer;
+    padding: 0 0.3rem;
+    font-size: inherit;
+    text-decoration: underline;
+}
+
+.btn-link:hover {
+    color: var(--color-brand-strong);
+}
+
+/* Grid Layout for Groups */
+.export-sections-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.export-group {
+    background: var(--color-surface-alt);
+    border: 1px solid var(--color-border-soft);
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+.export-group-header {
+    border-bottom: 1px solid var(--color-border-soft);
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 1em;
+}
+
+.export-checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: 0.6rem 1rem;
+}
+
+.export-checkbox-grid label,
+.export-group-header label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85em;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+}
+
+.export-checkbox-grid input[type="checkbox"],
+.export-group-header input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--color-brand);
+    cursor: pointer;
+}
+
+/* Mobile */
+
+@media screen and (max-width: 576px) {
+
+    .popup-overlay {
+        padding: 1.2rem;
+    }
+
+    .popup-container {
+        max-width: 100%;
+    }
+
+    .popup-header {
+        padding: 1.3rem 1.4rem;
+    }
+
+    .popup-content {
+        padding: 1.6rem 1.4rem;
+    }
+
+    .popup-actions {
+        padding: 1rem 1.4rem;
+    }
+
+    .popup-container-large {
+        max-height: 90vh;
+    }
+
+    .export-checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+}

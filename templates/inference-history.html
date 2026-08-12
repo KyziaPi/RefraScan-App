@@ -15,27 +15,39 @@ RefraScan - Inference History
 				
 				<div class="history-search-main-container">
 					<div class="history-search-container">
-						<p class="history-search-container-text">Search</p>
+						<input type="text" class="history-search-container-text remove-highlight" placeholder="Search ID or Name" />
 						<img src="static/assets/search-icon.png" class="history-search-container-icon" />
 					</div>
 					
 					<div class="history-filter-container history-filter-container1">
-						<div class="history-filter-dropbox">
-							<img src="static/assets/filter-dropbox-icon.png" class="history-filter-dropbox-icon" />
+						<div class="history-filter-wrapper">
+							<select class="history-filter-dropbox">
+								<option value="">All Classes</option>
+								<option value="myopia">Myopia</option>
+								<option value="hyperopia">Hyperopia</option>
+								<option value="normal">Normal</option>
+							</select>
+							<img src="static/assets/filter-dropbox-icon.png" class="history-filter-dropbox-icon" alt="Dropdown Icon" />
 						</div>
-						
+
 						<div class="history-filter-container-label">
 							<p class="history-filter-container-text">Filter By Class</p>
 						</div>
 					</div>
 					
 					<div class="history-filter-container history-filter-container2">
-						<div class="history-filter-dropbox">
+						<div class="history-filter-wrapper">
+							<select class="history-filter-dropbox">
+								<option value="">All Screenings</option>
+								<option value="no-act">No Action Needed</option>
+								<option value="monitor">Keep Monitoring</option>
+								<option value="refer">Refer for eye examination</option>
+							</select>
 							<img src="static/assets/filter-dropbox-icon.png" class="history-filter-dropbox-icon" />
-						</div>
-						
-						<div class="history-filter-container-label">
-							<p class="history-filter-container-text">Filter By Screening</p>
+							
+							<div class="history-filter-container-label">
+								<p class="history-filter-container-text">Filter By Screening</p>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -44,52 +56,56 @@ RefraScan - Inference History
 					<div class="history-table-container">
 							<div class="root-table-header">
 								<p class="root-text">ID</p>
-								<p class="root-text">File Name</p>
+								<p class="root-text">Name</p>
+								<p class="root-text">Age</p>
+								<p class="root-text">Side</p>
 								<p class="root-text">Date</p>
 								<p class="root-text">Prediction</p>
-								<p class="root-text">Confidence</p>
 								<p class="root-text">Screening</p>
 								<p class="root-text">Action</p>
 							</div>
 
 						<div class="root-table-body">
 							<div class="table-row">
-								<p class="table-row-text">003</p>
-								<p class="table-row-text">aquino_right_eye.jpg</p>
+								<p class="table-row-text">000003</p>
+								<p class="table-row-text">Aquino, Katrine Ingrid</p>
+								<p class="table-row-text">23</p>
+								<p class="table-row-text">Right</p>
 								<p class="table-row-text">04-06-2026</p>
 								<p class="table-row-text">Myopia</p>
-								<p class="table-row-text">94.2%</p>
 								<p class="table-row-text">Refer for eye examination</p>
-								<div class="table-row-buttons">
-									<button><img src="static/assets/row-view.png" alt="View"></button>
-									<button><img src="static/assets/row-delete.png" alt="Delete"></button>
-								</div>
+								<form class="table-row-buttons" action="/inference-results" method="get">
+									<button type="submit"><img src="static/assets/row-view.png" alt="View"></button>
+									<button type="button" data-popup="delete-confirmation-popup"><img src="static/assets/row-delete.png" alt="Delete"></button>
+								</form>
 							</div>
 							
 							<div class="table-row">
-								<p class="table-row-text">002</p>
-								<p class="table-row-text">gueco_right_eye.jpg</p>
+								<p class="table-row-text">000002</p>
+								<p class="table-row-text">Gueco, Yerika Elaine</p>
+								<p class="table-row-text">20</p>
+								<p class="table-row-text">Right</p>
 								<p class="table-row-text">04-05-2026</p>
 								<p class="table-row-text">Normal</p>
-								<p class="table-row-text">91.5%</p>
 								<p class="table-row-text">No action needed</p>
-								<div class="table-row-buttons">
-									<button><img src="static/assets/row-view.png" alt="View"></button>
-									<button><img src="static/assets/row-delete.png" alt="Delete"></button>
-								</div>
+								<form class="table-row-buttons" action="/inference-results" method="get">
+									<button type="submit"><img src="static/assets/row-view.png" alt="View"></button>
+									<button type="button" data-popup="delete-confirmation-popup"><img src="static/assets/row-delete.png" alt="Delete"></button>
+								</form>
 							</div>
 							
 							<div class="table-row">
-								<p class="table-row-text">001</p>
-								<p class="table-row-text">gueco_left_eye.jpg</p>
-								<p class="table-row-text">04-05-2026</p	>
+								<p class="table-row-text">000001</p>
+								<p class="table-row-text">Gueco, Yerika Elaine</p>
+								<p class="table-row-text">20</p>
+								<p class="table-row-text">Left</p>
+								<p class="table-row-text">04-05-2026</p>
 								<p class="table-row-text">Hyperopia</p>
-								<p class="table-row-text">45.0%</p>
 								<p class="table-row-text">Keep monitoring</p>
-								<div class="table-row-buttons">
-									<button><img src="static/assets/row-view.png" alt="View"></button>
-									<button><img src="static/assets/row-delete.png" alt="Delete"></button>
-								</div>
+								<form class="table-row-buttons" action="/inference-results" method="get">
+									<button type="submit"><img src="static/assets/row-view.png" alt="View"></button>
+									<button type="button" data-popup="delete-confirmation-popup"><img src="static/assets/row-delete.png" alt="Delete"></button>
+								</form>
 							</div>
 						</div>
 					</div>
@@ -98,4 +114,5 @@ RefraScan - Inference History
 				<button class="btn-main root-btn-main hover-bright">Export History</button>
 			</div>
 		</div>
+{% include "popup.html" %}
 {% endblock %}

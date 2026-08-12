@@ -1,0 +1,415 @@
+<div class="popup">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/popup.css') }}">
+
+    <!-- =========================================================
+        POPUPS
+    ========================================================= -->
+
+    <!-- 1. Follow Up Details -->
+    <div class="popup-overlay popup-follow-up" id="follow-up-popup">
+        <div class="popup-container">
+
+            <div class="popup-header">
+                <h2>Follow up #</h2>
+                <button type="button" class="popup-close">&times;</button>
+            </div>
+
+            <div class="popup-content">
+                <p>Details</p>
+
+                <textarea
+                    class="popup-textarea"
+                    name="follow_up_details"
+                    placeholder="Enter follow-up details..."
+                ></textarea>
+            </div>
+
+            <div class="popup-actions">
+                <button type="button" class="btn-secondary popup-cancel">
+                    Cancel
+                </button>
+
+                <button type="button" class="btn-primary">
+                    Save
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- 2. Patient Record Added / Edited -->
+    <form class="popup-overlay popup-record-success" id="record-success-popup" action="/patient-record-detailed" method="get">
+        <div class="popup-container">
+
+            <div class="popup-header">
+                <h2 id="record-success-title">Added</h2>
+                <button type="submit" class="popup-close">&times;</button>
+            </div>
+
+            <div class="popup-content">
+                <p id="record-success-message">
+                    New Patient Record Added.
+                </p>
+            </div>
+
+            <div class="popup-actions">
+                <button type="submit" class="btn-primary popup-close-action">
+                    OK
+                </button>
+            </div>
+
+        </div>
+    </form>
+
+
+    <!-- 3. Delete Patient Record Confirmation -->
+    <div class="popup-overlay popup-delete-confirmation" id="delete-confirmation-popup">
+        <div class="popup-container">
+
+            <div class="popup-header">
+                <h2>Confirmation</h2>
+                <button type="button" class="popup-close">&times;</button>
+            </div>
+
+            <div class="popup-content">
+                <p>
+                    Do you really want to delete this Patient record?
+                </p>
+            </div>
+
+            <form class="popup-actions" action="/delete-patient" method="post">
+                {# <input type="hidden" name="patient_id" value="{{ patient.id }}"> #}
+                <button type="button" class="btn-secondary popup-cancel">
+                    Cancel
+                </button>
+
+                <button type="submit" class="btn-danger" data-popup="record-deleted-popup">
+                    Delete
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+
+    <!-- 4. Patient Record Deleted -->
+    <form class="popup-overlay popup-record-deleted" id="record-deleted-popup" action="/patient-records" method="get">
+        <div class="popup-container">
+
+            <div class="popup-header">
+                <h2>Deleted</h2>
+                <button type="submit" class="popup-close">&times;</button>
+            </div>
+
+            <div class="popup-content">
+                <p>
+                    Patient Record has been deleted.
+                </p>
+            </div>
+
+            <div class="popup-actions">
+                <button type="submit" class="btn-primary popup-close-action">
+                    OK
+                </button>
+            </div>
+
+        </div>
+    </form>
+
+    <!-- 5. Cancel Edit Patient Record Confirmation -->
+    <div class="popup-overlay popup-delete-confirmation" id="cancel-edit-popup">
+        <div class="popup-container">
+
+            <div class="popup-header">
+                <h2>Confirmation</h2>
+                <button type="button" class="popup-close">&times;</button>
+            </div>
+
+            <div class="popup-content">
+                <p>
+                    Do you really want to cancel editing this Patient record?
+                </p>
+            </div>
+
+            <form class="popup-actions" action="/patient-records" method="get">
+                {# <input type="hidden" name="patient_id" value="{{ patient.id }}"> #}
+                <button type="button" class="btn-secondary popup-cancel">
+                    Keep Editing
+                </button>
+
+                <button type="submit" class="btn-danger">
+                    Cancel Editing
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- 6. Export to CSV Field Selection -->
+    <div class="popup-overlay popup-export-csv" id="export-csv-popup">
+        <div class="popup-container popup-container-large">
+
+            <div class="popup-header">
+                <h2>Export Patient Records to CSV</h2>
+                <button type="button" class="popup-close">&times;</button>
+            </div>
+
+            <form action="/export-csv" method="post" class="popup-form">
+                
+                <div class="popup-content popup-scrollable">
+                    <p class="export-subtitle">Select fields to include in the exported CSV file:</p>
+
+                    <div class="export-global-actions">
+                        <button type="button" class="btn-link" id="select-all-fields">Select All</button> | 
+                        <button type="button" class="btn-link" id="deselect-all-fields">Deselect All</button>
+                    </div>
+
+                    <div class="export-sections-grid">
+
+                        <!-- Patient Details -->
+                        <div class="export-group">
+                            <div class="export-group-header">
+                                <label><input type="checkbox" class="section-toggle" checked> <strong>Patient Details</strong></label>
+                            </div>
+                            <div class="export-checkbox-grid">
+                                <label><input type="checkbox" name="export_fields[]" value="patient_id" checked> Patient ID</label>
+                                <label><input type="checkbox" name="export_fields[]" value="last_name" checked> Last Name</label>
+                                <label><input type="checkbox" name="export_fields[]" value="first_name" checked> First Name</label>
+                                <label><input type="checkbox" name="export_fields[]" value="middle_name" checked> Middle Name</label>
+                                <label><input type="checkbox" name="export_fields[]" value="location" checked> Location</label>
+                                <label><input type="checkbox" name="export_fields[]" value="phone" checked> Phone</label>
+                                <label><input type="checkbox" name="export_fields[]" value="email" checked> Email</label>
+                                <label><input type="checkbox" name="export_fields[]" value="gender" checked> Gender</label>
+                                <label><input type="checkbox" name="export_fields[]" value="language" checked> Language Spoken</label>
+                                <label><input type="checkbox" name="export_fields[]" value="exam_datetime" checked> Date / Time</label>
+                                <label><input type="checkbox" name="export_fields[]" value="occupation" checked> Occupation</label>
+                                <label><input type="checkbox" name="export_fields[]" value="birthdate" checked> Birthdate</label>
+                                <label><input type="checkbox" name="export_fields[]" value="age" checked> Age</label>
+                                <label><input type="checkbox" name="export_fields[]" value="referred_from" checked> Referred From</label>
+                            </div>
+                        </div>
+
+                        <!-- History -->
+                        <div class="export-group">
+                            <div class="export-group-header">
+                                <label><input type="checkbox" class="section-toggle" checked> <strong>History</strong></label>
+                            </div>
+                            <div class="export-checkbox-grid">
+                                <label><input type="checkbox" name="export_fields[]" value="drug_allergy_present" checked> Drug Allergy Status</label>
+                                <label><input type="checkbox" name="export_fields[]" value="drug_allergy_info" checked> Drug Allergy Details</label>
+                                <label><input type="checkbox" name="export_fields[]" value="pregnancy_status" checked> Pregnancy / Nursing Status</label>
+                                <label><input type="checkbox" name="export_fields[]" value="pregnancy_info" checked> Pregnancy Info</label>
+                                <label><input type="checkbox" name="export_fields[]" value="family_history" checked> Family History</label>
+                                <label><input type="checkbox" name="export_fields[]" value="family_history_info" checked> Family History Info</label>
+                                <label><input type="checkbox" name="export_fields[]" value="past_history" checked> Past History</label>
+                                <label><input type="checkbox" name="export_fields[]" value="past_history_info" checked> Past History Info</label>
+                                <label><input type="checkbox" name="export_fields[]" value="medications" checked> Medications</label>
+                                <label><input type="checkbox" name="export_fields[]" value="medications_info" checked> Medications Info</label>
+                            </div>
+                        </div>
+
+                        <!-- Eye Details (OD / OS) -->
+                        <div class="export-group">
+                            <div class="export-group-header">
+                                <label><input type="checkbox" class="section-toggle" checked> <strong>Eye Details</strong></label>
+                            </div>
+                            <div class="export-checkbox-grid">
+                                <label><input type="checkbox" name="export_fields[]" value="od_va" checked> OD VA</label>
+                                <label><input type="checkbox" name="export_fields[]" value="os_va" checked> OS VA</label>
+                                <label><input type="checkbox" name="export_fields[]" value="od_ph" checked> OD PH</label>
+                                <label><input type="checkbox" name="export_fields[]" value="os_ph" checked> OS PH</label>
+                                <label><input type="checkbox" name="export_fields[]" value="od_eye_movements" checked> OD Eye Movements</label>
+                                <label><input type="checkbox" name="export_fields[]" value="os_eye_movements" checked> OS Eye Movements</label>
+                                <label><input type="checkbox" name="export_fields[]" value="od_cover_testing" checked> OD Cover Testing</label>
+                                <label><input type="checkbox" name="export_fields[]" value="os_cover_testing" checked> OS Cover Testing</label>
+                                <label><input type="checkbox" name="export_fields[]" value="od_lids" checked> OD Lids</label>
+                                <label><input type="checkbox" name="export_fields[]" value="os_lids" checked> OS Lids</label>
+                                <label><input type="checkbox" name="export_fields[]" value="od_conjunctiva" checked> OD Conjunctiva</label>
+                                <label><input type="checkbox" name="export_fields[]" value="os_conjunctiva" checked> OS Conjunctiva</label>
+                                <label><input type="checkbox" name="export_fields[]" value="od_cornea" checked> OD Cornea</label>
+                                <label><input type="checkbox" name="export_fields[]" value="os_cornea" checked> OS Cornea</label>
+                                <label><input type="checkbox" name="export_fields[]" value="od_anterior_chamber" checked> OD Anterior Chamber</label>
+                                <label><input type="checkbox" name="export_fields[]" value="os_anterior_chamber" checked> OS Anterior Chamber</label>
+                                <label><input type="checkbox" name="export_fields[]" value="od_light_reflexes" checked> OD Light Reflexes</label>
+                                <label><input type="checkbox" name="export_fields[]" value="os_light_reflexes" checked> OS Light Reflexes</label>
+                                <label><input type="checkbox" name="export_fields[]" value="od_eye_pressure" checked> OD Eye Pressure</label>
+                                <label><input type="checkbox" name="export_fields[]" value="os_eye_pressure" checked> OS Eye Pressure</label>
+                                <label><input type="checkbox" name="export_fields[]" value="od_lens" checked> OD Lens</label>
+                                <label><input type="checkbox" name="export_fields[]" value="os_lens" checked> OS Lens</label>
+                                <label><input type="checkbox" name="export_fields[]" value="od_nifbut" checked> OD NIFBUT</label>
+                                <label><input type="checkbox" name="export_fields[]" value="os_nifbut" checked> OS NIFBUT</label>
+                            </div>
+                        </div>
+
+                        <!-- Diagnosis -->
+                        <div class="export-group">
+                            <div class="export-group-header">
+                                <label><input type="checkbox" class="section-toggle" checked> <strong>Diagnosis</strong></label>
+                            </div>
+                            <div class="export-checkbox-grid">
+                                <label><input type="checkbox" name="export_fields[]" value="diagnosis" checked> Diagnosis List</label>
+                            </div>
+                        </div>
+
+                        <!-- Measurements -->
+                        <div class="export-group">
+                            <div class="export-group-header">
+                                <label><input type="checkbox" class="section-toggle" checked> <strong>Measurements</strong></label>
+                            </div>
+                            <div class="export-checkbox-grid">
+                                <label><input type="checkbox" name="export_fields[]" value="od_k1" checked> OD K1</label>
+                                <label><input type="checkbox" name="export_fields[]" value="od_k2" checked> OD K2</label>
+                                <label><input type="checkbox" name="export_fields[]" value="od_ax" checked> OD AX</label>
+                                <label><input type="checkbox" name="export_fields[]" value="os_k1" checked> OS K1</label>
+                                <label><input type="checkbox" name="export_fields[]" value="os_k2" checked> OS K2</label>
+                                <label><input type="checkbox" name="export_fields[]" value="os_ax" checked> OS AX</label>
+                                <label><input type="checkbox" name="export_fields[]" value="pd" checked> PD</label>
+                                <label><input type="checkbox" name="export_fields[]" value="ww_od" checked> W-W OD</label>
+                                <label><input type="checkbox" name="export_fields[]" value="ww_os" checked> W-W OS</label>
+                                <label><input type="checkbox" name="export_fields[]" value="scotopic_od" checked> Scotopic Pupil OD</label>
+                                <label><input type="checkbox" name="export_fields[]" value="scotopic_os" checked> Scotopic Pupil OS</label>
+                                <label><input type="checkbox" name="export_fields[]" value="pachy_od" checked> Pachymetry OD</label>
+                                <label><input type="checkbox" name="export_fields[]" value="pachy_os" checked> Pachymetry OS</label>
+                                <label><input type="checkbox" name="export_fields[]" value="additional_details" checked> Additional Details</label>
+                            </div>
+                        </div>
+
+                        <!-- MS39 -->
+                        <div class="export-group">
+                            <div class="export-group-header">
+                                <label><input type="checkbox" class="section-toggle" checked> <strong>MS39</strong></label>
+                            </div>
+                            <div class="export-checkbox-grid">
+                                <label><input type="checkbox" name="export_fields[]" value="ms39_od_k1" checked> MS39 OD K1</label>
+                                <label><input type="checkbox" name="export_fields[]" value="ms39_od_k2" checked> MS39 OD K2</label>
+                                <label><input type="checkbox" name="export_fields[]" value="ms39_od_axis" checked> MS39 OD Axis</label>
+                                <label><input type="checkbox" name="export_fields[]" value="ms39_od_pachy" checked> MS39 OD Pachymetry</label>
+                                <label><input type="checkbox" name="export_fields[]" value="ms39_od_class" checked> MS39 OD Class</label>
+                                <label><input type="checkbox" name="export_fields[]" value="ms39_od_epi" checked> MS39 OD Epi K</label>
+                                <label><input type="checkbox" name="export_fields[]" value="ms39_os_k1" checked> MS39 OS K1</label>
+                                <label><input type="checkbox" name="export_fields[]" value="ms39_os_k2" checked> MS39 OS K2</label>
+                                <label><input type="checkbox" name="export_fields[]" value="ms39_os_axis" checked> MS39 OS Axis</label>
+                                <label><input type="checkbox" name="export_fields[]" value="ms39_os_pachy" checked> MS39 OS Pachymetry</label>
+                                <label><input type="checkbox" name="export_fields[]" value="ms39_os_class" checked> MS39 OS Class</label>
+                                <label><input type="checkbox" name="export_fields[]" value="ms39_os_epi" checked> MS39 OS Epi K</label>
+                            </div>
+                        </div>
+
+                        <!-- Autorefraction (AR) -->
+                        <div class="export-group">
+                            <div class="export-group-header">
+                                <label><input type="checkbox" class="section-toggle" checked> <strong>Autorefraction (AR)</strong></label>
+                            </div>
+                            <div class="export-checkbox-grid">
+                                <label><input type="checkbox" name="export_fields[]" value="ar_od_ds" checked> AR OD Ds</label>
+                                <label><input type="checkbox" name="export_fields[]" value="ar_od_cyl" checked> AR OD Cyl</label>
+                                <label><input type="checkbox" name="export_fields[]" value="ar_od_axis" checked> AR OD Axis</label>
+                                <label><input type="checkbox" name="export_fields[]" value="ar_os_ds" checked> AR OS Ds</label>
+                                <label><input type="checkbox" name="export_fields[]" value="ar_os_cyl" checked> AR OS Cyl</label>
+                                <label><input type="checkbox" name="export_fields[]" value="ar_os_axis" checked> AR OS Axis</label>
+                            </div>
+                        </div>
+
+                        <!-- Old Refraction -->
+                        <div class="export-group">
+                            <div class="export-group-header">
+                                <label><input type="checkbox" class="section-toggle" checked> <strong>Old Refraction</strong></label>
+                            </div>
+                            <div class="export-checkbox-grid">
+                                <label><input type="checkbox" name="export_fields[]" value="old_od_ds" checked> Old Refraction OD Ds</label>
+                                <label><input type="checkbox" name="export_fields[]" value="old_od_cyl" checked> Old Refraction OD Cyl</label>
+                                <label><input type="checkbox" name="export_fields[]" value="old_od_axis" checked> Old Refraction OD Axis</label>
+                                <label><input type="checkbox" name="export_fields[]" value="old_od_j" checked> Old Refraction OD J</label>
+                                <label><input type="checkbox" name="export_fields[]" value="old_os_ds" checked> Old Refraction OS Ds</label>
+                                <label><input type="checkbox" name="export_fields[]" value="old_os_cyl" checked> Old Refraction OS Cyl</label>
+                                <label><input type="checkbox" name="export_fields[]" value="old_os_axis" checked> Old Refraction OS Axis</label>
+                                <label><input type="checkbox" name="export_fields[]" value="old_os_j" checked> Old Refraction OS J</label>
+                            </div>
+                        </div>
+
+                        <!-- Manifest Refraction -->
+                        <div class="export-group">
+                            <div class="export-group-header">
+                                <label><input type="checkbox" class="section-toggle" checked> <strong>Manifest Refraction</strong></label>
+                            </div>
+                            <div class="export-checkbox-grid">
+                                <label><input type="checkbox" name="export_fields[]" value="manifest_by" checked> Manifest Examiner</label>
+                                <label><input type="checkbox" name="export_fields[]" value="manifest_od_ds" checked> Manifest OD Ds</label>
+                                <label><input type="checkbox" name="export_fields[]" value="manifest_od_cyl" checked> Manifest OD Cyl</label>
+                                <label><input type="checkbox" name="export_fields[]" value="manifest_od_axis" checked> Manifest OD Axis</label>
+                                <label><input type="checkbox" name="export_fields[]" value="manifest_od_j" checked> Manifest OD J</label>
+                                <label><input type="checkbox" name="export_fields[]" value="manifest_os_ds" checked> Manifest OS Ds</label>
+                                <label><input type="checkbox" name="export_fields[]" value="manifest_os_cyl" checked> Manifest OS Cyl</label>
+                                <label><input type="checkbox" name="export_fields[]" value="manifest_os_axis" checked> Manifest OS Axis</label>
+                                <label><input type="checkbox" name="export_fields[]" value="manifest_os_j" checked> Manifest OS J</label>
+                                <label><input type="checkbox" name="export_fields[]" value="manifest_ou_details" checked> Manifest OU Details</label>
+                                <label><input type="checkbox" name="export_fields[]" value="manifest_add_od_ds" checked> Manifest Add OD Ds</label>
+                                <label><input type="checkbox" name="export_fields[]" value="manifest_add_od_n" checked> Manifest Add OD N</label>
+                                <label><input type="checkbox" name="export_fields[]" value="manifest_add_os_ds" checked> Manifest Add OS Ds</label>
+                                <label><input type="checkbox" name="export_fields[]" value="manifest_add_os_n" checked> Manifest Add OS N</label>
+                            </div>
+                        </div>
+
+                        <!-- Cyclo Refraction -->
+                        <div class="export-group">
+                            <div class="export-group-header">
+                                <label><input type="checkbox" class="section-toggle" checked> <strong>Cyclo Refraction</strong></label>
+                            </div>
+                            <div class="export-checkbox-grid">
+                                <label><input type="checkbox" name="export_fields[]" value="cyclo_by" checked> Cyclo Examiner</label>
+                                <label><input type="checkbox" name="export_fields[]" value="cyclo_od_ds" checked> Cyclo OD Ds</label>
+                                <label><input type="checkbox" name="export_fields[]" value="cyclo_od_cyl" checked> Cyclo OD Cyl</label>
+                                <label><input type="checkbox" name="export_fields[]" value="cyclo_od_axis" checked> Cyclo OD Axis</label>
+                                <label><input type="checkbox" name="export_fields[]" value="cyclo_od_vision" checked> Cyclo OD Vision (6/)</label>
+                                <label><input type="checkbox" name="export_fields[]" value="cyclo_od_j" checked> Cyclo OD J</label>
+                                <label><input type="checkbox" name="export_fields[]" value="cyclo_os_ds" checked> Cyclo OS Ds</label>
+                                <label><input type="checkbox" name="export_fields[]" value="cyclo_os_cyl" checked> Cyclo OS Cyl</label>
+                                <label><input type="checkbox" name="export_fields[]" value="cyclo_os_axis" checked> Cyclo OS Axis</label>
+                                <label><input type="checkbox" name="export_fields[]" value="cyclo_os_vision" checked> Cyclo OS Vision (6/)</label>
+                                <label><input type="checkbox" name="export_fields[]" value="cyclo_os_j" checked> Cyclo OS J</label>
+                                <label><input type="checkbox" name="export_fields[]" value="cyclo_add_od_ds" checked> Cyclo Add OD Ds</label>
+                                <label><input type="checkbox" name="export_fields[]" value="cyclo_add_od_n" checked> Cyclo Add OD N</label>
+                                <label><input type="checkbox" name="export_fields[]" value="cyclo_add_os_ds" checked> Cyclo Add OS Ds</label>
+                                <label><input type="checkbox" name="export_fields[]" value="cyclo_add_os_n" checked> Cyclo Add OS N</label>
+                            </div>
+                        </div>
+
+                        <!-- Additional Tests -->
+                        <div class="export-group">
+                            <div class="export-group-header">
+                                <label><input type="checkbox" class="section-toggle" checked> <strong>Additional Tests</strong></label>
+                            </div>
+                            <div class="export-checkbox-grid">
+                                <label><input type="checkbox" name="export_fields[]" value="master_eye" checked> Master Eye</label>
+                                <label><input type="checkbox" name="export_fields[]" value="rifle_eye" checked> Photo / Rifle Eye</label>
+                                <label><input type="checkbox" name="export_fields[]" value="flucaine_test" checked> Flucaine Test</label>
+                                <label><input type="checkbox" name="export_fields[]" value="schirmers_test" checked> Schirmer's Test</label>
+                            </div>
+                        </div>
+
+                        <!-- Follow Up Details -->
+                        <div class="export-group">
+                            <div class="export-checkbox-grid">
+                                <label><input type="checkbox" class="section-toggle" checked> <strong>Follow Up Details</strong></label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="popup-actions">
+                    <button type="button" class="btn-secondary popup-cancel">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        Export CSV
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>    
