@@ -1,0 +1,306 @@
+{% extends "layout.html" %}
+
+{% block title %}
+RefraScan - Patient Number 26-8000
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="/static/css/patient-record-detailed.css" />
+{% endblock %}
+
+{% block main %}
+<div class="patient-record-details">
+
+    <!-- Action Bar / Header -->
+    <div class="patient-record-details__header">
+        <div class="patient-record-details__header-left">
+            <div class="patient-record-details__header-titles">
+                <a href="/patient-records" class="patient-record-details__back-link">&larr; Back to Records</a>
+                <h1>Patient Record Details</h1>
+            </div>
+
+            <div class="patient-record-details__header-action">
+                <button class="btn-secondary" data-popup="follow-up-popup">New Follow Up Details</button>
+            </div>
+
+        </div>
+        <form class="patient-record-details__actions">
+            <button class="btn-secondary" onclick="window.print()">Print Card Sheet</button>
+            <button class="btn-primary" formaction="/add-patient" formmethod="get" type="submit">Edit Record</button>
+            <button class="btn-danger" data-popup="delete-confirmation-popup" type="button">Delete Record</button>
+        </form>
+    </div>
+
+    <!-- =========================================================
+        General & Eye Examination Card Sheet
+    ========================================================== -->
+    <div class="patient-record-details__sheet patient-record-details__sheet--front">
+        <div class="patient-record-details__sheet-title">GENERAL & EYE EXAMINATION</div>
+
+        <!-- Top Row: Patient Info Left & Right -->
+        <div class="patient-record-details__grid-row patient-record-details__grid-row--top-info">
+            
+            <!-- Left Info Box -->
+            <div class="patient-record-details__box patient-record-details__info-box--left">
+                <div class="patient-record-details__info-line"><span class="patient-record-details__info-label">Gender:</span> <span class="patient-record-details__info-value">{{ patient.gender or 'Female' }}</span></div>
+                <div class="patient-record-details__info-line"><span class="patient-record-details__info-label">Language Spoken:</span> <span class="patient-record-details__info-value">{{ patient.language or 'English' }}</span></div>
+                <div class="patient-record-details__info-line"><span class="patient-record-details__info-label">Date:</span> <span class="patient-record-details__info-value">{{ patient.exam_datetime or '2026-06-04' }}</span></div>
+                <div class="patient-record-details__info-line"><span class="patient-record-details__info-label">Occupation:</span> <span class="patient-record-details__info-value">{{ patient.occupation or 'Engineer' }}</span></div>
+                <div class="patient-record-details__info-line"><span class="patient-record-details__info-label">Birthdate:</span> <span class="patient-record-details__info-value">{{ patient.birthdate or '2002-11-15' }}</span></div>
+                <div class="patient-record-details__info-line"><span class="patient-record-details__info-label">Age:</span> <span class="patient-record-details__info-value">{{ patient.age or '23' }}</span></div>
+                <div class="patient-record-details__info-line"><span class="patient-record-details__info-label">Referred from:</span> <span class="patient-record-details__info-value">{{ patient.referred_from or 'Dr. Torres' }}</span></div>
+            </div>
+
+            <!-- Right Info Box (ID, Name, Contact) -->
+            <div class="patient-record-details__box patient-record-details__info-box--right">
+                <div class="patient-record-details__patient-id">ID: {{ patient.patient_id or '000003' }}</div>
+                <h2 class="patient-record-details__patient-name">{{ patient.last_name or 'Aquino' }}, {{ patient.first_name or 'Katrine Ingrid' }} {{ patient.middle_name or 'O.' }}</h2>
+                <div class="patient-record-details__info-line"><span class="patient-record-details__info-label">Location:</span> <span class="patient-record-details__info-value">{{ patient.location or 'Angeles City' }}</span></div>
+                <div class="patient-record-details__info-line"><span class="patient-record-details__info-label">Phone:</span> <span class="patient-record-details__info-value">{{ patient.phone or '0917-123-4567' }}</span></div>
+                <div class="patient-record-details__info-line"><span class="patient-record-details__info-label">Email:</span> <span class="patient-record-details__info-value">{{ patient.email or 'katrine@example.com' }}</span></div>
+            </div>
+
+        </div>
+
+        <!-- Middle Row: History & Diagnosis Side-by-Side -->
+        <div class="patient-record-details__grid-row patient-record-details__grid-row--middle">
+            
+            <!-- Left History Box -->
+            <div class="patient-record-details__box patient-record-details__box--history">
+                <h3 class="patient-record-details__box-title">History</h3>
+                <div class="patient-record-details__history">
+                    <p><strong>Drug Allergy:</strong> {{ patient.drug_allergy_info or 'None' }}</p>
+                    <p><strong>Pregnancy / Nursing:</strong> {{ patient.pregnancy_info or 'N/A' }}</p>
+                    <p><strong>Family History:</strong> {{ patient.family_history_info or 'CL' }}</p>
+                    <p><strong>Past History:</strong> {{ patient.past_history_info or 'DM, HPN' }}</p>
+                    <p><strong>Medications:</strong> {{ patient.medications_info or 'None' }}</p>
+                </div>
+            </div>
+
+            <!-- Right Diagnosis Box -->
+            <div class="patient-record-details__box patient-record-details__box--diagnosis">
+                <h3 class="patient-record-details__box-title">Diagnosis</h3>
+                <ol class="patient-record-details__diagnosis-list">
+                    <li>Myopia with Astigmatism</li>
+                    <li>Dry Eye Syndrome</li>
+                    <li>--</li>
+                </ol>
+            </div>
+
+        </div>
+
+        <!-- Bottom Row: Eye Details (OD / OS Side-by-Side) -->
+        <div class="patient-record-details__box patient-record-details__box--eye-details">
+            <h3 class="patient-record-details__box-title">Eye Details</h3>
+            <div class="patient-record-details__eye-grid">
+                <div class="patient-record-details__eye-column">
+                    <h4 class="patient-record-details__eye-title">RIGHT (OD)</h4>
+                    <table class="patient-record-details__detail-table">
+                        <tr><td>VA w/o glasses:</td><td>{{ patient.od_va or '20/200' }}</td></tr>
+                        <tr><td>P.H.:</td><td>{{ patient.od_ph or '20/20' }}</td></tr>
+                        <tr><td>Eye Movements:</td><td>{{ patient.od_eye_movements or 'Normal' }}</td></tr>
+                        <tr><td>Cover Testing:</td><td>{{ patient.od_cover_testing or 'Orthophoria' }}</td></tr>
+                        <tr><td>Lids:</td><td>{{ patient.od_lids or 'Clear' }}</td></tr>
+                        <tr><td>Conjunctiva:</td><td>{{ patient.od_conjunctiva or 'Clear' }}</td></tr>
+                        <tr><td>Cornea:</td><td>{{ patient.od_cornea or 'Clear' }}</td></tr>
+                        <tr><td>Anterior Chamber:</td><td>{{ patient.od_anterior_chamber or 'Deep & Clear' }}</td></tr>
+                        <tr><td>Light Reflexes:</td><td>{{ patient.od_light_reflexes or 'Brisk' }}</td></tr>
+                        <tr><td>Eye Pressure:</td><td>{{ patient.od_eye_pressure or '14 mmHg' }}</td></tr>
+                        <tr><td>Lens:</td><td>{{ patient.od_lens or 'Clear' }}</td></tr>
+                        <tr><td>NIFBUT:</td><td>{{ patient.od_nifbut or '10s' }}</td></tr>
+                    </table>
+                </div>
+
+                <div class="patient-record-details__eye-column">
+                    <h4 class="patient-record-details__eye-title">LEFT (OS)</h4>
+                    <table class="patient-record-details__detail-table">
+                        <tr><td>VA w/o glasses:</td><td>{{ patient.os_va or '20/200' }}</td></tr>
+                        <tr><td>P.H.:</td><td>{{ patient.os_ph or '20/20' }}</td></tr>
+                        <tr><td>Eye Movements:</td><td>{{ patient.os_eye_movements or 'Normal' }}</td></tr>
+                        <tr><td>Cover Testing:</td><td>{{ patient.os_cover_testing or 'Orthophoria' }}</td></tr>
+                        <tr><td>Lids:</td><td>{{ patient.os_lids or 'Clear' }}</td></tr>
+                        <tr><td>Conjunctiva:</td><td>{{ patient.os_conjunctiva or 'Clear' }}</td></tr>
+                        <tr><td>Cornea:</td><td>{{ patient.os_cornea or 'Clear' }}</td></tr>
+                        <tr><td>Anterior Chamber:</td><td>{{ patient.os_anterior_chamber or 'Deep & Clear' }}</td></tr>
+                        <tr><td>Light Reflexes:</td><td>{{ patient.os_light_reflexes or 'Brisk' }}</td></tr>
+                        <tr><td>Eye Pressure:</td><td>{{ patient.os_eye_pressure or '15 mmHg' }}</td></tr>
+                        <tr><td>Lens:</td><td>{{ patient.os_lens or 'Clear' }}</td></tr>
+                        <tr><td>NIFBUT:</td><td>{{ patient.os_nifbut or '9s' }}</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- =========================================================
+        Refraction & Measurements Card Sheet
+    ========================================================== -->
+    <div class="patient-record-details__sheet patient-record-details__sheet--back">
+        <div class="patient-record-details__sheet-title">REFRACTION & MEASUREMENTS</div>
+
+        <div class="patient-record-details__back-grid">
+
+            <!-- Left Main Column (Keratometry, MS39, Pupil, Pachy) -->
+            <div class="patient-record-details__back-column patient-record-details__back-column--left">
+                
+                <!-- Keratometry & W-W Box -->
+                <div class="patient-record-details__box">
+                    <table class="patient-record-details__compact-table">
+                        <thead>
+                            <tr><th></th><th>OD</th><th>OS</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>K1</td><td>{{ patient.od_k1 or '44.90' }}</td><td>{{ patient.os_k1 or '45.80' }}</td></tr>
+                            <tr><td>K2</td><td>{{ patient.od_k2 or '45.90' }}</td><td>{{ patient.os_k2 or '46.00' }}</td></tr>
+                            <tr><td>AX</td><td>{{ patient.od_ax or '163' }}</td><td>{{ patient.os_ax or '8' }}</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="patient-record-details__inline-stat"><strong>PD:</strong> {{ patient.pd or '61' }} mm</div>
+                    <div class="patient-record-details__section-divider">W - W</div>
+                    <div class="patient-record-details__inline-stat"><strong>OD:</strong> {{ patient.ww_od or '11.41' }}</div>
+                    <div class="patient-record-details__inline-stat"><strong>OS:</strong> {{ patient.ww_os or '11.32' }}</div>
+                </div>
+
+                <!-- Scotopic Pupil & Pachymetry Reading -->
+                <div class="patient-record-details__box">
+                    <h4 class="patient-record-details__compact-heading">Scotopic Pupil Size</h4>
+                    <p class="patient-record-details__stat-line">OD: <strong>{{ patient.scotopic_od or '5.46' }} μ</strong> &nbsp;|&nbsp; OS: <strong>{{ patient.scotopic_os or '4.87' }} μ</strong></p>
+                    
+                    <h4 class="patient-record-details__compact-heading patient-record-details__compact-heading--border-top">Pachymetry Reading</h4>
+                    <p class="patient-record-details__stat-line">OD: <strong>{{ patient.pachy_od or '485' }} μ</strong> &nbsp;|&nbsp; OS: <strong>{{ patient.pachy_os or '480' }} μ</strong></p>
+                </div>
+
+                <!-- MS39 Box -->
+                <div class="patient-record-details__box">
+                    <h3 class="patient-record-details__box-title">MS39</h3>
+                    <table class="patient-record-details__compact-table">
+                        <thead>
+                            <tr><th></th><th>OD</th><th>OS</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>K1</td><td>{{ patient.ms39_od_k1 or '45.02' }}</td><td>{{ patient.ms39_os_k1 or '46.14' }}</td></tr>
+                            <tr><td>K2</td><td>{{ patient.ms39_od_k2 or '46.14' }}</td><td>{{ patient.ms39_os_k2 or '46.47' }}</td></tr>
+                            <tr><td>Axis</td><td>{{ patient.ms39_od_axis or '174' }}</td><td>{{ patient.ms39_os_axis or '22' }}</td></tr>
+                            <tr><td>Pachymetry</td><td>{{ patient.ms39_od_pachy or '479' }}</td><td>{{ patient.ms39_os_pachy or '476' }}</td></tr>
+                            <tr><td>Class</td><td>{{ patient.ms39_od_class or 'N' }}</td><td>{{ patient.ms39_os_class or 'N' }}</td></tr>
+                            <tr><td>Epi K</td><td>{{ patient.ms39_od_epi or '-' }}</td><td>{{ patient.ms39_os_epi or '-' }}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+            <!-- Right Main Column (Refraction Tables) -->
+            <div class="patient-record-details__back-column patient-record-details__back-column--right">
+
+                <!-- AR Box -->
+                <div class="patient-record-details__box">
+                    <h3 class="patient-record-details__box-title">AR</h3>
+                    <div class="patient-record-details__refraction-row">
+                        <span><strong>OD:</strong> {{ patient.ar_od_ds or '-4.25' }} Ds &nbsp; {{ patient.ar_od_cyl or '-1.50' }} Cyl x {{ patient.ar_od_axis or '127' }}°</span>
+                    </div>
+                    <div class="patient-record-details__refraction-row">
+                        <span><strong>OS:</strong> {{ patient.ar_os_ds or '-6.00' }} Ds &nbsp; {{ patient.ar_os_cyl or '-0.75' }} Cyl x {{ patient.ar_os_axis or '93' }}°</span>
+                    </div>
+                </div>
+
+                <!-- Old Refraction Box -->
+                <div class="patient-record-details__box">
+                    <h3 class="patient-record-details__box-title">Old Refraction</h3>
+                    <div class="patient-record-details__refraction-row">
+                        <span><strong>OD:</strong> {{ patient.old_od_ds or '-4.25' }} = {{ patient.old_od_cyl or '-1.25' }} x {{ patient.old_od_axis or '121' }}° ({{ patient.old_od_j or '20/30' }})</span>
+                    </div>
+                    <div class="patient-record-details__refraction-row">
+                        <span><strong>OS:</strong> {{ patient.old_os_ds or '-5.75' }} = {{ patient.old_os_cyl or '-0.75' }} x {{ patient.old_os_axis or '108' }}° ({{ patient.old_os_j or '20/20' }})</span>
+                    </div>
+                </div>
+
+                <!-- Manifest Refraction Box -->
+                <div class="patient-record-details__box">
+                    <div class="patient-record-details__box-title patient-record-details__box-title--with-byline">
+                        <h3>Manifest Refraction</h3>
+                        <span>by: <strong>{{ patient.manifest_by or 'Jonalyn Ase, O.D.' }}</strong></span>
+                    </div>
+                    <div class="patient-record-details__refraction-row">
+                        <span><strong>OD:</strong> {{ patient.manifest_od_ds or '-4.25' }} Ds {{ patient.manifest_od_cyl or '-1.50' }} Cyl x {{ patient.manifest_od_axis or '125' }}° &nbsp;|&nbsp; J: {{ patient.manifest_od_j or '20/20' }}</span>
+                    </div>
+                    <div class="patient-record-details__refraction-row">
+                        <span><strong>OS:</strong> {{ patient.manifest_os_ds or '-5.75' }} Ds {{ patient.manifest_os_cyl or '-0.75' }} Cyl x {{ patient.manifest_os_axis or '95' }}° &nbsp;|&nbsp; J: {{ patient.manifest_os_j or '20/20' }}</span>
+                    </div>
+                    <div class="patient-record-details__refraction-row patient-record-details__refraction-row--add-line">
+                        <span><strong>Add:</strong> OD {{ patient.manifest_add_od_ds or '+2.00' }} &nbsp;|&nbsp; OS {{ patient.manifest_add_os_ds or '+2.00' }}</span>
+                    </div>
+                </div>
+
+                <!-- Cyclo Refraction Box -->
+                <div class="patient-record-details__box">
+                    <div class="patient-record-details__box-title patient-record-details__box-title--with-byline">
+                        <h3>Cyclo Refraction</h3>
+                        <span>by: <strong>{{ patient.cyclo_by or 'Jonalyn Ase, O.D.' }}</strong></span>
+                    </div>
+                    <div class="patient-record-details__refraction-row">
+                        <span><strong>OD:</strong> {{ patient.cyclo_od_ds or '--' }} Ds {{ patient.cyclo_od_cyl or '--' }} Cyl x {{ patient.cyclo_od_axis or '--' }}° &nbsp;|&nbsp; 6/{{ patient.cyclo_od_vision or '--' }}</span>
+                    </div>
+                    <div class="patient-record-details__refraction-row">
+                        <span><strong>OS:</strong> {{ patient.cyclo_os_ds or '--' }} Ds {{ patient.cyclo_os_cyl or '--' }} Cyl x {{ patient.cyclo_os_axis or '--' }}° &nbsp;|&nbsp; 6/{{ patient.cyclo_os_vision or '--' }}</span>
+                    </div>
+                </div>
+
+                <!-- Monovision Refraction -->
+                <div class="patient-record-details__box">
+                    <div class="patient-record-details__box-title patient-record-details__box-title--with-byline">
+                        <h3>Monovision Refraction</h3>
+                        <span>by: <strong>--</strong></span>
+                    </div>
+                    <p class="patient-record-details__stat-line">OD: 6/-- &nbsp; J: --</p>
+                    <p class="patient-record-details__stat-line">OS: 6/-- &nbsp; J: --</p>
+                </div>
+
+                <!-- Additional Tests / Master Eye Box -->
+                <div class="patient-record-details__box">
+                    <div class="patient-record-details__inline-stat"><strong>Master Eye:</strong> {{ patient.master_eye or 'Right (R)' }}</div>
+                    <div class="patient-record-details__inline-stat"><strong>Rifle Eye:</strong> {{ patient.rifle_eye or 'Right (R)' }}</div>
+                    <div class="patient-record-details__inline-stat"><strong>Flucaine Test:</strong> {{ patient.flucaine_test or 'Normal' }}</div>
+                    <div class="patient-record-details__inline-stat"><strong>Schirmer's Test:</strong> {{ patient.schirmers_test or '15mm' }}</div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- =========================================================
+        Follow Up Sheet
+    ========================================================== -->
+    <div class="patient-record-details__sheet patient-record-details__sheet--follow-up">
+        <div class="patient-record-details__sheet-title">FOLLOW UP</div>
+
+        <div class="patient-record-details__follow-up-list">
+            <div class="patient-record-details__follow-up-row">
+                <div class="patient-record-details__follow-up-label">
+                    <strong>Follow Up #1:</strong> {{ patient.follow_up_1 or '2026-07-04' }}
+                </div>
+                <p class="patient-record-details__follow-up-details">{{ patient.follow_up_1_details or 'Patient reports improved vision with new prescription.\nNo adverse effects noted.' }}</p>
+            </div>
+
+            <div class="patient-record-details__follow-up-row">
+                <div class="patient-record-details__follow-up-label">
+                    <strong>Follow Up #2:</strong> {{ patient.follow_up_2 or '2026-08-15' }}
+                </div>
+                <p class="patient-record-details__follow-up-details">{{ patient.follow_up_2_details or 'Patient reports mild dryness in the morning. Advised to use artificial tears as needed.' }}</p>
+            </div>
+
+            <div class="patient-record-details__follow-up-row">
+                <div class="patient-record-details__follow-up-label">
+                    <strong>Follow Up #3:</strong> {{ patient.follow_up_3 or '2026-09-20' }}
+                </div>
+                <p class="patient-record-details__follow-up-details">{{ patient.follow_up_3_details or 'Patient reports stable vision. No further complaints.' }}</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% include 'popup.html' %}
+{% endblock %}

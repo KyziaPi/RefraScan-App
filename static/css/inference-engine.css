@@ -1,14 +1,6 @@
-.inference-engine-body-a {
-	display: flex;
-	flex-direction: column;
-	background-color: #f9fafb;
-	margin-top: 7rem;
-}
-
 .inference-engine-main-content {
 	gap: 4.8rem;
-	color: #0a0a0a;
-	padding-bottom: 14.7rem;
+    color: var(--color-text);
 }
 
 
@@ -16,25 +8,116 @@
 /* input-group */
 
 .input-group {
-	width: 100%;
-	max-width: 84.8rem;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 2.5rem;
-	padding: 0 2.1rem;
+    width: 100%;
+    max-width: 84.8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2.5rem;
+    padding: 0 2.1rem;
+	margin: 0;
+	box-sizing: border-box;
 }
 
-.input-age-container {
-	margin-left: -0.1rem;
-	width: 14.6rem;
-	text-align: center;
-	background-color: unset;
-	padding: 1.5rem 4.8rem;
-	border: 2px solid #d1d5dc;
-	border-radius: 10px;
+.input-group1,
+.input-group1 * {
+    box-sizing: border-box;
 }
-/* end input-group*/
+
+.input-group-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
+}
+
+
+.input-group-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 2.5rem;
+    width: 100%;
+}
+
+
+.input-group-row > .input-group-container {
+    flex: 1;
+}
+
+
+/* labels */
+
+.input-group-label {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+
+/* inputs */
+
+.input-container {
+    width: 100%;
+    margin: 0;
+    text-align: left;
+    background-color: unset;
+    padding: 1.5rem;
+    border: 2px solid var(--color-border);
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+
+.input-name {
+    width: 100%;
+}
+
+
+.input-phone {
+    width: 100%;
+}
+
+
+.input-email {
+    width: 100%;
+}
+
+
+.input-age {
+    width: 10rem;
+}
+
+
+/* eye side */
+
+.eye-side-group {
+    flex: 1;
+}
+
+.eye-side-options {
+    display: flex;
+    width: 100%;
+    gap: 1rem;
+}
+
+.eye-side-options .selection-box {
+    width: 50%;
+    height: 5.5rem;
+}
+
+
+/* submit */
+
+.input-submit-group {
+    align-items: center;
+}
+
+
+.input-group1 .input-group-btn-main {
+    width: 20.1rem;
+    font-weight: 500;
+}
 
 
 .inference-engine-title {
@@ -53,12 +136,12 @@
 	font-weight: 400;
 	line-height: 1.4;
 	padding: 6.2rem 6.3rem 6.6rem 6.3rem;
-	border: 4px dashed #d1d5dc;
+    border: 4px dashed var(--color-border);
 	border-radius: 10px;
 }
 
 .inference-insert-img-text-paragraph4 {
-	color: #6a7282;
+    color: var(--color-text-muted);
 }
 
 .input-group1 .input-group-btn-main {
@@ -80,4 +163,46 @@
 	.inference-insert-img {
 		padding-inline: var(--margin-sm);
 	}
+	
+    /* Stack phone/email and age/eye side */
+    .input-group-row {
+        flex-direction: column;
+        gap: 2.5rem;
+    }
+
+    /* Every field takes the full width */
+    .input-group-row > .input-group-container {
+        width: 100%;
+    }
+
+    .input-container,
+    .input-name,
+    .input-phone,
+    .input-email {
+        width: 100%;
+    }
+
+    /* Age should also use the full width on mobile */
+    .input-age {
+        width: 100%;
+    }
+
+    /* Eye side */
+    .eye-side-group {
+        width: 100%;
+    }
+
+    .eye-side-options {
+        height: auto;
+        min-height: 5.5rem;
+    }
+
+    /* Submit button */
+    .input-submit-group {
+        width: 100%;
+    }
+
+    .input-group1 .input-group-btn-main {
+        width: 100%;
+    }
 }

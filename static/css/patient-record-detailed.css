@@ -1,0 +1,395 @@
+/* =========================================================
+   PATIENT RECORD DETAILED STYLES
+========================================================= */
+
+body {
+    text-align: left;
+}
+
+.patient-record-details {
+    width: 70%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 1.5rem 2rem 4rem 2rem;
+    box-sizing: border-box;
+    font-size: 1.75rem;
+    color: var(--color-text-strong);
+}
+
+/* Header & Action Bar */
+.patient-record-details__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 1.5rem;
+}
+
+.patient-record-details__header-left {
+    display: flex;
+    justify-content: flex-start;
+    gap: 2rem;
+}
+
+.patient-record-details__header-titles {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.patient-record-details__header-action {
+    display: flex;
+    align-items: flex-end;
+}
+
+.patient-record-details__back-link {
+    text-decoration: none;
+    color: var(--color-brand);
+    font-size: 0.95em;
+    font-weight: 500;
+    text-align: start;
+}
+
+.patient-record-details__back-link:hover {
+    text-decoration: underline;
+}
+
+.patient-record-details__header h1 {
+    font-size: 1.75em;
+    margin: 0.2em 0 0 0;
+    color: var(--color-text-strong);
+}
+
+.patient-record-details__actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Sheet Card Base Styling */
+.patient-record-details__sheet {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-soft);
+}
+
+.patient-record-details__sheet-title {
+    background: var(--color-brand-strong);
+    color: var(--color-surface);
+    padding: 0.5em 0.8em;
+    font-size: 0.9em;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+/* Generic Grid Box Bordering */
+.patient-record-details__box {
+    border: 1px solid var(--color-border-soft);
+    border-radius: 6px;
+    padding: 1rem;
+    background: var(--color-surface);
+    margin-bottom: 1rem;
+}
+
+.patient-record-details__box-title {
+    font-size: 1.05em;
+    font-weight: 700;
+    margin: 0 0 0.75rem 0;
+    padding-bottom: 0.4rem;
+    border-bottom: 2px solid var(--color-brand);
+    color: inherit;
+    text-transform: uppercase;
+}
+
+.patient-record-details__box-title--with-byline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--color-brand);
+    padding-bottom: 0.4rem;
+    margin-bottom: 0.75rem;
+}
+
+.patient-record-details__box-title--with-byline h3 {
+    margin: 0;
+    font-size: 1.05em;
+    text-transform: uppercase;
+    color: inherit;
+}
+
+.patient-record-details__box-title--with-byline span {
+    font-size: 0.9em;
+    color: var(--color-text-muted);
+}
+
+/* =========================================================
+   FRONT SHEET SPECIFICS
+========================================================= */
+
+.patient-record-details__grid-row {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.patient-record-details__grid-row--top-info {
+    grid-template-columns: 1fr 1fr;
+}
+
+.patient-record-details__grid-row--middle {
+    grid-template-columns: 2fr 1fr;
+}
+
+.patient-record-details__info-box--right {
+    position: relative;
+}
+
+.patient-record-details__patient-id {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-weight: 700;
+    font-size: 0.9em;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 0.25em 0.6em;
+    background: var(--color-surface-soft);
+    color: inherit;
+}
+
+.patient-record-details__patient-name {
+    font-size: 1.4em;
+    margin: 0 0 1rem 0;
+    font-weight: 800;
+    color: var(--color-brand-strong);
+}
+
+.patient-record-details__info-line {
+    font-size: 0.95em;
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+.patient-record-details__info-label {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+.patient-record-details__info-value {
+    font-weight: 700;
+    color: var(--color-text-strong);
+}
+
+.patient-record-details__history p {
+    margin: 0 0 0.6rem 0;
+    font-size: 0.95em;
+    line-height: 1.5;
+}
+
+.patient-record-details__diagnosis-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    font-size: 0.95em;
+    font-weight: 600;
+}
+
+.patient-record-details__diagnosis-list li {
+    margin-bottom: 0.5rem;
+}
+
+/* Eye Details Two Column Layout */
+.patient-record-details__eye-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.patient-record-details__eye-title {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.95em;
+    font-weight: 800;
+    text-align: center;
+    background: var(--color-surface-alt);
+    color: var(--color-brand-strong);
+    padding: 0.4em;
+    border: 1px solid var(--color-border-soft);
+    border-radius: 4px;
+}
+
+.patient-record-details__detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+}
+
+.patient-record-details__detail-table td {
+    padding: 0.4em 0.3em;
+    border-bottom: 1px dashed var(--color-border-soft);
+}
+
+.patient-record-details__detail-table td:first-child {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    width: 50%;
+}
+
+.patient-record-details__detail-table td:last-child {
+    font-weight: 700;
+    color: var(--color-text-strong);
+}
+
+/* =========================================================
+   BACK SHEET SPECIFICS
+========================================================= */
+
+.patient-record-details__back-grid {
+    display: grid;
+    grid-template-columns: 2fr 3fr;
+    gap: 1rem;
+}
+
+/* Compact Tables */
+.patient-record-details__compact-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+    text-align: center;
+    margin-bottom: 0.75rem;
+}
+
+.patient-record-details__compact-table th, .patient-record-details__compact-table td {
+    border: 1px solid var(--color-border);
+    padding: 0.4em;
+}
+
+.patient-record-details__compact-table th {
+    background: var(--color-surface-alt);
+    font-weight: 700;
+    color: inherit;
+}
+
+.patient-record-details__section-divider {
+    font-weight: 700;
+    font-size: 0.85em;
+    background: var(--color-surface-soft);
+    padding: 0.25em;
+    margin: 0.5rem 0;
+    text-align: center;
+    border-radius: 3px;
+}
+
+.patient-record-details__inline-stat {
+    font-size: 0.9em;
+    margin-top: 0.4rem;
+}
+
+.patient-record-details__compact-heading {
+    font-size: 0.9em;
+    font-weight: 700;
+    margin: 0.5rem 0;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.patient-record-details__compact-heading--border-top {
+    border-top: 1px solid var(--color-border-soft);
+    padding-top: 0.5rem;
+}
+
+.patient-record-details__stat-line {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9em;
+}
+
+.patient-record-details__refraction-row {
+    font-size: 0.9em;
+    padding: 0.4em 0;
+    border-bottom: 1px dashed var(--color-border-soft);
+}
+
+.patient-record-details__refraction-row--add-line {
+    border-top: 1px solid var(--color-border);
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+}
+
+.patient-record-details__follow-up-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.patient-record-details__follow-up-row {
+    display: grid;
+    grid-template-columns: 30% 70%;
+    gap: 1.6rem;
+    align-items: start;
+}
+
+.patient-record-details__follow-up-label {
+    color: var(--color-text);
+}
+
+.patient-record-details__follow-up-details {
+    color: var(--color-text-secondary);
+    white-space: pre-line;
+    margin: 0;
+}
+
+.patient-record-details__follow-up-row p {
+    font-size: 0.95em;
+    line-height: 1.5;
+}
+
+/* =========================================================
+   RESPONSIVE & PRINT MEDIA STYLES
+========================================================= */
+
+@media screen and (max-width: 850px) {
+    .patient-record-details__grid-row--top-info, .patient-record-details__grid-row--middle, .patient-record-details__back-grid, .patient-record-details__eye-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .patient-record-details__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+}
+
+@media print {
+    body {
+        background: var(--color-surface) !important;
+        color: var(--color-black) !important;
+    }
+
+    .patient-record-details__header, .patient-record-details__back-link {
+        display: none !important;
+    }
+
+    .patient-record-details {
+        padding: 0;
+        max-width: 100%;
+        font-size: 11pt;
+    }
+
+    .patient-record-details__sheet {
+        page-break-after: always;
+        box-shadow: none;
+        border: 1px solid var(--color-black) !important;
+        background: var(--color-surface) !important;
+    }
+
+    .patient-record-details__sheet-title {
+        background: var(--color-black) !important;
+        color: var(--color-surface) !important;
+    }
+
+    .patient-record-details__box {
+        border-color: var(--color-black) !important;
+    }
+}

@@ -1,0 +1,267 @@
+body {
+	text-align: left;
+}
+
+.input-group-container-a {
+	height: 4.2rem;
+	flex-shrink: 0;
+	background-color: unset;
+	border: 1px solid var(--color-border);
+	border-radius: 10px;
+}
+
+/* patient-table */
+
+.root-table-header,
+.table-row {
+	display: grid;
+    grid-template-columns:
+        minmax(4rem, 0.8fr)
+		minmax(12rem, 1.4fr)
+		minmax(12rem, 2fr)
+        minmax(2rem, 0.4fr)
+        minmax(12rem, 2fr)
+        minmax(8rem, 0.6fr);
+	column-gap: 1rem;
+}
+
+/* input-group-container-b */
+
+.input-group-container-b {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.5rem;
+	flex-grow: 1;
+	text-align: left;
+}
+
+.input-group-container-text3 {
+	align-self: stretch;
+	color: var(--color-text);
+	font-size: 1.4rem;
+	font-weight: 500;
+	line-height: 1.429;
+}
+
+.container-text-input {
+	width: 17.6rem;
+	color: var(--color-text-subtle);
+	font-size: 1.6rem;
+	font-style: normal;
+	font-weight: 400;
+	line-height: normal;
+	letter-spacing: 0rem;
+	text-align: left;
+}
+/* end input-group-container-b*/
+
+.patient-records-main-content {
+	margin-bottom: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	background-color: var(--color-surface);
+	padding: 6.4rem 2.3rem 6.3rem 2.3rem;
+}
+
+.patient-records-patient {
+	container: patient-records-patient / inline-size;
+	width: 100%;
+	max-width: 128rem;
+	display: flex;
+	flex-direction: column;
+	gap: 3.2rem;
+	padding-left: 2.4rem;
+	padding-right: 1.5rem;
+}
+
+/* patient-records-header */
+
+.patient-records-header {
+	container: patient-records-header / inline-size;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.patient-records-header-heading {
+	margin: -0.2rem 0;
+	display: flex;
+	align-items: center;
+	gap: 2rem;
+}
+
+.patient-records-header-title {
+	color: var(--color-text);
+	font-size: 3.6rem;
+	font-weight: 500;
+	line-height: 1.111;
+	text-align: center;
+}
+
+.btn1 {
+	display: flex;
+	justify-content: center;
+	gap: 2.9rem;
+	color: var(--color-text-subtle);
+	font-size: 1.6rem;
+	font-style: normal;
+	font-weight: 400;
+	line-height: normal;
+	letter-spacing: 0rem;
+	text-align: unset;
+	padding: 1.5rem 1rem 1.5rem 1.4rem;
+	border: 2px solid var(--color-border);
+	border-radius: 10px;
+}
+
+.btn-label {
+	margin-left: 0.2rem;
+	text-align: left;
+}
+
+.btn-icon1 {
+	margin-top: 0.1rem;
+	width: 1.7rem;
+	flex-shrink: 0;
+}
+
+.patient-records-header-container {
+	container: patient-records-header-container / inline-size;
+	width: 52.3rem;
+	display: flex;
+	align-items: flex-start;
+	gap: 1.6rem;
+	flex-shrink: 0;
+	color: var(--color-surface);
+	font-size: 1.6rem;
+	font-weight: 500;
+	line-height: 1.5;
+}
+
+/* card-btn */
+
+.card-btn {
+	min-height: 4.8rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	padding: 0 2rem;
+	border-radius: 10px;
+}
+
+.card-btn-icon {
+	min-width: 0;
+	flex-grow: 1;
+	max-width: 1em;
+}
+
+.card-btn-text {
+	flex-shrink: 0;
+	text-align: center;
+}
+
+.patient-records-header1 .card-btn1 {
+	background-color: var(--color-success);
+}
+
+.patient-records-header1 .card-btn1 .card-btn-text, 
+.patient-records-header1 .card-btn3 .card-btn-text {
+	width: 8.9rem;
+}
+
+.patient-records-header1 .card-btn2 {
+	background-color: var(--color-brand);
+}
+
+.patient-records-header1 .card-btn2 .card-btn-text {
+	width: 12.8rem;
+}
+
+.card-btn3 {
+	background-color: var(--color-warning-strong, #ff6700);
+}
+
+/* =========================================================
+   RESPONSIVE & CONTAINER QUERIES
+========================================================= */
+
+/* Top Header & Action Buttons Breakpoints */
+
+@container patient-records-patient (width < 828px) {
+    .patient-records-header {
+        margin-left: 0; 
+        margin-right: 0;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.4rem;
+    }
+    
+    .patient-records-header > * {
+        text-align: center;
+    }
+    
+    .patient-records-header > .patient-records-header-container {
+        width: 100%;
+        max-width: 38.2rem;
+        justify-content: center;
+    }
+}
+
+@container patient-records-header (width < 450px) {
+    .patient-records-header-heading {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.4rem;
+    }
+    
+    .patient-records-header-heading > * {
+        text-align: center;
+    }
+}
+
+@container patient-records-header (width < 450px) {
+    .patient-records-header-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.4rem;
+        width: 100%;
+    }
+    
+    .patient-records-header-container > .card-btn {
+        width: 100%;
+    }
+}
+
+@container patient-records-header-container (width < 200px) {
+    .card-btn {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.8rem;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .card-btn-text {
+        margin-top: 0;
+        width: auto !important;
+    }
+
+    .card-btn-icon {
+        margin-top: 0 !important;
+    }
+}
+
+/* Table Responsiveness */
+
+@container history-table-container (width < 760px) {
+    .root-table-header,
+    .table-row {
+        grid-template-columns: 4rem 2fr repeat(4, 1fr);
+        gap: 0.5rem;
+    }
+}

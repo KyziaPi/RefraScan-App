@@ -1,0 +1,880 @@
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+	text-align: left;
+}
+
+.input-group-container-a {
+	height: 4.2rem;
+	flex-shrink: 0;
+	background-color: unset;
+	border: 1px solid #d1d5dc;
+	border-radius: 10px;
+}
+
+/* patient-table */
+
+.root-table-header,
+.table-row {
+	display: grid;
+    grid-template-columns:
+        minmax(4rem, 0.8fr)
+		minmax(12rem, 1.4fr)
+		minmax(12rem, 2fr)
+        minmax(2rem, 0.4fr)
+        minmax(12rem, 2fr)
+        minmax(6rem, 0.4fr);
+	column-gap: 1rem;
+}
+
+/* input-group-container-b */
+
+.input-group-container-b {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.5rem;
+	flex-grow: 1;
+	text-align: left;
+}
+
+.input-group-container-text3 {
+	align-self: stretch;
+	color: #0a0a0a;
+	font-size: 1.4rem;
+	font-weight: 500;
+	line-height: 1.429;
+}
+
+.container-text-input {
+	width: 17.6rem;
+	color: rgba(10, 10, 10, 0.5);
+	font-size: 1.6rem;
+	font-style: normal;
+	font-weight: 400;
+	line-height: normal;
+	letter-spacing: 0rem;
+	text-align: left;
+}
+/* end input-group-container-b*/
+
+.patient-records-main-content {
+	margin-bottom: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	background-color: #fff;
+	padding: 6.4rem 2.3rem 6.3rem 2.3rem;
+}
+
+.patient-records-patient {
+	container: patient-records-patient / inline-size;
+	width: 100%;
+	max-width: 128rem;
+	display: flex;
+	flex-direction: column;
+	gap: 3.2rem;
+	padding-left: 2.4rem;
+	padding-right: 1.5rem;
+}
+
+/* patient-records-header */
+
+.patient-records-header {
+	container: patient-records-header / inline-size;
+	margin-right: 0.9rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.patient-records-header-heading {
+	margin: -0.2rem 0;
+	display: flex;
+	align-items: center;
+	gap: 2rem;
+}
+
+.patient-records-header-title {
+	color: #0a0a0a;
+	font-size: 3.6rem;
+	font-weight: 500;
+	line-height: 1.111;
+	text-align: left;
+}
+
+.btn1 {
+	display: flex;
+	justify-content: center;
+	gap: 2.9rem;
+	color: rgba(10, 10, 10, 0.5);
+	font-size: 1.6rem;
+	font-style: normal;
+	font-weight: 400;
+	line-height: normal;
+	letter-spacing: 0rem;
+	text-align: unset;
+	padding: 1.5rem 1rem 1.5rem 1.4rem;
+	border: 2px solid #d1d5dc;
+	border-radius: 10px;
+}
+
+.btn-label {
+	margin-left: 0.2rem;
+	text-align: left;
+}
+
+.btn-icon1 {
+	margin-top: 0.1rem;
+	width: 1.7rem;
+	flex-shrink: 0;
+}
+
+.patient-records-header-container {
+	container: patient-records-header-container / inline-size;
+	width: 38.2rem;
+	display: flex;
+	align-items: flex-start;
+	gap: 1.6rem;
+	flex-shrink: 0;
+	color: #fff;
+	font-size: 1.6rem;
+	font-weight: 500;
+	line-height: 1.5;
+}
+
+/* card-btn */
+
+.card-btn {
+	min-height: 4.8rem;
+	display: flex;
+	align-items: flex-start;
+	gap: 0.5rem;
+	flex-grow: 1;
+	padding-right: 1.8rem;
+	border-radius: 10px;
+}
+
+.card-btn-icon {
+	min-width: 0;
+	flex-grow: 1;
+	max-width: 1em;
+}
+
+.card-btn-text {
+	margin-top: 1rem;
+	flex-shrink: 0;
+	text-align: center;
+}
+
+.patient-records-header1 .card-btn1 {
+	width: 84%;
+	background-color: #00a63e;
+	padding-left: 2.6rem;
+}
+
+.patient-records-header1 .card-btn1 .card-btn-icon {
+	margin-top: 1.6rem;
+}
+
+.patient-records-header1 .card-btn1 .card-btn-text {
+	width: 8.9rem;
+}
+
+.patient-records-header1 .card-btn2 {
+	width: 116%;
+	background-color: #536c78;
+	padding-left: 2.7rem;
+}
+
+.patient-records-header1 .card-btn2 .card-btn-icon {
+	margin-top: 1.7rem;
+}
+
+.patient-records-header1 .card-btn2 .card-btn-text {
+	width: 12.8rem;
+}
+
+/* =========================================================
+   SIDEBAR NAVIGATION LAYOUT
+========================================================= */
+
+.form-layout-container {
+	display: grid;
+	grid-template-columns: 24rem 1fr;
+	gap: 3.2rem;
+	align-items: start;
+	position: relative;
+}
+
+.section-nav-pane {
+	position: sticky;
+	top: 10rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1.2rem;
+	padding: 2rem;
+	background-color: #fff;
+	border: 2px solid #e5e7eb;
+	border-radius: 10px;
+	box-shadow: 0px 4px 6px -4px rgba(0, 0, 0, 0.05);
+}
+
+.nav-pane-title {
+	margin: 0;
+	font-size: 1.6rem;
+	font-weight: 600;
+	color: #0a0a0a;
+	padding-bottom: 0.8rem;
+	border-bottom: 2px solid #e5e7eb;
+}
+
+.section-nav-pane ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.8rem;
+}
+
+.section-nav-pane a {
+	color: #536c78;
+	font-size: 1.4rem;
+	font-weight: 500;
+	text-decoration: none;
+	transition: color 0.15s ease;
+	display: block;
+	padding: 0.4rem 0;
+}
+
+.section-nav-pane a:hover {
+	color: #0a0a0a;
+	font-weight: 600;
+}
+
+/* =========================================================
+   PATIENT RECORD FORM
+========================================================= */
+
+.patient-records-form {
+    container: patient-records-form / inline-size;
+    display: flex;
+    flex-direction: column;
+    gap: 2.3rem;
+}
+
+/* =========================================================
+   MAIN SECTIONS
+========================================================= */
+
+.record-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 2.4rem;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow:
+        0px 4px 6px -4px rgba(0, 0, 0, 0.1),
+        0px 10px 15px -3px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    scroll-margin-top: 10rem;
+}
+
+.record-section-title {
+    margin: 0;
+    color: #0a0a0a;
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.subsection-title {
+    margin: 0;
+    color: #0a0a0a;
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+
+/* =========================================================
+   GENERAL FORM FIELDS
+========================================================= */
+
+.form-field {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.form-field.full-width {
+	width: 100%;
+}
+
+.form-field > label,
+.form-field > p,
+.form-field > input,
+.examiner-field > input,
+.refraction-row > input {
+    margin: 0;
+    color: #0a0a0a;
+    font-size: 1.4rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.label-input-pair > label {
+	margin-right: 0.7rem;
+}
+
+.form-field > label span {
+    color: #6a7282;
+    font-weight: 400;
+}
+
+.form-field > input,
+.form-field > select,
+.form-field > textarea,
+.record-sub-container > .form-field input,
+.record-sub-container > .form-field select,
+.record-sub-container > .form-field textarea {
+    width: 100%;
+    min-height: 4.2rem;
+    padding: 1rem 1.2rem;
+    color: #0a0a0a;
+    background-color: #fff;
+    border: 2px solid #d1d5dc;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+.form-field > input:focus,
+.form-field > select:focus {
+    outline: none;
+    border-color: #536c78;
+}
+
+/* =========================================================
+   CHECKBOX + ADDITIONAL TEXT INPUT ROW LAYOUT
+========================================================= */
+
+.record-history-checkboxes {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
+.checkbox-info-group {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1.6rem;
+	align-items: center;
+	width: 100%;
+}
+
+.checkbox-left {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+}
+
+.checkbox-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.8rem;
+	padding: 0.8rem 1.4rem;
+	border: 2px solid #d1d5dc;
+	border-radius: 10px;
+	background-color: #fff;
+	cursor: pointer;
+	user-select: none;
+	font-size: 1.4rem;
+	color: #0a0a0a;
+	transition: all 0.15s ease;
+}
+
+.checkbox-item input[type="checkbox"] {
+	width: 1.8rem;
+	height: 1.8rem;
+	accent-color: #536c78;
+	cursor: pointer;
+}
+
+.checkbox-item:has(input:checked) {
+	border-color: #536c78;
+	background-color: #f0f4f7;
+	font-weight: 600;
+	accent-color: #536c78;
+}
+
+.info-right input {
+	width: 100%;
+	min-height: 4.2rem;
+	padding: 1rem 1.2rem;
+	border: 2px solid #d1d5dc;
+	border-radius: 10px;
+	box-sizing: border-box;
+}
+
+.info-right input:focus {
+	outline: none;
+	border-color: #536c78;
+}
+
+/* =========================================================
+   TWO-COLUMN SECTIONS
+========================================================= */
+
+.record-two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.4rem;
+}
+
+.record-sub-container {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* =========================================================
+   RADIO / SELECTION OPTIONS
+========================================================= */
+
+.selection-options {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+}
+
+.selection-options .selection-box {
+    width: 50%;
+    min-height: 5rem;
+}
+
+/* =========================================================
+   EYE DETAILS
+========================================================= */
+
+.eye-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.4rem;
+}
+
+.eye-detail-container {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.8rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+}
+
+.eye-detail-container h3,
+.od-os-card h3,
+.refraction-eye h3 {
+    margin: 0;
+    color: #0a0a0a;
+    font-size: 1.7rem;
+    font-weight: 600;
+}
+
+/* =========================================================
+   DIAGNOSIS
+========================================================= */
+
+.dynamic-input-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.dynamic-input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.dynamic-input-row input {
+    flex: 1;
+    min-width: 0;
+    min-height: 4.2rem;
+    padding: 1rem 1.2rem;
+    border: 2px solid #d1d5dc;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+.dynamic-add-btn,
+.dynamic-remove-btn {
+    width: 4.8rem;
+    height: 4.2rem;
+    flex-shrink: 0;
+    color: #fff;
+    background-color: #536c78;
+    border: 0;
+    border-radius: 10px;
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+.dynamic-remove-btn {
+    background-color: #d1d5dc;
+    color: #0a0a0a;
+}
+
+/* =========================================================
+   OD / OS
+========================================================= */
+
+.od-os-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.6rem;
+}
+
+.od-os-card {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.3rem;
+    padding: 1.6rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+}
+
+/* =========================================================
+   INLINE NUMERIC FIELDS
+========================================================= */
+
+.form-field-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.form-field-inline label {
+    width: 4rem;
+    flex-shrink: 0;
+    font-size: 1.4rem;
+    font-weight: 500;
+}
+
+.form-field-inline input {
+    width: 100%;
+    min-height: 4.2rem;
+    padding: 1rem;
+    border: 2px solid #d1d5dc;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+/* =========================================================
+   REFRACTION
+========================================================= */
+
+.refraction-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.4rem;
+}
+
+.add-refraction-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.4rem;
+}
+
+.refraction-eye {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.6rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+}
+
+.refraction-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.refraction-row label {
+    font-size: 1.4rem;
+    font-weight: 500;
+}
+
+.refraction-row input {
+    width: 8rem;
+    min-height: 4rem;
+    padding: 0.8rem;
+    border: 2px solid #d1d5dc;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+.refraction-row .input-additional {
+	width: 24rem;
+}
+
+.section-heading-row {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.section-heading-row .record-section-title {
+    margin-right: auto;
+}
+
+.examiner-field {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.examiner-field label {
+    font-size: 1.4rem;
+    font-weight: 500;
+}
+
+.examiner-field input {
+    width: 16rem;
+    min-height: 4rem;
+    padding: 0.8rem 1rem;
+    border: 2px solid #d1d5dc;
+    border-radius: 10px;
+}
+
+.signature-upload {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: 1.4rem;
+    font-weight: 500;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.patient-records-container5 {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1.6rem;
+    margin-top: 0.9rem;
+}
+
+.patient-records-btn {
+    min-height: 4.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1.5rem;
+    border-radius: 10px;
+    font-size: 1.6rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.patient-records-btn1 {
+    width: 9.6rem;
+    color: #0a0a0a;
+    background-color: #fff;
+    border: 1px solid #d1d5dc;
+}
+
+.patient-records-btn2 {
+    width: 13.4rem;
+    color: #fff;
+    background-color: #536c78;
+    border: 0;
+}
+
+.history-table-wrapper {
+	scroll-margin-top: 10rem;
+}
+
+/* =========================================================
+   CONTAINER DEFINITIONS
+========================================================= */
+
+.patient-records-header {
+    container-type: inline-size;
+    container-name: patient-records-header;
+}
+
+.patient-records-header-container {
+    container-type: inline-size;
+    container-name: patient-records-header-container;
+}
+
+/* =========================================================
+   RESPONSIVE & CONTAINER QUERIES
+========================================================= */
+
+/* Top Header & Action Buttons Breakpoints */
+
+@container patient-records-patient (width < 828px) {
+    .patient-records-header {
+        margin-left: 0; 
+        margin-right: 0;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.4rem;
+    }
+    
+    .patient-records-header > * {
+        text-align: center;
+    }
+    
+    .patient-records-header > .patient-records-header-container {
+        width: 100%;
+        max-width: 38.2rem;
+        justify-content: center;
+    }
+}
+
+@container patient-records-header (width < 438px) {
+    .patient-records-header-heading {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.4rem;
+    }
+    
+    .patient-records-header-heading > * {
+        text-align: center;
+    }
+}
+
+@container patient-records-header (width < 380px) {
+    .patient-records-header-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.4rem;
+        width: 100%;
+    }
+    
+    .patient-records-header-container > .card-btn {
+        width: 100%;
+    }
+}
+
+@container patient-records-header-container (width < 200px) {
+    .card-btn {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.8rem;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .card-btn-text {
+        margin-top: 0;
+        width: auto !important;
+    }
+
+    .card-btn-icon {
+        margin-top: 0 !important;
+    }
+}
+
+/* Form Layout & Sidebar Navigation */
+
+@media screen and (max-width: 1024px) {
+    .form-layout-container {
+        grid-template-columns: 1fr;
+    }
+
+    .section-nav-pane {
+        position: static;
+    }
+
+    .section-nav-pane ul {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 1.2rem;
+    }
+}
+
+/* Form Section Grid Breakpoints */
+
+@container patient-records-form (width < 900px) {
+    .record-two-column,
+    .eye-details-grid,
+    .refraction-grid,
+    .add-refraction-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .checkbox-info-group {
+        grid-template-columns: 1fr;
+    }
+}
+
+@container patient-records-form (width < 600px) {
+    .record-section {
+        padding: 1.6rem;
+    }
+
+    .od-os-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .section-heading-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .section-heading-row .record-section-title {
+        margin-right: 0;
+    }
+
+    .examiner-field {
+        width: 100%;
+    }
+
+    .examiner-field input {
+        flex: 1;
+        width: auto;
+    }
+
+    .refraction-row {
+        align-items: stretch;
+    }
+
+    .refraction-row input {
+        width: 7rem;
+    }
+
+    .patient-records-container5 {
+        flex-direction: column;
+    }
+
+    .patient-records-btn1,
+    .patient-records-btn2 {
+        width: 100%;
+    }
+}
+
+/* Table Responsiveness */
+
+@container history-table-container (width < 760px) {
+    .root-table-header,
+    .table-row {
+        grid-template-columns: 4rem 2fr repeat(4, 1fr);
+        gap: 0.5rem;
+    }
+}

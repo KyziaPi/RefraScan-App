@@ -1,5 +1,5 @@
 .body-a-main-content {
-	color: #0a0a0a;
+	color: var(--color-text);
 	padding-bottom: 6.4rem;
 }
 

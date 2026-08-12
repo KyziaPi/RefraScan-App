@@ -14,17 +14,67 @@ RefraScan - Inference Engine
 			<h1 class="inference-engine-title title">
 				Fundus Image-Based Refractive Error Classification
 			</h1>
-			
-			<div class="inference-insert-img">
-				<p>Drag and Drop an Image Here</p>
-				<p>or</p>
-				<p>Click and Choose an Image</p>
-				<p class="inference-insert-img-text-paragraph4 text1">(supports .jpg, .png, .jpeg)</p>
-			</div>
-			
-			<div class="input-group input-group1">
-				<input class="input-age-container text2" value="Age" />
-				<a class="btn-main input-group-btn-main hover-bright" href="/inference-results">Start Analysis</a>
-			</div>
+			<form class="input-group input-group1" action="/inference-results" method="GET">
+				<div class="inference-insert-img">
+					<p>Drag and Drop an Image Here</p>
+					<p>or</p>
+					<p>Click and Choose an Image</p>
+					<p class="inference-insert-img-text-paragraph4 text1">(supports .jpg, .png, .jpeg)</p>
+				</div>
+				
+				<div class="input-group input-group1">
+
+					<!-- Line 1: Name -->
+					<div class="input-group-container input-name-group">
+						<label for="name" class="input-group-label">Name</label>
+						<input type="text" id="name" class="input-container text2 input-name" placeholder="Name" />
+					</div>
+
+					<!-- Line 2: Phone + Email -->
+					<div class="input-group-row">
+						<div class="input-group-container">
+							<label for="phone" class="input-group-label">Phone</label>
+							<input type="tel" id="phone" class="input-container text2 input-phone" placeholder="Phone" />
+						</div>
+
+						<div class="input-group-container">
+							<label for="email" class="input-group-label">Email (optional)</label>
+							<input type="email" id="email" class="input-container text2 input-email" placeholder="Email" />
+						</div>
+					</div>
+
+					<!-- Line 3: Age + Eye Side -->
+					<div class="input-group-row input-group-row3">
+						<div class="input-group-container">
+							<label for="age" class="input-group-label">Age</label>
+							<input type="number" id="age" class="input-container text2 input-age" placeholder="Age" />
+						</div>
+
+						<div class="input-group-container eye-side-group">
+							<p class="input-group-label">Eye Side</p>
+
+							<div class="eye-side-options">
+								<label class="selection-box">
+									<input type="radio" id="right" name="eye_side" value="Right" />
+									Right
+								</label>
+
+								<label class="selection-box">
+									<input type="radio" id="left" name="eye_side" value="Left" />
+									Left
+								</label>
+							</div>
+						</div>
+					</div>
+
+					<!-- Line 4: Submit -->
+					<div class="input-group-container input-submit-group">
+						<button type="submit" class="btn-main input-group-btn-main hover-bright">
+							Start Analysis
+						</button>
+					</div>
+
+				</div>
+			</form>
 		</div>
 {% endblock %}
