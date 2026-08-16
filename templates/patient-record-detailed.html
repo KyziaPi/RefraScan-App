@@ -44,7 +44,7 @@ RefraScan - Patient Number 26-8000
             <div class="patient-record-details__box patient-record-details__info-box--left">
                 <div class="patient-record-details__info-line"><span class="patient-record-details__info-label">Gender:</span> <span class="patient-record-details__info-value">{{ patient.gender or 'Female' }}</span></div>
                 <div class="patient-record-details__info-line"><span class="patient-record-details__info-label">Language Spoken:</span> <span class="patient-record-details__info-value">{{ patient.language or 'English' }}</span></div>
-                <div class="patient-record-details__info-line"><span class="patient-record-details__info-label">Date:</span> <span class="patient-record-details__info-value">{{ patient.exam_datetime or '2026-06-04' }}</span></div>
+                <div class="patient-record-details__info-line"><span class="patient-record-details__info-label">Date:</span> <span class="patient-record-details__info-value">{{ patient.exam_date or '2026-06-04' }}</span></div>
                 <div class="patient-record-details__info-line"><span class="patient-record-details__info-label">Occupation:</span> <span class="patient-record-details__info-value">{{ patient.occupation or 'Engineer' }}</span></div>
                 <div class="patient-record-details__info-line"><span class="patient-record-details__info-label">Birthdate:</span> <span class="patient-record-details__info-value">{{ patient.birthdate or '2002-11-15' }}</span></div>
                 <div class="patient-record-details__info-line"><span class="patient-record-details__info-label">Age:</span> <span class="patient-record-details__info-value">{{ patient.age or '23' }}</span></div>
@@ -69,11 +69,36 @@ RefraScan - Patient Number 26-8000
             <div class="patient-record-details__box patient-record-details__box--history">
                 <h3 class="patient-record-details__box-title">History</h3>
                 <div class="patient-record-details__history">
-                    <p><strong>Drug Allergy:</strong> {{ patient.drug_allergy_info or 'None' }}</p>
-                    <p><strong>Pregnancy / Nursing:</strong> {{ patient.pregnancy_info or 'N/A' }}</p>
-                    <p><strong>Family History:</strong> {{ patient.family_history_info or 'CL' }}</p>
-                    <p><strong>Past History:</strong> {{ patient.past_history_info or 'DM, HPN' }}</p>
-                    <p><strong>Medications:</strong> {{ patient.medications_info or 'None' }}</p>
+                    <div>
+                        <p><strong>Drug Allergy:</strong> {{ patient.drug_allergy_present or 'None' }}</p>
+                        {# {% if patient.drug_allergy_info %} #}
+                        <p><strong>&nbsp;&nbsp;&nbsp;&nbsp;Additional Info:</strong> {{ patient.drug_allergy_info or '2 years ago' }}</p>
+                        {# {% endif %} #}
+                    </div>
+                    <div>
+                        <p><strong>Pregnancy / Nursing:</strong> {{ patient.pregnancy_status or 'N/A' }}</p>
+                        {# {% if patient.pregnancy_info %} #}
+                        <p><strong>&nbsp;&nbsp;&nbsp;&nbsp;Additional Info:</strong> {{ patient.pregnancy_info or '3 months' }}</p>
+                        {# {% endif %} #}
+                    </div>
+                    <div>
+                        <p><strong>Family History:</strong> {{ patient.family_history or 'CL' }}</p>
+                        {# {% if patient.family_history %} #}
+                        <p><strong>&nbsp;&nbsp;&nbsp;&nbsp;Additional Info:</strong> {{ patient.family_history_info or '2 weeks' }}</p>
+                        {# {% endif %} #}
+                    </div>
+                    <div>
+                        <p><strong>Past History:</strong> {{ patient.past_history or 'DM, HPN' }}</p>
+                        {# {% if patient.past_history_info %} #}
+                        <p><strong>&nbsp;&nbsp;&nbsp;&nbsp;Additional Info:</strong> {{ patient.past_history_info or '' }}</p>
+                        {# {% endif %} #}
+                    </div>
+                    <div>
+                        <p><strong>Medications:</strong> {{ patient.medications or 'None' }}</p>
+                        {# {% if patient.medications_info %} #}
+                        <p><strong>&nbsp;&nbsp;&nbsp;&nbsp;Additional Info:</strong> {{ patient.medications_info or '' }}</p>
+                        {# {% endif %} #}
+                    </div>                  
                 </div>
             </div>
 
@@ -188,7 +213,6 @@ RefraScan - Patient Number 26-8000
                         </tbody>
                     </table>
                 </div>
-
             </div>
 
             <!-- Right Main Column (Refraction Tables) -->
@@ -227,6 +251,9 @@ RefraScan - Patient Number 26-8000
                     </div>
                     <div class="patient-record-details__refraction-row">
                         <span><strong>OS:</strong> {{ patient.manifest_os_ds or '-5.75' }} Ds {{ patient.manifest_os_cyl or '-0.75' }} Cyl x {{ patient.manifest_os_axis or '95' }}° &nbsp;|&nbsp; J: {{ patient.manifest_os_j or '20/20' }}</span>
+                    </div>
+                    <div class="patient-record-details__refraction-row">
+                        <span>&nbsp;&nbsp;&nbsp;&nbsp;<strong>OU:</strong> {{ patient.manifest_ou_num or '20/20' }} <span>&nbsp;&nbsp;&nbsp;&nbsp;<strong>Additional Info:</strong> {{ patient.manifest_ou_details or 'J1' }}</span></span>
                     </div>
                     <div class="patient-record-details__refraction-row patient-record-details__refraction-row--add-line">
                         <span><strong>Add:</strong> OD {{ patient.manifest_add_od_ds or '+2.00' }} &nbsp;|&nbsp; OS {{ patient.manifest_add_os_ds or '+2.00' }}</span>
@@ -281,21 +308,51 @@ RefraScan - Patient Number 26-8000
                 <div class="patient-record-details__follow-up-label">
                     <strong>Follow Up #1:</strong> {{ patient.follow_up_1 or '2026-07-04' }}
                 </div>
-                <p class="patient-record-details__follow-up-details">{{ patient.follow_up_1_details or 'Patient reports improved vision with new prescription.\nNo adverse effects noted.' }}</p>
+                <div>
+                    <p class="patient-record-details__follow-up-details">{{ patient.follow_up_1_details or 'Patient reports improved vision with new prescription.\nNo adverse effects noted.' }}</p>
+                </div>
+                <div class="patient-record-details__follow-up-actions">
+                    <button data-popup="follow-up-popup">
+                        <img src="/static/assets/row-edit.png" alt="Edit" />
+                    </button>
+                    <button data-popup="delete-confirmation-popup">
+                        <img src="/static/assets/row-delete.png" alt="Delete" />
+                    </button>
+                </div>
             </div>
 
             <div class="patient-record-details__follow-up-row">
                 <div class="patient-record-details__follow-up-label">
                     <strong>Follow Up #2:</strong> {{ patient.follow_up_2 or '2026-08-15' }}
                 </div>
-                <p class="patient-record-details__follow-up-details">{{ patient.follow_up_2_details or 'Patient reports mild dryness in the morning. Advised to use artificial tears as needed.' }}</p>
+                <div>
+                    <p class="patient-record-details__follow-up-details">{{ patient.follow_up_2_details or 'Patient reports mild dryness in the morning. Advised to use artificial tears as needed.' }}</p>
+                </div>
+                <div class="patient-record-details__follow-up-actions">
+                    <button data-popup="follow-up-popup">
+                        <img src="/static/assets/row-edit.png" alt="Edit" />
+                    </button>
+                    <button data-popup="delete-confirmation-popup">
+                        <img src="/static/assets/row-delete.png" alt="Delete" />
+                    </button>
+                </div>
             </div>
 
             <div class="patient-record-details__follow-up-row">
                 <div class="patient-record-details__follow-up-label">
                     <strong>Follow Up #3:</strong> {{ patient.follow_up_3 or '2026-09-20' }}
                 </div>
-                <p class="patient-record-details__follow-up-details">{{ patient.follow_up_3_details or 'Patient reports stable vision. No further complaints.' }}</p>
+                <div>
+                    <p class="patient-record-details__follow-up-details">{{ patient.follow_up_3_details or 'Patient reports stable vision. No further complaints.' }}</p>
+                </div>
+                <div class="patient-record-details__follow-up-actions">
+                    <button data-popup="follow-up-popup">
+                        <img src="/static/assets/row-edit.png" alt="Edit" />
+                    </button>
+                    <button data-popup="delete-confirmation-popup">
+                        <img src="/static/assets/row-delete.png" alt="Delete" />
+                    </button>
+                </div>
             </div>
         </div>
     </div>
