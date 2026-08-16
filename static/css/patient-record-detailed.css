@@ -184,6 +184,12 @@ body {
     color: var(--color-text-strong);
 }
 
+.patient-record-details__history div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
 .patient-record-details__history p {
     margin: 0 0 0.6rem 0;
     font-size: 0.95em;
@@ -325,7 +331,7 @@ body {
 
 .patient-record-details__follow-up-row {
     display: grid;
-    grid-template-columns: 30% 70%;
+    grid-template-columns: 2.5fr 7fr 1fr;
     gap: 1.6rem;
     align-items: start;
 }
@@ -340,6 +346,19 @@ body {
     margin: 0;
 }
 
+.patient-record-details__follow-up-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.patient-record-details__follow-up-actions img {
+    width: 1.25em;
+    height: 1.25em;
+    object-fit: contain;
+}
+
 .patient-record-details__follow-up-row p {
     font-size: 0.95em;
     line-height: 1.5;
@@ -350,7 +369,7 @@ body {
 ========================================================= */
 
 @media screen and (max-width: 850px) {
-    .patient-record-details__grid-row--top-info, .patient-record-details__grid-row--middle, .patient-record-details__back-grid, .patient-record-details__eye-grid {
+    .patient-record-details__grid-row--top-info, .patient-record-details__grid-row--middle, .patient-record-details__back-grid, .patient-record-details__eye-grid, .patient-record-details__follow-up-row, .patient-record-details__history div {
         grid-template-columns: 1fr;
     }
 

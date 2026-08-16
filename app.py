@@ -12,6 +12,10 @@ import numpy as np
 from tensorflow import keras
 import joblib
 from werkzeug.utils import secure_filename
+import database as db
+
+# Create database 
+db.create_database()
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
