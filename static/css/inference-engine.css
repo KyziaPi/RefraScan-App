@@ -3,10 +3,7 @@
     color: var(--color-text);
 }
 
-
-
 /* input-group */
-
 .input-group {
     width: 100%;
     max-width: 84.8rem;
@@ -15,8 +12,8 @@
     align-items: stretch;
     gap: 2.5rem;
     padding: 0 2.1rem;
-	margin: 0;
-	box-sizing: border-box;
+    margin: 0;
+    box-sizing: border-box;
 }
 
 .input-group1,
@@ -29,8 +26,8 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.7rem;
+    position: relative;
 }
-
 
 .input-group-row {
     display: flex;
@@ -39,23 +36,56 @@
     width: 100%;
 }
 
-
 .input-group-row > .input-group-container {
     flex: 1;
 }
 
+/* Tab Navigation */
+.patient-tabs {
+    display: flex;
+    gap: 1rem;
+    border-bottom: 2px solid var(--color-border);
+    padding-bottom: 0.5rem;
+    justify-content: space-around;
+}
 
-/* labels */
+.tab-btn {
+    background: none;
+    border: none;
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    padding: 0.8rem 1.6rem;
+    cursor: pointer;
+    border-radius: 6px 6px 0 0;
+    transition: all 0.2s ease;
+    width: 100%;
+}
 
+.tab-btn.active {
+    color: var(--color-brand);
+    border-bottom: 3px solid var(--color-brand);
+    font-weight: 600;
+}
+
+.tab-content {
+    display: none;
+    flex-direction: column;
+    gap: 2.5rem;
+    width: 100%;
+}
+
+.tab-content.active {
+    display: flex;
+}
+
+/* Labels & Inputs */
 .input-group-label {
     margin: 0;
     font-size: 1.6rem;
     font-weight: 500;
     color: var(--color-text);
 }
-
-
-/* inputs */
 
 .input-container {
     width: 100%;
@@ -66,31 +96,92 @@
     border: 2px solid var(--color-border);
     border-radius: 10px;
     box-sizing: border-box;
+    font-size: 1.5rem;
 }
-
-
-.input-name {
-    width: 100%;
-}
-
-
-.input-phone {
-    width: 100%;
-}
-
-
-.input-email {
-    width: 100%;
-}
-
 
 .input-age {
     width: 10rem;
 }
 
+/* Search Dropdown & Results */
+.search-container {
+    width: 100%;
+    position: relative;
+}
 
-/* eye side */
+.search-results-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border: 1px solid var(--color-border, #ccc);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    margin-top: 0.5rem;
+}
 
+.search-item {
+    padding: 1.2rem 1.5rem;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.search-item:hover {
+    background-color: #f8f9fa;
+}
+
+.search-item-info span {
+    display: block;
+    font-size: 1.2rem;
+    color: #666;
+}
+
+/* Patient Summary Card */
+.patient-summary-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background-color: var(--color-brand-light);
+    border: 1px solid var(--color-brand);
+    border-radius: 10px;
+    width: 100%;
+}
+
+.summary-details h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.6rem;
+    color: var(--color-brand);
+}
+
+.summary-details p {
+    margin: 0;
+    font-size: 1.3rem;
+    color: var(--color-brand);
+}
+
+.btn-clear {
+    background: transparent;
+    border: 1px solid var(--color-brand);
+    color: var(--color-brand);
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Eye side */
 .eye-side-group {
     flex: 1;
 }
@@ -104,15 +195,22 @@
 .eye-side-options .selection-box {
     width: 50%;
     height: 5.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--color-border, #ccc);
+    border-radius: 10px;
+    cursor: pointer;
 }
 
+.eye-side-options .selection-box:hover {
+    border: 2px solid var(--color-brand);
+}
 
-/* submit */
-
+/* Submit */
 .input-submit-group {
     align-items: center;
 }
-
 
 .input-group1 .input-group-btn-main {
     width: 20.1rem;
@@ -126,18 +224,72 @@
 }
 
 .inference-insert-img {
-	margin-top: 0.3rem;
-	width: 100%;
-	max-width: 84.8rem;
-	display: flex;
-	flex-direction: column;
-	gap: 0.8rem;
-	--min-font-size: 1.6; --max-font-size: 2; font-size: var(--interpolate);
-	font-weight: 400;
-	line-height: 1.4;
-	padding: 6.2rem 6.3rem 6.6rem 6.3rem;
+    margin-top: 0.3rem;
+    width: fit-content;
+    max-width: 100%;
+    padding: 2rem;
+    min-height: 25rem;
     border: 4px dashed var(--color-border);
-	border-radius: 10px;
+    border-radius: 10px;
+    background: transparent;
+    cursor: pointer;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Hide the native input visually while keeping it functional */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Center the placeholder content */
+.inference-insert-img .placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    width: 100%;
+    min-width: 28rem;
+    --min-font-size: 1.6; --max-font-size: 2; font-size: var(--interpolate);
+    font-weight: 400;
+    line-height: 1.4;
+    pointer-events: none; /* Prevents text from interfering with clicks */
+    padding: 7rem 20rem;
+}
+
+.file-name-wrapper {
+    display: none; 
+    text-align: center;
+    font-size: 1.6rem;
+    color: var(--color-text, #333);
+    font-weight: 500;
+}
+
+.file-name-display {
+    word-break: break-all; /* Prevents long file names from overflowing */
+}
+
+/* Fit the image nicely inside the button */
+.inference-insert-img #preview {
+    max-width: 100%;
+    max-height: 35rem;
+    object-fit: contain;
+    border-radius: 6px;
 }
 
 .inference-insert-img-text-paragraph4 {

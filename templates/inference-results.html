@@ -6,6 +6,7 @@ RefraScan - Inference Results
 
 {% block additional_css %}
 <link rel="stylesheet" href="/static/css/inference-results.css" />
+<script src="{{ url_for('static', filename='js/inference-results.js') }}"></script>
 {% endblock %}
 
 {% block main %}
@@ -16,43 +17,44 @@ RefraScan - Inference Results
 				<!-- ID row -->
 				<div class="screening-result-table-container-id-row">
 					<p class="screening-result-table-container-text-id">
-						<b class="bold">ID: </b> 12345
+						<b class="bold">ID: </b> {{ inference_id }}
 					</p>
 				</div>
+
 
 				<!-- Row 1 -->
 				<div class="screening-result-table-container-container1">
 					<p class="screening-result-table-container-text screening-result-table-container-text-left">
-						<b class="bold">Name: </b> Gueco, Yerika Elaine
+						<b class="bold">Name: </b> {{ name }}
 					</p>
 
 					<p class="screening-result-table-container-text1 text3">
-						Age: <span class="sub-text">20</span>
+						Age:  <span class="sub-text"> {{ age }}</span>
 					</p>
 
 					<p class="screening-result-table-container-text screening-result-table-container-text-right">
-						<b class="bold">Date: </b> 04-18-2026
+						<b class="bold">Date: </b> {{ date }}
 					</p>
 				</div>
 
 				<!-- Row 2 -->
 				<div class="screening-result-table-container-container1">
 					<p class="screening-result-table-container-text screening-result-table-container-text-left">
-						<b class="bold">Eye Side: </b> Right
+						<b class="bold">Eye Side: </b> {{ eye_side }}
 					</p>
 
 					<p class="screening-result-table-container-text1 text3">
-						Phone: <span class="sub-text">09123456789</span>
+						Phone: <span class="sub-text">{{ phone }}</span>
 					</p>
 
 					<p class="screening-result-table-container-text screening-result-table-container-text-right">
-						<b class="bold">Email: </b> Sample@email.com
+						<b class="bold">Email: </b> {{ email }}
 					</p>
 				</div>
 				
 				<div class="screening-result-table-container-container2">
 					<p>
-						Predicted Classification:<span class="sub-text"> Myopia (94.2%)</span>
+						Predicted Classification:<span class="sub-text"> {{ prediction }} ({{ confidence }})</span>
 					</p>
 				</div>
 			</div>
@@ -62,36 +64,36 @@ RefraScan - Inference Results
 					<h2 class="subtitle">Probability Breakdown</h2>
 					
 					<div class="inference-engine-results-container3">
-						<div class="container-a container1">
+						<div class="container-a myopia">
 							<div class="container-container1">
 								<p class="container-text1">Myopia</p>
-								<p class="container-text2">94.2%</p>
+								<p class="container-text2" id="myopia-probability">{{ probabilities.Myopia }}%</p>
 							</div>
 							
-							<div class="container-container2">
-								<div class="container-container3"></div>
+							<div class="container-myopia-bar-bg bar-bg">
+								<div class="container-myopia-bar bar"></div>
 							</div>
 						</div>
 						
-						<div class="container-a container2">
+						<div class="container-a hyperopia">
 							<div class="container-container1">
 								<p class="container-text1">Hyperopia</p>
-								<p class="container-text2">3.7%</p>
+								<p class="container-text2" id="hyperopia-probability">{{ probabilities.Hyperopia }}%</p>
 							</div>
 							
-							<div class="container-container2">
-								<div class="container-container3"></div>
+							<div class="container-hyperopia-bar-bg bar-bg">
+								<div class="container-hyperopia-bar bar"></div>
 							</div>
 						</div>
 						
-						<div class="container-a container3">
+						<div class="container-a emmetropia">
 							<div class="container-container1">
 								<p class="container-text1">Normal</p>
-								<p class="container-text2">2.1%</p>
+								<p class="container-text2" id="emmetropia-probability">{{ probabilities.Emmetropia }}%</p>
 							</div>
 							
-							<div class="container-container2">
-								<div class="container-container3"></div>
+							<div class="container-emmetropia-bar-bg bar-bg">
+								<div class="container-emmetropia-bar bar"></div>
 							</div>
 						</div>
 					</div>
@@ -105,15 +107,15 @@ RefraScan - Inference Results
 							<p>Original Image</p>
 							
 							<div class="original-img-container">
-								<img src="static/assets/sample-fundus.png" class="original-img-container-img-selected" />
+								<img src="{{ url_for('static', filename=image_path) }}" class="original-img-container-img-selected" />
 							</div>
 						</div>
 						
 						<div class="inference-engine-results-container7">
 							<p>Attention Heatmap</p>
 							
-							<div class="attention-heatmap-container">
-								<div class="attention-heatmap-container-circle"></div>
+							<div class="original-img-container">
+								<img src="{{ url_for('static', filename=heatmap_path) }}" class="original-img-container-img-selected" />
 							</div>
 						</div>
 					</div>

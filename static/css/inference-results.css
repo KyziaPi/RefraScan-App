@@ -137,59 +137,59 @@
 	text-align: left;
 }
 
-.container-container2 {
+.bar-bg {
 	background-color: var(--color-border-soft);
-	border-radius: 3.402820018375656e+38px;
+	border-radius: 3rem;
 }
 
-.container-container3 {
+.bar {
 	height: 3.2rem;
-	border-radius: 3.402820018375656e+38px;
+	border-radius: 3rem;
 }
 /* end container-a*/
 
 
-.container1 .container-text2 {
+.myopia .container-text2 {
 	margin-right: -0.5rem;
 }
 
-.container1 .container-container2 {
+.myopia .container-myopia-bar-bg {
 	padding-right: 2.7rem;
 }
 
-.container1 .container-container3 {
+.myopia .container-myopia-bar {
 	background-color: var(--color-success-strong);
 }
 
-.container2 {
+.hyperopia {
 	gap: 0.8rem;
 }
 
-.container2 .container-text1 {
+.hyperopia .container-text1 {
 	margin-top: 0.2rem;
 }
 
-.container2 .container-text2 {
+.hyperopia .container-text2 {
 	margin-right: -0.3rem;
 }
 
-.container2 .container-container2 {
+.hyperopia .container-hyperopia-bar-bg {
 	padding-right: 45.5rem;
 }
 
-.container2 .container-container3 {
+.hyperopia .container-hyperopia-bar {
 	background-color: var(--color-info);
 }
 
-.container3 .container-text2 {
+.emmetropia .container-text2 {
 	margin-right: -0.2rem;
 }
 
-.container3 .container-container2 {
+.emmetropia .container-emmetropia-bar-bg {
 	padding-right: 46.2rem;
 }
 
-.container3 .container-container3 {
+.emmetropia .container-emmetropia-bar {
 	background-color: var(--color-warning);
 }
 
@@ -223,7 +223,6 @@
 
 .original-img-container {
 	background-color: var(--color-black);
-	padding: 4.2rem 0.1rem;
 	border: 2px solid var(--color-border);
 	border-radius: 10px;
 }

@@ -11,12 +11,9 @@ RefraScan - LASIK Patient Records
 {% block main %}
 <div class="patient-records-main-content">
 	<div class="patient-records-patient">
-		<div class="patient-records-header patient-records-header1">
-				<h1 class="patient-records-header-title">Add a Patient Record</h1>
-		</div>
 
 		<!-- Layout Container with Sticky Sidebar Nav -->
-		<div class="form-layout-container">
+		<form class="form-layout-container">
 			
 			<!-- Sticky Section Navigation Sidebar -->
 			<nav class="section-nav-pane">
@@ -34,10 +31,22 @@ RefraScan - LASIK Patient Records
 					<li><a href="#sec-cyclo-refraction">Cyclo Refraction</a></li>
 					<li><a href="#sec-additional-tests">Additional Tests</a></li>
 				</ul>
+				<!-- =========================================================
+					ACTIONS
+				========================================================== -->
+				<div class="patient-records-container5">
+					<button type="button" class="patient-records-btn patient-records-btn1 hover-dark" data-popup="cancel-edit-popup">
+						Cancel
+					</button>
+
+					<button type="button" class="patient-records-btn patient-records-btn2 hover-bright" data-popup="record-success-popup">
+						Save
+					</button>
+				</div>
 			</nav>
 
 			<!-- Main Form Area -->
-			<form class="patient-records-form">
+			<div class="patient-records-form">
 
 				<!-- =========================================================
 					PATIENT DETAILS
@@ -990,22 +999,8 @@ RefraScan - LASIK Patient Records
 					</div>
 				</section>
 
-
-				<!-- =========================================================
-					ACTIONS
-				========================================================== -->
-				<div class="patient-records-container5">
-					<button type="button" class="patient-records-btn patient-records-btn1 hover-zoom" data-popup="cancel-edit-popup">
-						Cancel
-					</button>
-
-					<button type="button" class="patient-records-btn patient-records-btn2 hover-bright" data-popup="record-success-popup">
-						Save Record
-					</button>
-				</div>
-
-			</form>
-		</div>
+			</div>
+		</form>
 	</div>
 </div>
 
