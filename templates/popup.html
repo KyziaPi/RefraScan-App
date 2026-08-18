@@ -64,7 +64,7 @@
     </form>
 
 
-    <!-- 3. Delete Patient Record Confirmation -->
+    <!-- 3. Dynamic Delete Confirmation Popup -->
     <div class="popup-overlay popup-delete-confirmation" id="delete-confirmation-popup">
         <div class="popup-container">
 
@@ -74,18 +74,19 @@
             </div>
 
             <div class="popup-content">
-                <p>
-                    Do you really want to delete this Patient record?
+                <p id="delete-confirmation-message">
+                    Do you really want to delete this <span id="delete-item-type">record</span>?
                 </p>
             </div>
 
-            <form class="popup-actions" action="/delete-patient" method="post">
-                {# <input type="hidden" name="patient_id" value="{{ patient.id }}"> #}
+            <form class="popup-actions" id="delete-popup-form" action="/delete-patient" method="post">
+                <input type="hidden" name="item_id" id="delete-item-id" value="">
+                
                 <button type="button" class="btn-secondary popup-cancel">
                     Cancel
                 </button>
 
-                <button type="submit" class="btn-danger" data-popup="record-deleted-popup">
+                <button type="submit" class="btn-danger">
                     Delete
                 </button>
             </form>
@@ -94,8 +95,8 @@
     </div>
 
 
-    <!-- 4. Patient Record Deleted -->
-    <form class="popup-overlay popup-record-deleted" id="record-deleted-popup" action="/patient-records" method="get">
+    <!-- 4. Dynamic Record Deleted Success Popup -->
+    <div class="popup-overlay popup-record-deleted" id="record-deleted-popup">
         <div class="popup-container">
 
             <div class="popup-header">
@@ -104,19 +105,19 @@
             </div>
 
             <div class="popup-content">
-                <p>
-                    Patient Record has been deleted.
+                <p id="record-deleted-message">
+                    Record has been deleted.
                 </p>
             </div>
 
             <div class="popup-actions">
-                <button type="submit" class="btn-primary popup-close-action">
+                <button class="btn-primary popup-close-action">
                     OK
                 </button>
             </div>
 
         </div>
-    </form>
+    </div>
 
     <!-- 5. Cancel Edit Patient Record Confirmation -->
     <div class="popup-overlay popup-delete-confirmation" id="cancel-edit-popup">

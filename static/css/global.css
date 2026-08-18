@@ -1,6 +1,7 @@
 
 :root {
 	/* shared color system */
+	--color-brand-light: #ced8dd;
 	--color-brand: #536c78;
 	--color-brand-strong: #1e293b;
 	--color-danger: #dc3545;
@@ -178,7 +179,14 @@ textarea {
 
 .hover-bright:hover {
 	filter: brightness(1.2);
+	transition: all 0.2s ease;
 }
+
+.hover-dark:hover {
+	filter: brightness(0.9);
+	transition: all 0.2s ease;
+}
+
 
 .remove-highlight:focus {
 	outline: none;
@@ -410,7 +418,6 @@ textarea {
 	color: var(--color-border);
 	background-color: var(--color-surface);
 
-	border: 2px solid var(--color-border);
     border-radius: 10px;
 
 	font-size: 1.6rem;
@@ -438,7 +445,7 @@ textarea {
 
 
 .selection-box:hover {
-	border-color: var(--color-brand);
+	border: 2px solid var(--color-brand);
 	color: var(--color-brand);
 }
 /* end selection box */

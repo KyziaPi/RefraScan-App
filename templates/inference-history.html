@@ -6,93 +6,98 @@ RefraScan - Inference History
 
 {% block additional_css %}
 <link rel="stylesheet" href="/static/css/inference-history.css" />
+<script src="{{ url_for('static', filename='js/inference-history.js') }}"></script>
 {% endblock %}
 
 {% block main %}
-		<div class="root-main-content section2">
-			<div class="root-history">
-				<h1 class="root-title title">Screening History</h1>
-				
-				<div class="history-search-main-container">
-					<div class="history-search-container">
-						<input type="text" class="history-search-container-text remove-highlight" placeholder="Search ID or Name" />
-						<img src="static/assets/search-icon.png" class="history-search-container-icon" />
-					</div>
-					
-					<div class="history-filter-container history-filter-container1">
-						<div class="history-filter-wrapper">
-							<select class="history-filter-dropbox">
-								<option value="">All Classes</option>
-								<option value="myopia">Myopia</option>
-								<option value="hyperopia">Hyperopia</option>
-								<option value="normal">Normal</option>
-							</select>
-							<img src="static/assets/filter-dropbox-icon.png" class="history-filter-dropbox-icon" alt="Dropdown Icon" />
-						</div>
+<div class="root-main-content section2">
+    <div class="root-history">
+        <h1 class="root-title title">Screening History</h1>
+        
+        <div class="history-search-main-container">
+            <div class="history-search-container">
+                <input type="text" id="search-input" class="history-search-container-text remove-highlight" placeholder="Search ID or Name" />
+                <img src="{{ url_for('static', filename='assets/search-icon.png') }}" class="history-search-container-icon" alt="Search" />
+            </div>
+            
+            <div class="history-filter-container history-filter-container1">
+                <div class="history-filter-wrapper">
+                    <select class="history-filter-dropbox" id="filter-class">
+                        <option value="">All Classes</option>
+                        <option value="myopia">Myopia</option>
+                        <option value="hyperopia">Hyperopia</option>
+                        <option value="normal">Normal</option>
+                    </select>
+                    <img src="{{ url_for('static', filename='assets/filter-dropbox-icon.png') }}" class="history-filter-dropbox-icon" alt="Dropdown Icon" />
+                </div>
 
-						<div class="history-filter-container-label">
-							<p class="history-filter-container-text">Filter By Class</p>
-						</div>
-					</div>
-				</div>
-				
-				<div class="history-table-wrapper">
-					<div class="history-table-container">
-							<div class="root-table-header">
-								<p class="root-text">ID</p>
-								<p class="root-text">Name</p>
-								<p class="root-text">Age</p>
-								<p class="root-text">Side</p>
-								<p class="root-text">Date</p>
-								<p class="root-text">Prediction</p>
-								<p class="root-text">Action</p>
-							</div>
+                <div class="history-filter-container-label">
+                    <p class="history-filter-container-text">Filter By Class</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="history-table-wrapper">
+            <div class="history-table-container">
+                <div class="root-table-header">
+                    <p class="root-text">ID</p>
+                    <p class="root-text">Name</p>
+                    <p class="root-text">Age</p>
+                    <p class="root-text">Side</p>
+                    <p class="root-text">Date</p>
+                    <p class="root-text">Prediction</p>
+                    <p class="root-text">Confidence</p>
+                    <p class="root-text">Action</p>
+                </div>
 
-						<div class="root-table-body">
-							<div class="table-row">
-								<p class="table-row-text">000003</p>
-								<p class="table-row-text">Aquino, Katrine Ingrid</p>
-								<p class="table-row-text">23</p>
-								<p class="table-row-text">Right</p>
-								<p class="table-row-text">04-06-2026</p>
-								<p class="table-row-text">Myopia</p>
-								<form class="table-row-buttons" action="/inference-results" method="get">
-									<button type="submit"><img src="static/assets/row-view.png" alt="View"></button>
-									<button type="button" data-popup="delete-confirmation-popup"><img src="static/assets/row-delete.png" alt="Delete"></button>
-								</form>
-							</div>
-							
-							<div class="table-row">
-								<p class="table-row-text">000002</p>
-								<p class="table-row-text">Gueco, Yerika Elaine</p>
-								<p class="table-row-text">20</p>
-								<p class="table-row-text">Right</p>
-								<p class="table-row-text">04-05-2026</p>
-								<p class="table-row-text">Normal</p>
-								<form class="table-row-buttons" action="/inference-results" method="get">
-									<button type="submit"><img src="static/assets/row-view.png" alt="View"></button>
-									<button type="button" data-popup="delete-confirmation-popup"><img src="static/assets/row-delete.png" alt="Delete"></button>
-								</form>
-							</div>
-							
-							<div class="table-row">
-								<p class="table-row-text">000001</p>
-								<p class="table-row-text">Gueco, Yerika Elaine</p>
-								<p class="table-row-text">20</p>
-								<p class="table-row-text">Left</p>
-								<p class="table-row-text">04-05-2026</p>
-								<p class="table-row-text">Hyperopia</p>
-								<form class="table-row-buttons" action="/inference-results" method="get">
-									<button type="submit"><img src="static/assets/row-view.png" alt="View"></button>
-									<button type="button" data-popup="delete-confirmation-popup"><img src="static/assets/row-delete.png" alt="Delete"></button>
-								</form>
-							</div>
-						</div>
-					</div>
-				</div>
+                <div class="root-table-body">
+                    {% if records %}
+                        {% for record in records %}
+                            <div class="table-row">
+                                <p class="table-row-text">{{ record.inference_id }}</p>
+                                <p class="table-row-text">{{ record.name }}</p>
+                                <p class="table-row-text">{{ record.age }}</p>
+                                <p class="table-row-text">{{ record.eye_side }}</p>
+                                <p class="table-row-text">{{ record.date }}</p>
+                                <p class="table-row-text">{{ record.prediction }}</p>
+                                <p class="table-row-text">{{ record.confidence }}</p>
+                                
+                                <div class="table-row-buttons">
+                                    <a href="{{ url_for('inference_results', inference_id=record.inference_id) }}" class="btn-view">
+                                        <img src="{{ url_for('static', filename='assets/row-view.png') }}" alt="View">
+                                    </a>
 
-				<button class="btn-main root-btn-main hover-bright">Export History</button>
-			</div>
-		</div>
+                                    <button type="button" 
+                                            class="btn-delete" 
+                                            data-popup="delete-confirmation-popup"
+                                            data-item-type="Inference Record"
+                                            data-item-name="Record #{{ record.inference_id }} ({{ record.name }})"
+                                            data-item-id="{{ record.inference_id }}"
+                                            data-delete-url="/api/delete-inference/{{ record.inference_id }}">
+                                        <img src="{{ url_for('static', filename='assets/row-delete.png') }}" alt="Delete">
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Always include empty-row so JS can toggle it dynamically -->
+                    <div class="table-row empty-row" style="{% if records %}display: none;{% endif %}">
+                        <p class="table-row-text" style="grid-column: span 8; text-align: center;">No inference history found.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-controls">
+            <button type="button" id="prev-page" class="btn-secondary">&laquo; Previous</button>
+            <span id="page-info">Page 1 of 1</span>
+            <button type="button" id="next-page" class="btn-secondary">Next &raquo;</button>
+        </div>
+
+        <button class="btn-main root-btn-main hover-bright">Export History</button>
+    </div>
+</div>
 {% include "popup.html" %}
 {% endblock %}

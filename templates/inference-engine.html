@@ -6,6 +6,7 @@ RefraScan - Inference Engine
 
 {% block additional_css %}
 <link rel="stylesheet" href="/static/css/inference-engine.css" />
+<script src="{{ url_for('static', filename='js/inference-engine.js') }}"></script>
 {% endblock %}
 
 {% block main %}
@@ -14,40 +15,102 @@ RefraScan - Inference Engine
 			<h1 class="inference-engine-title title">
 				Fundus Image-Based Refractive Error Classification
 			</h1>
-			<form class="input-group input-group1" action="/inference-results" method="GET">
-				<div class="inference-insert-img">
-					<p>Drag and Drop an Image Here</p>
-					<p>or</p>
-					<p>Click and Choose an Image</p>
-					<p class="inference-insert-img-text-paragraph4 text1">(supports .jpg, .png, .jpeg)</p>
+			<form class="input-group input-group1" action="/submit-inference" method="POST" enctype="multipart/form-data" id="inferenceForm">
+				<div type="button" class="inference-insert-img" id="dropZone">
+					<img id="preview" 
+						src="{{ image_url if image_url else '' }}" 
+						style="{{ 'display:block;' if image_url else 'display:none;' }}">
+					
+					<div class="placeholder" style="{{ 'display:none;' if image_url else 'display:flex;' }}">
+						<p>Drag and Drop an Image Here</p>
+						<p>or</p>
+						<p>Click and Choose an Image</p>
+						<p class="inference-insert-img-text-paragraph4 text1">(supports .jpg, .png, .jpeg)</p>
+					</div>
+					
+					<input type="file" name="file" id="fileInput" accept="image/*" class="visually-hidden">
 				</div>
-				
+
+				<!-- File name output display -->
+				<p id="fileNameWrapper" class="file-name-wrapper">
+					<strong>File name: </strong><span id="fileName" class="file-name-display"></span>
+				</p>								
+
 				<div class="input-group input-group1">
 
-					<!-- Line 1: Name -->
-					<div class="input-group-container input-name-group">
-						<label for="name" class="input-group-label">Name</label>
-						<input type="text" id="name" class="input-container text2 input-name" placeholder="Name" />
+				<!-- Hidden Field to track which tab is active -->
+				<input type="hidden" id="submission-type" name="submission_type" value="new">
+				
+				<!-- Hidden Field for Existing Patient ID -->
+				<input type="hidden" id="patient-id" name="patient_id" value="">
+
+					<!-- Tab Selection Bar -->
+					<div class="patient-tabs">
+						<button type="button" class="tab-btn active" data-tab="new-patient">New Patient</button>
+						<button type="button" class="tab-btn" data-tab="existing-patient">Existing Patient</button>
 					</div>
 
-					<!-- Line 2: Phone + Email -->
-					<div class="input-group-row">
-						<div class="input-group-container">
-							<label for="phone" class="input-group-label">Phone</label>
-							<input type="tel" id="phone" class="input-container text2 input-phone" placeholder="Phone" />
+					<!-- TAB 1: NEW PATIENT FORM -->
+					<div id="new-patient-tab" class="tab-content active">
+						<!-- Line 1: Name -->
+						<div class="input-group-row">
+							<div class="input-group-container">
+								<label for="last-name" class="input-group-label">Last Name</label>
+								<input type="text" id="last-name" name="last_name" class="input-container text2" placeholder="Last Name" />
+							</div>
+
+							<div class="input-group-container">
+								<label for="first-name" class="input-group-label">First Name</label>
+								<input type="text" id="first-name" name="first_name" class="input-container text2" placeholder="First Name" />
+							</div>
+
+							<div class="input-group-container">
+								<label for="middle-name" class="input-group-label">Middle Name <span>(optional)</span></label>
+								<input type="text" id="middle-name" name="middle_name" class="input-container text2" placeholder="Middle Name (optional)" />
+							</div>
 						</div>
 
-						<div class="input-group-container">
-							<label for="email" class="input-group-label">Email (optional)</label>
-							<input type="email" id="email" class="input-container text2 input-email" placeholder="Email" />
+						<!-- Line 2: Phone + Email -->
+						<div class="input-group-row">
+							<div class="input-group-container">
+								<label for="phone" class="input-group-label">Phone</label>
+								<input type="tel" id="phone" name="phone" class="input-container text2 input-phone" placeholder="Phone" />
+							</div>
+
+							<div class="input-group-container">
+								<label for="email" class="input-group-label">Email (optional)</label>
+								<input type="email" id="email" name="email" class="input-container text2 input-email" placeholder="Email" />
+							</div>
 						</div>
 					</div>
 
-					<!-- Line 3: Age + Eye Side -->
+					<!-- TAB 2: EXISTING PATIENT SEARCH -->
+					<div id="existing-patient-tab" class="tab-content">
+						<div class="input-group-row">
+							<div class="input-group-container search-container">
+								<label for="patient-search" class="input-group-label">Search Patient (Name, ID, or Phone)</label>
+								<input type="text" id="patient-search" class="input-container text2" placeholder="Type to search..." autocomplete="off" />
+								
+								<!-- Dynamic Dropdown Results -->
+								<div id="search-results" class="search-results-dropdown hidden"></div>
+							</div>
+						</div>
+
+						<!-- Summary Card (Appears after selecting an existing patient) -->
+						<div id="patient-summary-card" class="patient-summary-card hidden">
+							<div class="summary-details">
+								<h4 id="summary-name">--</h4>
+								<p><strong>ID:</strong> <span id="summary-id">--</span> | <strong>Phone:</strong> <span id="summary-phone">--</span></p>
+							</div>
+							<button type="button" id="clear-selected-patient" class="btn-clear">Change Patient</button>
+						</div>
+					</div>
+
+					<!-- SHARED FIELDS: Age & Eye Side (Appears for both tabs) -->
 					<div class="input-group-row input-group-row3">
 						<div class="input-group-container">
 							<label for="age" class="input-group-label">Age</label>
-							<input type="number" id="age" class="input-container text2 input-age" placeholder="Age" />
+							<input type="number" id="age" name="age" class="input-container text2 input-age" placeholder="Age" />
 						</div>
 
 						<div class="input-group-container eye-side-group">
@@ -67,7 +130,7 @@ RefraScan - Inference Engine
 						</div>
 					</div>
 
-					<!-- Line 4: Submit -->
+					<!-- Submit Button -->
 					<div class="input-group-container input-submit-group">
 						<button type="submit" class="btn-main input-group-btn-main hover-bright">
 							Start Analysis
