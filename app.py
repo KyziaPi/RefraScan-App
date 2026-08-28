@@ -19,9 +19,9 @@ from utilities.preprocessing import load_and_preprocess_image
 from utilities.explainability import generate_and_save_gradcam
 
 # Create database 
-#db.delete_table()
+db.delete_table()
 db.create_database()
-#db.add_dummy_data()
+db.add_dummy_data()
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -143,6 +143,15 @@ def submit_inference():
                 patient_id = int(patient_id_str)
             except (ValueError, TypeError):
                 return jsonify({'error': 'Invalid patient ID format'}), 400
+            
+            encounter_id_str = request.form.get('encounter_id')
+            if not encounter_id_str:
+                return jsonify({'error': 'Missing existing encounter ID'}), 400
+            
+            try:
+                encounter_id = int(encounter_id_str)
+            except (ValueError, TypeError):
+                return jsonify({'error': 'Invalid encounter ID format'}), 400
             
             # Fetch existing patient details from the database based on patient ID
             patient_query = "SELECT last_name, first_name, middle_name, phone, email FROM patients WHERE id = %s;"
@@ -268,14 +277,27 @@ def api_search_patients():
     
     # Search by First Name, Last Name, Patient Code, or Phone
     sql = """
-        SELECT id, patient_code, first_name, last_name, phone, age, email 
-        FROM patients 
-        WHERE LOWER(first_name) LIKE %s 
-           OR LOWER(last_name) LIKE %s 
-           OR LOWER(patient_code) LIKE %s 
-           OR phone LIKE %s
-        ORDER BY last_name ASC
-        LIMIT 10;
+        SELECT 
+            p.id, 
+            p.patient_code, 
+            p.first_name, 
+            p.last_name, 
+            p.phone, 
+            p.age, 
+            p.email,
+            (
+                SELECT id 
+                FROM clinical_encounters 
+                WHERE patient_id = p.id 
+                ORDER BY id DESC 
+                LIMIT 1
+            ) AS encounter_id
+        FROM patients p 
+        WHERE LOWER(p.first_name) LIKE %s 
+           OR LOWER(p.last_name) LIKE %s 
+           OR LOWER(p.patient_code) LIKE %s 
+           OR p.phone LIKE %s
+        ORDER BY p.last_name ASC;
     """
     res, status = db.select_rows(sql, (search_term, search_term, search_term, search_term), single=False)
     

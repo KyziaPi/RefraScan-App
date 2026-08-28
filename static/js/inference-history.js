@@ -12,12 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById("search-input");
     const filterSelect = document.getElementById("filter-class");
 
-    // Modal Elements (Populated by global.js)
-    const deleteForm = document.getElementById("delete-popup-form");
-    const hiddenIdInput = document.getElementById("delete-item-id");
-    const deletePopup = document.getElementById("delete-confirmation-popup");
-    const successPopup = document.getElementById("record-deleted-popup");
-
     // State Variables
     const itemsPerPage = 10;
     let currentPage = 1;
@@ -92,50 +86,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     searchInput?.addEventListener("input", filterTable);
     filterSelect?.addEventListener("change", filterTable);
-
-    // --- 3. AJAX DELETE SUBMISSION ---
-
-    deleteForm?.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        // Values pre-populated by global.js
-        const itemId = hiddenIdInput?.value;
-        const deleteUrl = deleteForm.action;
-
-        try {
-            const response = await fetch(deleteUrl, { method: "DELETE" });
-            const result = await response.json();
-
-            if (response.ok) {
-                // Remove deleted row from DOM & arrays
-                const targetRow = allRows.find(row => {
-                    const idText = row.querySelector(".table-row-text")?.textContent.trim();
-                    return idText === itemId;
-                });
-
-                if (targetRow) {
-                    const rowIdx = allRows.indexOf(targetRow);
-                    if (rowIdx > -1) allRows.splice(rowIdx, 1);
-
-                    const visibleIdx = visibleRows.indexOf(targetRow);
-                    if (visibleIdx > -1) visibleRows.splice(visibleIdx, 1);
-
-                    targetRow.remove();
-                }
-
-                updatePagination();
-
-                // Toggle Modals
-                deletePopup?.classList.remove("active");
-                successPopup?.classList.add("active");
-            } else {
-                alert(result.message || "Failed to delete record.");
-            }
-        } catch (error) {
-            console.error("Error deleting inference record:", error);
-            alert("An error occurred while connecting to the server.");
-        }
-    });
 
     // Initialize Pagination
     updatePagination();
