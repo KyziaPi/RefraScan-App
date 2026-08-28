@@ -200,11 +200,9 @@ def create_database():
             id SERIAL PRIMARY KEY,
             inference_id VARCHAR(50) UNIQUE NOT NULL DEFAULT 'INF-' || TO_CHAR(CURRENT_TIMESTAMP, 'YYYYMMDDHH24MISS'),
             
-            -- Optional links to full clinical records (NULL for quick walk-ins)
             patient_id INTEGER REFERENCES patients(id) ON DELETE SET NULL,
             encounter_id INTEGER REFERENCES clinical_encounters(id) ON DELETE SET NULL,
             
-            -- Walk-in / Unlinked Metadata (Used when patient_id IS NULL)
             last_name VARCHAR(100) NOT NULL,
             first_name VARCHAR(100) NOT NULL,
             middle_name VARCHAR(100),
@@ -212,7 +210,6 @@ def create_database():
             age INTEGER NOT NULL,
             email VARCHAR(255),
             
-            -- Inference Data
             eye_side VARCHAR(10) CHECK (eye_side IN ('Right', 'Left', 'OD', 'OS')),
             screening_date DATE NOT NULL DEFAULT CURRENT_DATE,
             prediction_label VARCHAR(50) NOT NULL,
@@ -224,7 +221,9 @@ def create_database():
             original_image_path TEXT,
             heatmap_image_path TEXT,
             
-            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+            CONSTRAINT unique_patient_eye_side UNIQUE (patient_id, eye_side)
         );
 
         -- =========================================================

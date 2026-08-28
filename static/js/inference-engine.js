@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabContents = document.querySelectorAll('.tab-content');
     const submissionTypeInput = document.getElementById('submission-type');
     const patientIdInput = document.getElementById('patient-id');
+    const encounterIdInput = document.getElementById('encounter-id');
     const searchInput = document.getElementById('patient-search');
     const searchResults = document.getElementById('search-results');
     const summaryCard = document.getElementById('patient-summary-card');
@@ -83,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (targetTab === 'new-patient') {
                 submissionTypeInput.value = 'new';
                 patientIdInput.value = '';
+                if (encounterIdInput) encounterIdInput.value = '';
             } else {
                 submissionTypeInput.value = 'existing';
             }
@@ -145,6 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function selectPatient(patient) {
         // Use database serial 'id' for relationships, but display 'patient_code'
         patientIdInput.value = patient.id; 
+        if (encounterIdInput) encounterIdInput.value = patient.encounter_id || '';
         document.getElementById('summary-name').textContent = `${patient.last_name}, ${patient.first_name}`;
         document.getElementById('summary-id').textContent = patient.patient_code;
         document.getElementById('summary-phone').textContent = patient.phone || 'N/A';
@@ -162,6 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Reset Selected Patient
     clearBtn.addEventListener('click', () => {
         patientIdInput.value = '';
+        if (encounterIdInput) encounterIdInput.value = '';
         searchInput.value = '';
         ageInput.value = '';
         summaryCard.classList.add('hidden');
