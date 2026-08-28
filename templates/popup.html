@@ -11,41 +11,51 @@
         <div class="popup-container">
 
             <div class="popup-header">
-                <h2>Follow up #</h2>
+                <h2 id="fu-popup-title">Follow up</h2>
                 <button type="button" class="popup-close">&times;</button>
             </div>
 
-            <div class="popup-content">
-                <p>Details</p>
+            <form id="follow-up-form">
+                <!-- Hidden inputs to track what we are editing/adding -->
+                <input type="hidden" name="fu_id" id="fu-id" value="">
+                <input type="hidden" name="encounter_id" id="fu-encounter-id" value="">
+                
+                <div class="popup-content">
+                    <div class="form-field" style="margin-bottom: 1.5rem;">
+                        <label for="fu-date">Follow Up Date</label>
+                        <input type="date" id="fu-date" name="follow_up_date" class="input-container">
+                    </div>
+                    <p>Details</p>
+                    <textarea
+                        class="popup-textarea"
+                        name="details"
+                        id="fu-details"
+                        placeholder="Enter follow-up details..."
+                        required
+                    ></textarea>
+                </div>
 
-                <textarea
-                    class="popup-textarea"
-                    name="follow_up_details"
-                    placeholder="Enter follow-up details..."
-                ></textarea>
-            </div>
-
-            <div class="popup-actions">
-                <button type="button" class="btn-secondary popup-cancel">
-                    Cancel
-                </button>
-
-                <button type="button" class="btn-primary">
-                    Save
-                </button>
-            </div>
+                <div class="popup-actions">
+                    <button type="button" class="btn-secondary popup-cancel">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        Save
+                    </button>
+                </div>
+            </form>
 
         </div>
     </div>
 
 
     <!-- 2. Patient Record Added / Edited -->
-    <form class="popup-overlay popup-record-success" id="record-success-popup" action="/patient-record-detailed" method="get">
+    <div class="popup-overlay popup-record-success" id="record-success-popup">
         <div class="popup-container">
 
             <div class="popup-header">
                 <h2 id="record-success-title">Added</h2>
-                <button type="submit" class="popup-close">&times;</button>
+                <button class="popup-close">&times;</button>
             </div>
 
             <div class="popup-content">
@@ -55,13 +65,13 @@
             </div>
 
             <div class="popup-actions">
-                <button type="submit" class="btn-primary popup-close-action">
+                <button class="btn-primary popup-close-action">
                     OK
                 </button>
             </div>
 
         </div>
-    </form>
+    </div>
 
 
     <!-- 3. Dynamic Delete Confirmation Popup -->

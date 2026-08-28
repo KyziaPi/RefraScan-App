@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-    /* Image Upload Functionality */
+    /* ==========================================
+       Image Upload Functionality
+    ========================================== */
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
     const preview = document.getElementById('preview');
@@ -9,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Trigger file input when the main button is clicked
     dropZone.addEventListener('click', (e) => {
-        // Prevent infinite loop if clicking the input itself
         if (e.target !== fileInput) {
             fileInput.click();
         }
@@ -19,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
     fileInput.addEventListener('change', function() {
         const file = this.files[0];
         if (file) {
-            // Update only the span content and show the wrapper label
             if (fileName) fileName.textContent = file.name;
             if (fileNameWrapper) fileNameWrapper.style.display = 'block';
 
@@ -31,13 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             reader.readAsDataURL(file);
         } else {
-            // Clear span text and hide label if selection is cleared
             if (fileName) fileName.textContent = '';
             if (fileNameWrapper) fileNameWrapper.style.display = 'none';
         }
     });
 
-    // Optional: Drag and drop support
+    // Drag and drop support
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
         dropZone.style.borderColor = 'var(--color-primary, #007bff)';
@@ -57,15 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    /* Input Group Functionality */
-
-    // Mock database for existing patient search
-    const mockPatients = [
-        { id: 'PAT-1001', firstName: 'John', lastName: 'Doe', phone: '09171234567', age: 45, email: 'john@example.com' },
-        { id: 'PAT-1002', firstName: 'Jane', lastName: 'Smith', phone: '09189876543', age: 32, email: 'jane@example.com' },
-        { id: 'PAT-1003', firstName: 'Robert', lastName: 'Johnson', phone: '09191112223', age: 58, email: 'robert@example.com' }
-    ];
-
+    /* ==========================================
+       Input Group & Tab Functionality
+    ========================================== */
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
     const submissionTypeInput = document.getElementById('submission-type');
@@ -91,14 +84,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 submissionTypeInput.value = 'new';
                 patientIdInput.value = '';
             } else {
-                document.getElementById('submission-type').value = 'existing';
+                submissionTypeInput.value = 'existing';
             }
         });
     });
 
-    // Patient Search Implementation
+    /* ==========================================
+       Live Patient Search (Database Integration)
+    ========================================== */
+    let debounceTimer;
+
     searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase().trim();
+        clearTimeout(debounceTimer);
+        const query = e.target.value.trim();
         searchResults.innerHTML = '';
 
         if (query.length < 2) {
@@ -106,41 +104,52 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const filtered = mockPatients.filter(p => 
-            p.firstName.toLowerCase().includes(query) ||
-            p.lastName.toLowerCase().includes(query) ||
-            p.id.toLowerCase().includes(query) ||
-            p.phone.includes(query)
-        );
+        // Wait 300ms after the user stops typing before hitting the database
+        debounceTimer = setTimeout(async () => {
+            try {
+                const response = await fetch(`/api/search-patients?q=${encodeURIComponent(query)}`);
+                if (!response.ok) throw new Error("Search failed");
+                
+                const patients = await response.json();
 
-        if (filtered.length === 0) {
-            searchResults.innerHTML = `<div class="search-item">No patients found</div>`;
-        } else {
-            filtered.forEach(patient => {
-                const item = document.createElement('div');
-                item.className = 'search-item';
-                item.innerHTML = `
-                    <div>
-                        <strong>${patient.lastName}, ${patient.firstName}</strong>
-                        <div class="search-item-info"><span>ID: ${patient.id} | Phone: ${patient.phone}</span></div>
-                    </div>
-                `;
-                item.addEventListener('click', () => selectPatient(patient));
-                searchResults.appendChild(item);
-            });
-        }
+                if (!Array.isArray(patients) || patients.length === 0) {
+                    searchResults.innerHTML = `<div class="search-item">No patients found</div>`;
+                } else {
+                    patients.forEach(patient => {
+                        const item = document.createElement('div');
+                        item.className = 'search-item';
+                        // Matches db column names: last_name, first_name, patient_code
+                        item.innerHTML = `
+                            <div>
+                                <strong>${patient.last_name}, ${patient.first_name}</strong>
+                                <div class="search-item-info">
+                                    <span>ID: ${patient.patient_code} | Phone: ${patient.phone || 'N/A'}</span>
+                                </div>
+                            </div>
+                        `;
+                        item.addEventListener('click', () => selectPatient(patient));
+                        searchResults.appendChild(item);
+                    });
+                }
 
-        searchResults.classList.remove('hidden');
+                searchResults.classList.remove('hidden');
+            } catch (error) {
+                console.error("Error fetching patients:", error);
+                searchResults.innerHTML = `<div class="search-item">Error searching database</div>`;
+                searchResults.classList.remove('hidden');
+            }
+        }, 300); 
     });
 
     // Select Patient Logic
     function selectPatient(patient) {
-        patientIdInput.value = patient.id;
-        document.getElementById('summary-name').textContent = `${patient.lastName}, ${patient.firstName}`;
-        document.getElementById('summary-id').textContent = patient.id;
-        document.getElementById('summary-phone').textContent = patient.phone;
+        // Use database serial 'id' for relationships, but display 'patient_code'
+        patientIdInput.value = patient.id; 
+        document.getElementById('summary-name').textContent = `${patient.last_name}, ${patient.first_name}`;
+        document.getElementById('summary-id').textContent = patient.patient_code;
+        document.getElementById('summary-phone').textContent = patient.phone || 'N/A';
         
-        // Auto-fill shared age field
+        // Auto-fill shared age field based on DB value
         if (patient.age) {
             ageInput.value = patient.age;
         }
@@ -157,5 +166,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ageInput.value = '';
         summaryCard.classList.add('hidden');
         searchInput.parentElement.classList.remove('hidden');
+        
+        // Refocus search bar
+        setTimeout(() => searchInput.focus(), 50);
     });
 });

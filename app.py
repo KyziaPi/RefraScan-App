@@ -13,6 +13,7 @@ from tensorflow import keras
 import joblib
 from werkzeug.utils import secure_filename
 from datetime import datetime
+from email.utils import parsedate_to_datetime
 import utilities.database as db
 from utilities.preprocessing import load_and_preprocess_image
 from utilities.explainability import generate_and_save_gradcam
@@ -45,10 +46,10 @@ os.makedirs(HEATMAP_FOLDER, exist_ok=True)
 CLASS_NAMES = ["Emmetropia", "Myopia", "Hyperopia"]
 
 # Load Model and Scaler
-model = keras.models.load_model("static/models/best_resnet50_fold_1(1).keras",
+model = keras.models.load_model("static/models/resnet50.keras",
                                 compile=False  # Bypasses custom loss (SparseCategoricalFocalLoss) & optimizer loading
                                 )
-scaler = joblib.load("static/models/scaler_fold_1(1).joblib")
+scaler = joblib.load("static/models/scaler.joblib")
 
 input_names = [inp.name for inp in model.inputs]
 print(f"Model's input names: {input_names}")
@@ -67,6 +68,14 @@ def about_the_study():
     """About The Study"""
     return render_template("about-the-study.html", page="about_the_study")
 
+def format_middle_initial(middle_name):
+    """Converts 'Santiago' or 's' to 'S.'"""
+    if not middle_name:
+        return ""
+    clean = str(middle_name).strip()
+    if not clean:
+        return ""
+    return f"{clean[0].upper()}."
 
 @app.route('/submit-inference', methods=['POST'])
 def submit_inference():
@@ -126,8 +135,31 @@ def submit_inference():
         # BRANCH 2: EXISTING PATIENT
         # -------------------------------------------------------------
         else:
-            pass  # Handle existing patient submission (to be implemented)
-            # SELECT THE REST OF THE EXISTING PATIENT DETAILS FROM DATABASE BASED ON PATIENT ID
+            patient_id_str = request.form.get('patient_id')
+            if not patient_id_str:
+                return jsonify({'error': 'Missing existing patient ID'}), 400
+            
+            try:
+                patient_id = int(patient_id_str)
+            except (ValueError, TypeError):
+                return jsonify({'error': 'Invalid patient ID format'}), 400
+            
+            # Fetch existing patient details from the database based on patient ID
+            patient_query = "SELECT last_name, first_name, middle_name, phone, email FROM patients WHERE id = %s;"
+            patient_res, status = db.select_rows(patient_query, (patient_id,), single=True)
+            
+            patient_data = patient_res.get_json() if status == 200 else {}
+            if isinstance(patient_data, dict) and 'data' in patient_data:
+                patient_data = patient_data['data'] or {}
+                
+            if not patient_data:
+                return jsonify({'error': 'Patient record not found in database'}), 404
+                
+            last_name = patient_data.get('last_name')
+            first_name = patient_data.get('first_name')
+            middle_name = patient_data.get('middle_name')
+            phone = patient_data.get('phone')
+            email = patient_data.get('email')
         
         # -------------------------------------------------------------
         # RUN AI INFERENCE & SAVE RESULT
@@ -224,6 +256,37 @@ def submit_inference():
             if os.path.exists(heatmap_filepath):
                 os.remove(heatmap_filepath)
             return render_template('index.html', error=f'Inference failed: {str(e)}')
+        
+@app.route('/api/search-patients', methods=['GET'])
+def api_search_patients():
+    """API endpoint for live-searching existing patients."""
+    query = request.args.get('q', '').lower()
+    if not query or len(query) < 2:
+        return jsonify([])
+
+    search_term = f"%{query}%"
+    
+    # Search by First Name, Last Name, Patient Code, or Phone
+    sql = """
+        SELECT id, patient_code, first_name, last_name, phone, age, email 
+        FROM patients 
+        WHERE LOWER(first_name) LIKE %s 
+           OR LOWER(last_name) LIKE %s 
+           OR LOWER(patient_code) LIKE %s 
+           OR phone LIKE %s
+        ORDER BY last_name ASC
+        LIMIT 10;
+    """
+    res, status = db.select_rows(sql, (search_term, search_term, search_term, search_term), single=False)
+    
+    if status == 200:
+        data = res.get_json() if hasattr(res, 'get_json') else res
+        
+        # Extract the list from the "data" wrapper if it exists (matching your db.select_rows pattern)
+        patients = data.get('data', []) if isinstance(data, dict) else data
+        return jsonify(patients)
+        
+    return jsonify([])
 
 @app.route("/inference-results/<string:inference_id>", methods=["GET"])
 def inference_results(inference_id):
@@ -371,36 +434,556 @@ def delete_inference(inference_id):
     return db_response, db_status
     
 
-@app.route("/patient-records")
+@app.route("/patient-records", methods=["GET"])
 def patient_records():
-    """Patient Records"""
-    return render_template("patient-records.html", page="patient_records")
-
-@app.route("/patient-record-detailed")
-def patient_record_detailed():
-    """Detailed Patient Record"""
-    # Fetch patient object/dictionary from DB
-    #patient_data = get_patient_by_id(...)
+    """Patient Records View with dynamic list formatting and pagination"""
+    select_sql = """
+        SELECT 
+            p.id,
+            p.patient_code,
+            p.last_name || ', ' || p.first_name || COALESCE(' ' || LEFT(NULLIF(p.middle_name, ''), 1) || '.', '') AS "full_name",
+            p.age,
+            COALESCE(p.referred_from, '—') AS referred_from,
+            TO_CHAR(p.date, 'MM-DD-YYYY') AS date
+        FROM patients p
+        ORDER BY p.id DESC;
+    """
+    response, status_code = db.select_rows(query=select_sql, params=())
     
-    # Placeholder for now
-    patient_data = {}
-    return render_template("patient-record-detailed.html", page="patient_record_detailed", patient=patient_data)
+    formatted_records = []
+    
+    if status_code == 200:
+        raw_records = response.get_json() or []
+        
+        for record in raw_records:
+            formatted_records.append({
+                'id': record.get('id'),
+                'patient_code': record.get('patient_code') or f"{record.get('id'):05d}",
+                'date': record.get('date') or 'N/A',
+                'name': record.get('full_name') or 'N/A',
+                'age': record.get('age') if record.get('age') is not None else 'N/A',
+                'referred_from': record.get('referred_from') or '—'
+            })
 
+    return render_template(
+        "patient-records.html", 
+        page="patient_records", 
+        records=formatted_records
+    )
+
+def clean_date(val):
+    """Parses GMT/ISO date strings or datetime objects and formats as 'Mon DD, YYYY' (e.g., Feb 14, 2026)."""
+    if not val:
+        return '—'
+    if isinstance(val, str):
+        # 1. Try parsing GMT HTTP RFC 2822 format (e.g. Sat, 14 Feb 2026 00:00:00 GMT)
+        try:
+            return parsedate_to_datetime(val).strftime("%b %d, %Y")
+        except Exception:
+            pass
+        # 2. Try parsing ISO string format (e.g. 2026-02-14)
+        try:
+            return datetime.fromisoformat(val.replace('Z', '')).strftime("%b %d, %Y")
+        except Exception:
+            return val
+    if hasattr(val, 'strftime'):
+        return val.strftime("%b %d, %Y")
+    return val
+
+def fmt_val(val):
+    """Converts values to string so 0 or 0.00 aren't treated as Falsy by Jinja."""
+    if val is None or str(val).strip() == "":
+        return None
+    return str(val)
+
+# ==========================================
+# HELPER: Fetch Patient Data by ID
+# ==========================================
+def fetch_patient_data_by_id(patient_id):
+    """Reusable function to gather all patient details from multiple tables."""
+    # Helper to parse DB responses safely
+    def parse_data(res, status, single=False):
+        if status != 200 or not res:
+            return None if single else []
+        body = res.get_json() if hasattr(res, 'get_json') else res
+        if isinstance(body, dict) and 'data' in body:
+            return body['data']
+        return body
+
+    # 1. Fetch Master Demographics
+    p_query = "SELECT * FROM patients WHERE id = %s;"
+    p_response, p_status = db.select_rows(p_query, (patient_id,), single=True)
+    patient_data = parse_data(p_response, p_status, single=True) or {}
+
+    if not patient_data:
+        return None
+
+    # Defaults
+    patient_data["follow_ups"] = []
+    patient_data["diagnosis"] = []
+
+    # 2. Fetch Medical History
+    mh_query = "SELECT * FROM patient_medical_history WHERE patient_id = %s;"
+    mh_response, mh_status = db.select_rows(mh_query, (patient_id,), single=True)
+    mh_data = parse_data(mh_response, mh_status, single=True)
+    if mh_data:
+        patient_data.update(mh_data)
+        if 'drug_allergy_present' in patient_data and isinstance(patient_data['drug_allergy_present'], bool):
+            patient_data['drug_allergy_present'] = 'Yes' if patient_data['drug_allergy_present'] else 'No'
+
+    # 3. Fetch Latest Clinical Encounter
+    ce_query = "SELECT * FROM clinical_encounters WHERE patient_id = %s ORDER BY id DESC LIMIT 1;"
+    ce_response, ce_status = db.select_rows(ce_query, (patient_id,), single=True)
+    encounter = parse_data(ce_response, ce_status, single=True)
+    
+    if encounter:
+        patient_data.update(encounter)
+        encounter_id = encounter.get('id')
+        
+        # Map Encounter Column Name Mismatches
+        patient_data['manifest_ou_num'] = fmt_val(encounter.get('manifest_ou'))
+        patient_data['manifest_ou_details'] = fmt_val(encounter.get('manifest_ou_details')) # Mapped correctly to schema
+        patient_data['pd'] = fmt_val(encounter.get('pd'))
+        
+        if encounter_id:
+            # 4. Fetch Eye Examinations
+            ee_query = "SELECT * FROM eye_examinations WHERE encounter_id = %s;"
+            ee_response, ee_status = db.select_rows(ee_query, (encounter_id,), single=False)
+            ee_list = parse_data(ee_response, ee_status, single=False) or []
+            
+            if isinstance(ee_list, list):
+                for eye in ee_list:
+                    side = eye.get('eye_side', '').lower()
+                    if not side: 
+                        continue
+                    
+                    # Basic attributes mapping here
+                    for key in ['visual_acuity', 'pinhole', 'eye_movements', 'cover_testing', 'lids', 'conjunctiva', 'cornea', 'anterior_chamber', 'light_reflexes', 'eye_pressure', 'lens', 'nifbut', 'k1', 'k2', 'axis', 'white_to_white', 'scotopic_pupil', 'pachymetry', 'ms39_k1', 'ms39_k2', 'ms39_axis', 'ms39_pachy', 'ms39_class', 'ms39_epi']:
+                        mapped_key = f"{side}_{key}" if not key.startswith('ms39') and not key in ['white_to_white', 'scotopic_pupil', 'pachymetry'] else f"ms39_{side}_{key.split('_', 1)[1]}" if key.startswith('ms39') else f"ww_{side}" if key == "white_to_white" else f"scotopic_{side}" if key == "scotopic_pupil" else f"pachy_{side}"
+                        # Simple fix for VA/PH to map cleanly based on your standard mappings
+                        if key == 'visual_acuity': mapped_key = f"{side}_va"
+                        if key == 'pinhole': mapped_key = f"{side}_ph"
+                        if key == 'axis': mapped_key = f"{side}_ax"
+                        
+                        patient_data[mapped_key] = fmt_val(eye.get(key))
+
+            # 5. Fetch Refractions
+            ref_query = "SELECT * FROM refractions WHERE encounter_id = %s;"
+            ref_response, ref_status = db.select_rows(ref_query, (encounter_id,), single=False)
+            ref_list = parse_data(ref_response, ref_status, single=False) or []
+            
+            if isinstance(ref_list, list):
+                for ref in ref_list:
+                    rtype = ref.get('refraction_type')
+                    side = ref.get('eye_side', '').lower()
+                    
+                    prefix_map = {'Autorefraction': 'ar', 'Old_Prescription': 'old', 'Manifest': 'manifest', 'Cycloplegic': 'cyclo'}
+                    prefix = prefix_map.get(rtype, '')
+                    if not prefix or not side: continue
+                    
+                    if prefix in ['manifest', 'cyclo'] and ref.get('performed_by'):
+                        patient_data[f"{prefix}_by"] = fmt_val(ref.get('performed_by'))
+                        
+                    patient_data[f"{prefix}_{side}_ds"] = fmt_val(ref.get('sphere'))
+                    patient_data[f"{prefix}_{side}_cyl"] = fmt_val(ref.get('cylinder'))
+                    patient_data[f"{prefix}_{side}_axis"] = fmt_val(ref.get('axis'))
+                    
+                    if prefix == "cyclo":
+                        patient_data[f"{prefix}_{side}_vision"] = fmt_val(ref.get('distance_va'))
+                        patient_data[f"{prefix}_{side}_j"] = fmt_val(ref.get('near_va'))
+                    else:
+                        patient_data[f"{prefix}_{side}_j"] = fmt_val(ref.get('near_va'))
+                        
+                    if ref.get('add_sphere') is not None:
+                        patient_data[f"{prefix}_add_{side}_ds"] = fmt_val(ref.get('add_sphere'))
+                        patient_data[f"{prefix}_add_{side}_n"] = fmt_val(ref.get('near_va'))
+
+            # 6. Fetch Diagnoses
+            diag_query = "SELECT diagnosis FROM patient_diagnoses WHERE encounter_id = %s ORDER BY id ASC;"
+            diag_res, diag_status = db.select_rows(diag_query, (encounter_id,), single=False)
+            raw_diags = parse_data(diag_res, diag_status, single=False) or []
+            if isinstance(raw_diags, list):
+                patient_data["diagnosis"] = [d.get('diagnosis') for d in raw_diags if isinstance(d, dict) and d.get('diagnosis')]
+                    
+            # 7. Fetch Follow-Ups
+            fu_query = "SELECT * FROM patient_follow_ups WHERE encounter_id = %s ORDER BY follow_up_number ASC;"
+            fu_response, fu_status = db.select_rows(fu_query, (encounter_id,), single=False)
+            patient_data["follow_ups"] = parse_data(fu_response, fu_status, single=False) or []
+
+    # 8. Date Cleaning
+    for date_key in ['birthdate', 'date', 'created_at', 'updated_at', 'date']:
+        if date_key in patient_data and patient_data[date_key]:
+            patient_data[date_key] = clean_date(patient_data[date_key])
+    for fu in patient_data.get("follow_ups", []):
+        if 'follow_up_date' in fu and fu['follow_up_date']:
+            fu['follow_up_date'] = clean_date(fu['follow_up_date'])
+
+    return patient_data
+
+# ==========================================
+# NEW API ROUTE: Get JSON data for JS Autofill
+# ==========================================
+@app.route("/api/get-patient/<int:patient_id>", methods=["GET"])
+def api_get_patient(patient_id):
+    patient_data = fetch_patient_data_by_id(patient_id)
+    if not patient_data:
+        return jsonify({"error": "Patient not found"}), 404
+    return jsonify(patient_data), 200
+
+# ==========================================
+# REFACTORED: Add/Edit Route (Hides ID from URL)
+# ==========================================
 @app.route("/add-patient", methods=["GET", "POST"])
 def add_patient():
-    """Add Patient Record"""
+    """Add Patient Record OR Load Edit View Silently"""
+    edit_id = ""
     if request.method == "POST":
-        # Process form data and save to database
-        # Example: name = request.form['name']
-        return redirect("/patient-records")
+        # Extracts ID sent silently via POST request from the Edit Button
+        edit_id = request.form.get("id", "")
     
-    return render_template("add-patient.html", page="add_patient")
+    return render_template("add-patient.html", page="add_patient", edit_id=edit_id)
 
-@app.route("/delete-patient", methods=["POST"])
-def delete_patient():
-    """Delete Patient Record"""
-    # Implement deletion logic here (e.g., remove from database)
-    return redirect("/patient-records")
+# ==========================================
+# REFACTORED: Detailed Record Route
+# ==========================================
+@app.route("/patient-record-detailed")
+def patient_record_detailed():
+    patient_id = request.args.get("id")
+    if not patient_id:
+        return redirect("/patient-records") 
+        
+    patient_data = fetch_patient_data_by_id(patient_id)
+    
+    if not patient_data:
+        return redirect("/patient-records")
+        
+    return render_template("patient-record-detailed.html", page="patient_record_detailed", patient=patient_data)
+
+
+def to_num(val):
+    """Converts empty string inputs to None for NUMERIC/INTEGER DB columns."""
+    if val is not None and str(val).strip() != "":
+        try:
+            return float(val) if "." in str(val) else int(val)
+        except ValueError:
+            return None
+    return None
+
+def map_eye_side(val):
+    """Maps Right/Left form selections to OD/OS DB constraint."""
+    if val == 'Right': return 'OD'
+    if val == 'Left': return 'OS'
+    return val
+
+@app.route("/api/add-patient", methods=["POST"])
+def api_add_patient():
+    """Handles saving or updating a full patient record across all database tables."""
+    data = request.json if request.is_json else (request.form or {})
+
+    # 1. HELPER: Safely extract arrays for checkboxes and dynamic fields
+    def get_list_param(key):
+        if hasattr(data, 'getlist'):
+            return data.getlist(f"{key}[]") or data.getlist(key)
+        
+        val = data.get(f"{key}[]") or data.get(key)
+        if isinstance(val, list):
+            return val
+        return [val] if val else []
+
+    # 2. HELPER: Map 'Left'/'Right' to 'OS'/'OD' for PostgreSQL constraints
+    def map_eye(val):
+        val = str(val).lower() if val else ""
+        if "left" in val: return "OS"
+        if "right" in val: return "OD"
+        return None
+
+    # Track if this is an Edit or a New Record
+    patient_id = data.get('patient_id')
+    encounter_id = data.get('id')
+    patient_code = data.get('patient_code')
+
+    # =========================================================
+    # 1. PATIENTS (Master Demographics)
+    # =========================================================
+    if not patient_code:
+        # Generate new Patient Code if completely blank
+        last_patient_response, status = db.select_rows("""
+            SELECT patient_code
+            FROM patients
+            ORDER BY CAST(SPLIT_PART(patient_code, '-', 2) AS INTEGER) DESC
+            LIMIT 1
+        """, single=True)
+
+        if status == 200:
+            last_patient_code = last_patient_response.json["patient_code"]
+
+            # Get the number after "-"
+            last_number = int(last_patient_code.split("-")[1])
+
+            # Increment the latest number
+            next_number = last_number + 1
+        else:
+            # First patient
+            next_number = 1
+
+        # Current year, last 2 digits
+        current_year = datetime.now().strftime("%y")
+
+        # Generate patient code
+        patient_code = f"{current_year}-{next_number:05d}"
+        
+        print(f"Generated new patient_code: {patient_code}")
+
+    patient_values = (
+        patient_code, data.get('last_name'), data.get('first_name'), data.get('middle_name', ''), 
+        data.get('gender', 'Other'), data.get('birthdate') or None, to_num(data.get('age')), 
+        data.get('phone', ''), data.get('email', ''), data.get('occupation', ''), 
+        data.get('referred_from', ''), data.get('location', ''), data.get('language_spoken', ''), 
+        data.get('date') or None
+    )
+
+    if patient_id:
+        # UPDATE Existing Patient
+        print(f"Updating existing patient with ID: {patient_id}")
+        patient_query = """
+            UPDATE patients SET
+                patient_code = %s, last_name = %s, first_name = %s, middle_name = %s, 
+                gender = %s, birthdate = %s, age = %s, phone = %s, email = %s, occupation = %s, 
+                referred_from = %s, location = %s, language_spoken = %s, date = COALESCE(CAST(%s AS DATE), CURRENT_DATE)
+            WHERE id = %s;
+        """
+        response, status = db.update_row("Update Patient", patient_query, patient_values + (patient_id,))
+        if status not in [200, 201]: return response, status
+    else:
+        # INSERT New Patient
+        print(f"Inserting new patient with code: {patient_code}")
+        patient_query = """
+            INSERT INTO patients (
+                patient_code, last_name, first_name, middle_name, gender, birthdate, age, phone, email, 
+                occupation, referred_from, location, language_spoken, date
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, COALESCE(CAST(%s AS DATE), CURRENT_DATE))
+            RETURNING id;
+        """
+        response, status = db.add_row("Add New Patient", patient_query, patient_values)
+        if status != 201: return response, status
+        
+        res_json = response.get_json() or {}
+        patient_id = res_json.get('data', {}).get('id') if 'data' in res_json else res_json.get('id')
+
+
+    # =========================================================
+    # 2. PATIENT MEDICAL HISTORY
+    # =========================================================
+    mh_values = (
+        data.get('drug_allergy_present') == 'Yes', data.get('drug_allergy_info', ''),
+        get_list_param('pregnancy_status'), data.get('pregnancy_info', ''),
+        get_list_param('family_history'), data.get('family_history_info', ''),
+        get_list_param('past_history'), data.get('past_history_info', ''),
+        get_list_param('medications'), data.get('medications_info', '')
+    )
+    
+    if data.get('id'):
+        mh_query = """
+            UPDATE patient_medical_history SET
+                drug_allergy_present = %s, drug_allergy_info = %s, pregnancy_status = %s, pregnancy_info = %s,
+                family_history = %s, family_history_info = %s, past_history = %s, past_history_info = %s,
+                medications = %s, medications_info = %s
+            WHERE patient_id = %s;
+        """
+        db.update_row("Update Medical History", mh_query, mh_values + (patient_id,))
+    else:
+        mh_query = """
+            INSERT INTO patient_medical_history (
+                drug_allergy_present, drug_allergy_info, pregnancy_status, pregnancy_info,
+                family_history, family_history_info, past_history, past_history_info,
+                medications, medications_info, patient_id
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+        """
+        db.add_row("Add Medical History", mh_query, mh_values + (patient_id,))
+
+
+    # =========================================================
+    # 3. CLINICAL ENCOUNTERS
+    # =========================================================
+    ce_values = (
+        to_num(data.get('pd')), data.get('manifest_ou', ''), data.get('manifest_ou_details', ''),
+        map_eye(data.get('master_eye')), map_eye(data.get('rifle_eye')),
+        data.get('flucaine_test', ''), data.get('schirmers_test', '')
+    )
+    
+    if encounter_id:
+        ce_query = """
+            UPDATE clinical_encounters SET
+                pd = %s, manifest_ou = %s, manifest_ou_details = %s, master_eye = %s,
+                rifle_eye = %s, flucaine_test = %s, schirmers_test = %s
+            WHERE id = %s;
+        """
+        ce_response, ce_status = db.update_row("Update Encounter", ce_query, ce_values + (encounter_id,))
+        if ce_status not in [200, 201]: return ce_response, ce_status
+        
+        # [CRITICAL FIX]: Wipe old sub-records so they can be freshly inserted cleanly below
+        db.delete_row("Wipe Old Exams", "DELETE FROM eye_examinations WHERE encounter_id = %s;", (encounter_id,))
+        db.delete_row("Wipe Old Refractions", "DELETE FROM refractions WHERE encounter_id = %s;", (encounter_id,))
+        db.delete_row("Wipe Old Diagnoses", "DELETE FROM patient_diagnoses WHERE encounter_id = %s;", (encounter_id,))
+    else:
+        ce_query = """
+            INSERT INTO clinical_encounters (
+                pd, manifest_ou, manifest_ou_details, master_eye, rifle_eye, flucaine_test, schirmers_test, patient_id
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id;
+        """
+        ce_response, ce_status = db.add_row("Add Encounter", ce_query, ce_values + (patient_id,))
+        if ce_status != 201: return ce_response, ce_status
+        
+        ce_json = ce_response.get_json() or {}
+        encounter_id = ce_json.get('data', {}).get('id') if 'data' in ce_json else ce_json.get('id')
+
+
+    # =========================================================
+    # 4. SUB-RECORDS (Identical execution for both Edit and New)
+    # =========================================================
+    if encounter_id:
+        
+        # A. EYE EXAMINATIONS (OD & OS)
+        ee_query = """
+            INSERT INTO eye_examinations (
+                encounter_id, eye_side, visual_acuity, pinhole, eye_movements, cover_testing,
+                lids, conjunctiva, cornea, anterior_chamber, light_reflexes, eye_pressure,
+                lens, nifbut, k1, k2, axis, white_to_white, scotopic_pupil, pachymetry,
+                ms39_k1, ms39_k2, ms39_axis, ms39_pachy, ms39_class, ms39_epi
+            ) VALUES (
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+            );
+        """
+        for side in ['od', 'os']:
+            side_upper = side.upper()
+            ee_values = (
+                encounter_id, side_upper,
+                data.get(f'{side}_va', ''), data.get(f'{side}_ph', ''), data.get(f'{side}_eye_movements', ''),
+                data.get(f'{side}_cover_testing', ''), data.get(f'{side}_lids', ''), data.get(f'{side}_conjunctiva', ''),
+                data.get(f'{side}_cornea', ''), data.get(f'{side}_anterior_chamber', ''), data.get(f'{side}_light_reflexes', ''),
+                data.get(f'{side}_eye_pressure', ''), data.get(f'{side}_lens', ''), data.get(f'{side}_nifbut', ''),
+                to_num(data.get(f'{side}_k1')), to_num(data.get(f'{side}_k2')), to_num(data.get(f'{side}_ax')),
+                to_num(data.get(f'ww_{side}')), to_num(data.get(f'scotopic_{side}')), to_num(data.get(f'pachy_{side}')),
+                to_num(data.get(f'ms39_{side}_k1')), to_num(data.get(f'ms39_{side}_k2')), to_num(data.get(f'ms39_{side}_axis')),
+                to_num(data.get(f'ms39_{side}_pachy')), data.get(f'ms39_{side}_class', ''), data.get(f'ms39_{side}_epi', '')
+            )
+            db.add_row(f"Add Eye Exam ({side_upper})", ee_query, ee_values)
+
+        # B. REFRACTIONS (Autorefraction, Old, Manifest, Cycloplegic)
+        ref_query = """
+            INSERT INTO refractions (
+                encounter_id, refraction_type, eye_side, sphere, cylinder, axis,
+                add_sphere, near_va, distance_va, performed_by
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+        """
+        refraction_types = [
+            ('Autorefraction', 'ar'), ('Old_Prescription', 'old'), 
+            ('Manifest', 'manifest'), ('Cycloplegic', 'cyclo')
+        ]
+
+        for ref_name, prefix in refraction_types:
+            performed_by = data.get(f'{prefix}_by', '') if prefix in ['manifest', 'cyclo'] else ''
+            for side in ['od', 'os']:
+                side_upper = side.upper()
+                ref_values = (
+                    encounter_id, ref_name, side_upper,
+                    to_num(data.get(f'{prefix}_{side}_ds')), to_num(data.get(f'{prefix}_{side}_cyl')),
+                    to_num(data.get(f'{prefix}_{side}_axis')), to_num(data.get(f'{prefix}_add_{side}_ds')),
+                    data.get(f'{prefix}_add_{side}_n') or data.get(f'{prefix}_{side}_j', ''),
+                    data.get(f'{prefix}_{side}_vision', ''), performed_by
+                )
+                db.add_row(f"Add Refraction ({ref_name} - {side_upper})", ref_query, ref_values)
+
+        # C. DIAGNOSIS
+        diag_query = """
+            INSERT INTO patient_diagnoses (encounter_id, diagnosis)
+            VALUES (%s, %s);
+        """
+        raw_diagnoses = get_list_param('diagnosis')
+        for diag in raw_diagnoses:
+            diag_clean = str(diag).strip() if diag else ""
+            if diag_clean:
+                db.add_row("Add Diagnosis", diag_query, (encounter_id, diag_clean))
+
+    return jsonify({"success": True, "patient_id": patient_id}), 201
+
+@app.route('/api/delete-patient/<int:patient_id>', methods=['DELETE'])
+def api_delete_patient(patient_id):
+    """API Endpoint to delete a patient record by ID."""
+    
+    # 1. Verify the patient exists before attempting deletion
+    check_sql = "SELECT id FROM patients WHERE id = %s;"
+    res, status = db.select_rows(check_sql, (patient_id,), single=True)
+    
+    if status != 200 or not res.get_json():
+        return jsonify({"error": "Patient record not found."}), 404
+
+    # 2. Delete the record from the database
+    # ON DELETE CASCADE in your schema automatically removes all 
+    # linked medical history, clinical encounters, refractions, and eye exams.
+    delete_sql = "DELETE FROM patients WHERE id = %s;"
+    db_response, db_status = db.delete_row(
+        purpose="Delete Patient Record",
+        query=delete_sql,
+        params=(patient_id,)
+    )
+    
+    if db_status == 200:
+        return jsonify({"success": True, "message": "Patient record deleted successfully."}), 200
+    else:
+        return jsonify({"error": "Failed to delete patient record."}), 500
+
+@app.route('/api/save-follow-up', methods=['POST'])
+def api_save_follow_up():
+    """Handles adding a new follow-up or updating an existing one."""
+    data = request.json or {}
+    fu_id = data.get('fu_id')
+    encounter_id = data.get('encounter_id')
+    follow_up_date = data.get('follow_up_date') or None
+    details = data.get('details')
+
+    if not encounter_id:
+        return jsonify({"error": "No clinical encounter found to attach follow-up to."}), 400
+
+    if fu_id: 
+        # Update existing follow-up date and details
+        query = """
+            UPDATE patient_follow_ups 
+            SET details = %s, follow_up_date = COALESCE(CAST(%s AS DATE), CURRENT_DATE) 
+            WHERE id = %s;
+        """
+        res, status = db.update_row("Update Follow Up", query, (details, follow_up_date, fu_id))
+    else:
+        # Insert new follow-up - calculate next follow_up_number for this encounter
+        max_q = "SELECT COALESCE(MAX(follow_up_number), 0) AS max_num FROM patient_follow_ups WHERE encounter_id = %s;"
+        max_res, _ = db.select_rows(max_q, (encounter_id,), single=True)
+        
+        max_data = max_res.get_json() if hasattr(max_res, 'get_json') else {}
+        if isinstance(max_data, dict) and 'data' in max_data:
+            next_num = max_data['data'].get('max_num', 0) + 1
+        else:
+            next_num = max_data.get('max_num', 0) + 1 if isinstance(max_data, dict) else 1
+        
+        query = """
+            INSERT INTO patient_follow_ups (encounter_id, follow_up_number, follow_up_date, details) 
+            VALUES (%s, %s, COALESCE(CAST(%s AS DATE), CURRENT_DATE), %s);
+        """
+        res, status = db.add_row("Add Follow Up", query, (encounter_id, next_num, follow_up_date, details))
+
+    if status in [200, 201]:
+        return jsonify({"success": True}), 200
+    return jsonify({"error": "Failed to save follow up."}), 500
+
+@app.route('/api/delete-follow-up/<int:fu_id>', methods=['DELETE'])
+def api_delete_follow_up(fu_id):
+    """API Endpoint to delete a follow-up record by ID."""
+    query = "DELETE FROM patient_follow_ups WHERE id = %s;"
+    res, status = db.delete_row("Delete Follow Up", query, (fu_id,))
+    if status == 200:
+        return jsonify({"success": True, "message": "Follow-up deleted successfully."}), 200
+    return jsonify({"error": "Failed to delete follow-up."}), 500
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
