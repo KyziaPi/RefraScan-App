@@ -6,6 +6,7 @@ RefraScan - LASIK Patient Records
 
 {% block additional_css %}
 <link rel="stylesheet" href="/static/css/add-patient.css" />
+<script src="{{ url_for('static', filename='js/add-patient.js') }}"></script>
 {% endblock %}
 
 {% block main %}
@@ -13,7 +14,11 @@ RefraScan - LASIK Patient Records
 	<div class="patient-records-patient">
 
 		<!-- Layout Container with Sticky Sidebar Nav -->
-		<form class="form-layout-container">
+		<form class="form-layout-container" id="add-patient-form">
+		
+			<!-- Hidden ID (Will be empty for new patients, populated for edits) -->
+			<input type="hidden" name="id" id="id" value="{{ edit_id }}">
+			<input type="hidden" name="patient_id" id="patient-id" value="{{ patient_id }}">
 			
 			<!-- Sticky Section Navigation Sidebar -->
 			<nav class="section-nav-pane">
@@ -39,7 +44,7 @@ RefraScan - LASIK Patient Records
 						Cancel
 					</button>
 
-					<button type="button" class="patient-records-btn patient-records-btn2 hover-bright" data-popup="record-success-popup">
+					<button type="submit" class="patient-records-btn patient-records-btn2 hover-bright">
 						Save
 					</button>
 				</div>
@@ -59,24 +64,25 @@ RefraScan - LASIK Patient Records
 						<!-- Left side -->
 						<div class="record-sub-container">
 							<div class="form-field">
-								<label for="patient-id">ID</label>
+								<label for="patient-code">Patient Code</label>
 								<input
 									type="text"
-									id="patient-id"
-									name="patient_id"
+									id="patient-code"
+									name="patient_code"
 									pattern="[0-9-]+"
-									placeholder="ID"
+									placeholder="Patient Code"
+									required
 								/>
 							</div>
 
 							<div class="form-field">
 								<label for="last-name">Last Name</label>
-								<input type="text" id="last-name" name="last_name">
+								<input type="text" id="last-name" name="last_name" required>
 							</div>
 
 							<div class="form-field">
 								<label for="first-name">First Name</label>
-								<input type="text" id="first-name" name="first_name">
+								<input type="text" id="first-name" name="first_name" required>
 							</div>
 
 							<div class="form-field">
@@ -86,12 +92,12 @@ RefraScan - LASIK Patient Records
 
 							<div class="form-field">
 								<label for="location">Location</label>
-								<input type="text" id="location" name="location">
+								<input type="text" id="location" name="location" required>
 							</div>
 
 							<div class="form-field">
 								<label for="phone">Phone</label>
-								<input type="tel" id="phone" name="phone">
+								<input type="tel" id="phone" name="phone" required>
 							</div>
 
 							<div class="form-field">
@@ -108,7 +114,7 @@ RefraScan - LASIK Patient Records
 
 								<div class="selection-options">
 									<label class="selection-box">
-										<input type="radio" name="gender" value="Male">
+										<input type="radio" name="gender" value="Male" checked>
 										Male
 									</label>
 
@@ -117,38 +123,37 @@ RefraScan - LASIK Patient Records
 										Female
 									</label>
 								</div>
+							</div>	
+
+							<div class="form-field">
+								<label for="language_spoken">Language Spoken</label>
+								<input type="text" id="language_spoken" name="language_spoken" required>
 							</div>
 
 							<div class="form-field">
-								<label for="language">Language Spoken</label>
-								<input type="text" id="language" name="language">
-							</div>
-
-							<div class="form-field">
-								<label for="exam-date">Date</label>
-								<input type="date" id="exam-date" name="exam_date">
+								<label for="date">Date</label>
+								<input type="date" id="date" name="date" required>
 							</div>
 
 							<div class="form-field">
 								<label for="occupation">Occupation</label>
-								<input type="text" id="occupation" name="occupation">
+								<input type="text" id="occupation" name="occupation" required>
 							</div>
 
 							<div class="form-field">
 								<label for="birthdate">Birthdate</label>
-								<input type="date" id="birthdate" name="birthdate">
+								<input type="date" id="birthdate" name="birthdate" required>
 							</div>
 
 							<div class="form-field">
 								<label for="age">Age</label>
-								<input type="number" id="age" name="age" min="0">
+								<input type="number" id="age" name="age" min="0" required>
 							</div>
 
 							<div class="form-field">
 								<label for="referred-from">Referred From</label>
-								<input type="text" id="referred-from" name="referred_from">
+								<input type="text" id="referred-from" name="referred_from" required>
 							</div>
-
 						</div>
 					</div>
 				</section>
@@ -405,15 +410,21 @@ RefraScan - LASIK Patient Records
 					</div>
 
 					<div class="dynamic-input-list" id="diagnosis-list">
-
-						<div class="dynamic-input-row">
-							<input type="text" name="diagnosis[]">
-
-							<button type="button" class="dynamic-remove-btn" aria-label="Remove diagnosis">−</button>
-
-							<button type="button" class="dynamic-add-btn" aria-label="Add diagnosis">+</button>
-						</div>
-
+						{% if patient and patient.diagnosis and patient.diagnosis|length > 0 %}
+							{% for diag in patient.diagnosis %}
+								<div class="dynamic-input-row">
+									<input type="text" name="diagnosis[]" value="{{ diag }}" placeholder="Enter diagnosis...">
+									<button type="button" class="dynamic-remove-btn" aria-label="Remove diagnosis">−</button>
+									<button type="button" class="dynamic-add-btn" aria-label="Add diagnosis">+</button>
+								</div>
+							{% endfor %}
+						{% else %}
+							<div class="dynamic-input-row">
+								<input type="text" name="diagnosis[]" placeholder="Enter diagnosis...">
+								<button type="button" class="dynamic-remove-btn" aria-label="Remove diagnosis" disabled>−</button>
+								<button type="button" class="dynamic-add-btn" aria-label="Add diagnosis">+</button>
+							</div>
+						{% endif %}
 					</div>
 				</section>
 
@@ -473,9 +484,10 @@ RefraScan - LASIK Patient Records
 
 							</div>
 
-							<div class="form-field">
+							<div class="form-field-inline">
 								<label for="pd">PD</label>
 								<input type="number" id="pd" name="pd">
+								<span>mm</span>
 							</div>
 
 							<div class="subsection-title">W - W</div>
@@ -738,11 +750,6 @@ RefraScan - LASIK Patient Records
 							<label for="manifest-by">By</label>
 							<input type="text" id="manifest-by" name="manifest_by">
 						</div>
-
-						<label class="signature-upload">
-							<span>E-signature</span>
-							<input type="file" accept="image/*" name="manifest_signature">
-						</label>
 					</div>
 
 					<div class="refraction-grid">
@@ -792,9 +799,9 @@ RefraScan - LASIK Patient Records
 					</div>
 
 					<div class="form-field">
-						<label>OU</label>
+						<h3>OU</h3>
 						<div class="refraction-row">
-							<input type="text" name="manifest_ou_num">
+							<input type="text" name="manifest_ou">
 							<input class="input-additional" type="text" name="manifest_ou_details" placeholder="Additional details">
 						</div>
 					</div>
@@ -841,11 +848,6 @@ RefraScan - LASIK Patient Records
 							<label for="cyclo-by">By</label>
 							<input type="text" id="cyclo-by" name="cyclo_by">
 						</div>
-
-						<label class="signature-upload">
-							<span>E-signature</span>
-							<input type="file" accept="image/*" name="cyclo_signature">
-						</label>
 					</div>
 
 					<div class="refraction-grid">

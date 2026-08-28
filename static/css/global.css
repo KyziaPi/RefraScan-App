@@ -450,27 +450,62 @@ textarea {
 }
 /* end selection box */
 
-/* container queries (flex rows) */
-
-@container site-header (width < 507px) {
-	.site-header__inner {
-		flex-direction: column;
-		align-items: center;
-		gap: 1.4rem;
-	}
-	.site-header__inner > * {
-		text-align: center;
-	}
-	.site-header__inner > .site-header__brand {
-		width: 100%;
-		max-width: 308px;
-	}
+/* Mobile Toggle Button (Hidden on larger containers) */
+.site-header__mobile-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.6rem;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.4rem;
+    z-index: 10;
 }
 
-@media screen and (max-width: 576px) {
-	.main-body {
-		margin-top: 12rem;
-	}
+.site-header__mobile-toggle .hamburger-bar {
+    display: block;
+    width: 2.2rem;
+    height: 0.2rem;
+    background-color: var(--color-surface);
+    border-radius: 2px;
+}
+
+/* Container Query for width < 610px */
+@container site-header (width < 610px) {
+    .site-header__inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        width: 100%;
+        min-height: 4.8rem;
+    }
+
+    /* Hide extra links from the header view */
+    .site-header__about-link,
+    .site-header__nav {
+        display: none;
+    }
+
+    /* Center Logo and Title perfectly in the middle */
+    .site-header__brand {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        gap: 0;
+        margin: 0;
+    }
+
+    .site-header__brand-link {
+        justify-content: center;
+    }
+
+    /* Display the toggle button on the right side */
+    .site-header__mobile-toggle {
+        display: flex;
+        margin-left: auto;
+    }
 }
 
 @container history-table-container (width < 760px) {

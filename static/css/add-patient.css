@@ -300,6 +300,11 @@ body {
 .selection-options .selection-box {
     width: 50%;
     min-height: 5rem;
+    border: 2px solid var(--color-border, #ccc);
+}
+
+.selection-box:hover {
+    border: 2px solid var(--color-brand, #ccc);
 }
 
 /* =========================================================
@@ -324,7 +329,8 @@ body {
 
 .eye-detail-container h3,
 .od-os-card h3,
-.refraction-eye h3 {
+.refraction-eye h3,
+.form-field>h3 {
     margin: 0;
     color: var(--color-text);
     font-size: 1.7rem;
@@ -355,6 +361,7 @@ body {
     border: 2px solid var(--color-border);
     border-radius: 10px;
     box-sizing: border-box;
+    font-size: 1.4rem;  
 }
 
 .dynamic-add-btn,
@@ -373,6 +380,12 @@ body {
 .dynamic-remove-btn {
     background-color: var(--color-border);
     color: var(--color-text);
+}
+
+.dynamic-remove-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 /* =========================================================
@@ -419,6 +432,7 @@ body {
     border: 2px solid var(--color-border);
     border-radius: 10px;
     box-sizing: border-box;
+    font-size: 1.4rem;
 }
 
 /* =========================================================
@@ -494,7 +508,7 @@ body {
 }
 
 .examiner-field input {
-    width: 16rem;
+    width: 30rem;
     min-height: 4rem;
     padding: 0.8rem 1rem;
     border: 2px solid var(--color-border);

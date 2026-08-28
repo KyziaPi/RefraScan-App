@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const deleteForm = document.getElementById("delete-popup-form");
+    const hiddenIdInput = document.getElementById("delete-item-id");
+    
     // Form input autocomplete off for all input fields
     document.querySelectorAll('input').forEach(input => {
         input.setAttribute('autocomplete', 'off');
@@ -28,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     // 2. Update form action URL and hidden input value
-                    const deleteForm = popup.querySelector("#delete-popup-form");
                     if (deleteForm) deleteForm.action = deleteUrl;
 
                     const itemIdInput = popup.querySelector("#delete-item-id");
@@ -56,12 +58,62 @@ document.addEventListener('DOMContentLoaded', () => {
                 button.closest(".popup-overlay")?.classList.remove("active");
             });
         });
-    
 
+    // --- CENTRALIZED DELETE SUBMISSION ---
+    deleteForm?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const itemId = hiddenIdInput?.value;
+        const deleteUrl = deleteForm.action;
+        const deletePopup = document.getElementById("delete-confirmation-popup");
+        const successPopup = document.getElementById("record-deleted-popup");
+
+        try {
+            const response = await fetch(deleteUrl, { method: "DELETE" });
+            const result = await response.json();
+
+            if (response.ok) {
+                // 1. IF ON DETAILED PAGE: Redirect back to records list or reload page
+                if (window.location.pathname.includes('patient-record-detailed')) {
+                    // If deleting a specific follow-up sheet item, reload page. Otherwise redirect.
+                    if (deleteUrl.includes('delete-follow-up')) {
+                        window.location.reload();
+                    } else {
+                        window.location.href = '/patient-records';
+                    }
+                    return;
+                }
+
+                // 2. IF ON MAIN TABLE PAGE: Remove row directly from DOM
+                const deleteBtn = document.querySelector(`button[data-item-id="${itemId}"]`);
+                if (deleteBtn) {
+                    const targetRow = deleteBtn.closest('.table-row');
+                    if (targetRow) {
+                        targetRow.remove();
+                    }
+                }
+
+                // Call updatePagination if it exists globally (defined in patient-records.js)
+                if (typeof updatePagination === 'function') {
+                    updatePagination();
+                }
+
+                // Toggle Modals
+                deletePopup?.classList.remove("active");
+                successPopup?.classList.add("active");
+            } else {
+                alert(result.error || result.message || "Failed to delete record.");
+            }
+        } catch (error) {
+            console.error("Error deleting record:", error);
+            alert("An error occurred while communicating with the server.");
+        }
+    });
+
+    // Export CSV Handling
     const exportPopup = document.getElementById('export-csv-popup');
     if (!exportPopup) return;
 
-    // Global Select All / Deselect All
     document.getElementById('select-all-fields')?.addEventListener('click', () => {
         exportPopup.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
     });
@@ -70,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
         exportPopup.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
     });
 
-    // Section Header Toggle Checkboxes
     exportPopup.querySelectorAll('.section-toggle').forEach(toggle => {
         toggle.addEventListener('change', (e) => {
             const group = e.target.closest('.export-group');
@@ -78,5 +129,4 @@ document.addEventListener('DOMContentLoaded', () => {
             checkboxes.forEach(cb => cb.checked = e.target.checked);
         });
     });
-    
 });

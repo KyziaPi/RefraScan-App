@@ -28,7 +28,7 @@ RefraScan - Inference Engine
 						<p class="inference-insert-img-text-paragraph4 text1">(supports .jpg, .png, .jpeg)</p>
 					</div>
 					
-					<input type="file" name="file" id="fileInput" accept="image/*" class="visually-hidden">
+					<input type="file" name="file" id="fileInput" accept="image/*" class="visually-hidden" required>
 				</div>
 
 				<!-- File name output display -->
@@ -109,7 +109,7 @@ RefraScan - Inference Engine
 					<!-- SHARED FIELDS: Age & Eye Side (Appears for both tabs) -->
 					<div class="input-group-row input-group-row3">
 						<div class="input-group-container">
-							<label for="age" class="input-group-label">Age</label>
+							<label for="age" class="input-group-label" required>Age</label>
 							<input type="number" id="age" name="age" class="input-container text2 input-age" placeholder="Age" />
 						</div>
 

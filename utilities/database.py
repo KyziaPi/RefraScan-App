@@ -76,6 +76,7 @@ def create_database():
             location VARCHAR(255),
             phone VARCHAR(50),
             email VARCHAR(255),
+            date DATE NOT NULL DEFAULT CURRENT_DATE,
             occupation VARCHAR(255),
             language_spoken VARCHAR(100),
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -107,7 +108,9 @@ def create_database():
         CREATE TABLE IF NOT EXISTS clinical_encounters (
             id SERIAL PRIMARY KEY,
             patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
-            exam_date DATE NOT NULL DEFAULT CURRENT_DATE,
+            pd INTEGER, -- Pupillary Distance in mm 
+            manifest_ou VARCHAR(50),
+            manifest_ou_details TEXT,
             master_eye VARCHAR(10) CHECK (master_eye IN ('OD', 'OS')),
             rifle_eye VARCHAR(10) CHECK (rifle_eye IN ('OD', 'OS')),
             flucaine_test VARCHAR(100),
@@ -115,7 +118,17 @@ def create_database():
             additional_details TEXT,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
-
+        
+        -- =========================================================
+        -- DIAGNOSES (1:N relationship per Clinical Encounter)
+        -- =========================================================
+        CREATE TABLE IF NOT EXISTS patient_diagnoses (
+            id SERIAL PRIMARY KEY,
+            encounter_id INTEGER NOT NULL REFERENCES clinical_encounters(id) ON DELETE CASCADE,
+            diagnosis VARCHAR(255) NOT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+        
         -- =========================================================
         -- 4) EYE EXAMINATIONS (1 entry per eye per encounter)
         -- =========================================================
@@ -144,13 +157,13 @@ def create_database():
             axis INTEGER,
             white_to_white NUMERIC(6,2),
             scotopic_pupil NUMERIC(6,2),
-            pachymetry NUMERIC(6,2),
+            pachymetry INTEGER,
 
             -- MS-39 Advanced Topography
             ms39_k1 NUMERIC(6,2),
             ms39_k2 NUMERIC(6,2),
             ms39_axis INTEGER,
-            ms39_pachy NUMERIC(6,2),
+            ms39_pachy INTEGER,
             ms39_class VARCHAR(50),
             ms39_epi VARCHAR(50),
 
@@ -306,6 +319,30 @@ def add_row(purpose, query, values):
         if connection:
             connection.close()
 
+def update_row(purpose, query, values):
+    """Executes dynamic UPDATE queries with automatic rollback on error."""
+    connection = None
+    try:
+        connection = get_db_connection()
+        with connection:  # Automatically handles commit/rollback context
+            with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+                cursor.execute(query, values)
+                
+                # If query includes RETURNING, fetch and return that value
+                returned_data = None
+                if cursor.description:
+                    returned_data = cursor.fetchone()
+                    
+        return jsonify({
+            "purpose": purpose,
+            "message": "Row updated successfully!",
+            "data": returned_data
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if connection:
+            connection.close()
 
 def delete_row(purpose, query, params):
     """Executes dynamic DELETE queries safely with automatic rollback and row-count check."""
@@ -404,17 +441,17 @@ def add_dummy_data():
         RESTART IDENTITY CASCADE;
 
         -- 2. Insert Patients
-        INSERT INTO patients (patient_code, last_name, first_name, middle_name, gender, birthdate, age, referred_from, location, phone, email, occupation, language_spoken) VALUES
-        ('PAT-001', 'Santos', 'Maria', 'Clara', 'Female', '1988-04-12', 38, 'Dr. Cruz - General Health', 'Quezon City', '09171234567', 'maria.santos@email.com', 'Software Engineer', 'Tagalog, English'),
-        ('PAT-002', 'Reyes', 'Juan', 'Dela Cruz', 'Male', '1975-11-23', 50, 'Walk-in', 'Makati City', '09189876543', 'juan.reyes@email.com', 'Accountant', 'Tagalog, English'),
-        ('PAT-003', 'Tan', 'Grace', 'Lim', 'Female', '1995-02-08', 31, 'Dr. Sy - Ophthalmology', 'Manila', '09223334444', 'gtan95@email.com', 'Graphic Designer', 'English, Hokkien'),
-        ('PAT-004', 'Dizon', 'Mark', 'Bautista', 'Male', '2001-09-15', 24, 'Walk-in', 'Pasig City', '09156667777', 'mark.dizon@email.com', 'Student', 'Tagalog'),
-        ('PAT-005', 'Mendoza', 'Elena', 'Ramos', 'Female', '1962-07-03', 64, 'Barangay Health Center', 'Caloocan', '09391112223', NULL, 'Retired Teacher', 'Tagalog'),
-        ('PAT-006', 'Garcia', 'Carlos', 'Torres', 'Male', '1990-12-30', 35, 'Dr. Cruz - General Health', 'Mandaluyong', '09175558888', 'carlos.garcia@email.com', 'Civil Engineer', 'Tagalog, English'),
-        ('PAT-007', 'Aquino', 'Sophia', 'Hernandez', 'Female', '2010-05-18', 16, 'School Nurse', 'Taguig City', NULL, NULL, 'Student', 'English, Tagalog'),
-        ('PAT-008', 'Villanueva', 'Roberto', 'Navarro', 'Male', '1958-01-20', 68, 'Dr. Sy - Ophthalmology', 'Paranaque', '09204445555', 'rvillanueva@email.com', 'Consultant', 'Tagalog, English'),
-        ('PAT-009', 'Cruz', 'Ana', 'Gonzales', 'Female', '2003-10-05', 22, 'Walk-in', 'San Juan', '09178889999', 'ana.cruz@email.com', 'Student', 'Tagalog, English'),
-        ('PAT-010', 'Bautista', 'Jose', 'Mercado', 'Male', '1982-03-14', 44, 'Walk-in', 'Valenzuela', '09087776666', 'jbautista@email.com', 'Driver', 'Tagalog');
+        INSERT INTO patients (patient_code, last_name, first_name, middle_name, gender, birthdate, age, referred_from, location, phone, email, date, occupation, language_spoken) VALUES
+        ('25-00001', 'Santos', 'Maria', 'Clara', 'Female', '1988-04-12', 38, 'Dr. Cruz - General Health', 'Quezon City', '09171234567', 'maria.santos@email.com', '2026-01-10', 'Software Engineer', 'Tagalog, English'),
+        ('25-00002', 'Reyes', 'Juan', 'Dela Cruz', 'Male', '1975-11-23', 50, 'Walk-in', 'Makati City', '09189876543', 'juan.reyes@email.com', '2026-01-12', 'Accountant', 'Tagalog, English'),
+        ('25-00003', 'Tan', 'Grace', 'Lim', 'Female', '1995-02-08', 31, 'Dr. Sy - Ophthalmology', 'Manila', '09223334444', 'gtan95@email.com', '2026-01-15', 'Graphic Designer', 'English, Hokkien'),
+        ('26-00004', 'Dizon', 'Mark', 'Bautista', 'Male', '2001-09-15', 24, 'Walk-in', 'Pasig City', '09156667777', 'mark.dizon@email.com', '2026-01-18', 'Student', 'Tagalog'),
+        ('26-00005', 'Mendoza', 'Elena', 'Ramos', 'Female', '1962-07-03', 64, 'Barangay Health Center', 'Caloocan', '09391112223', NULL, '2026-01-20', 'Retired Teacher', 'Tagalog'),
+        ('26-00006', 'Garcia', 'Carlos', 'Torres', 'Male', '1990-12-30', 35, 'Dr. Cruz - General Health', 'Mandaluyong', '09175558888', 'carlos.garcia@email.com', '2026-02-01', 'Civil Engineer', 'Tagalog, English'),
+        ('26-00007', 'Aquino', 'Sophia', 'Hernandez', 'Female', '2010-05-18', 16, 'School Nurse', 'Taguig City', NULL, NULL, '2026-02-03', 'Student', 'English, Tagalog'),
+        ('26-00008', 'Villanueva', 'Roberto', 'Navarro', 'Male', '1958-01-20', 68, 'Dr. Sy - Ophthalmology', 'Paranaque', '09204445555', 'rvillanueva@email.com', '2026-02-05', 'Consultant', 'Tagalog, English'),
+        ('26-00009', 'Cruz', 'Ana', 'Gonzales', 'Female', '2003-10-05', 22, 'Walk-in', 'San Juan', '09178889999', 'ana.cruz@email.com', '2026-02-10', 'Student', 'Tagalog, English'),
+        ('26-00010', 'Bautista', 'Jose', 'Mercado', 'Male', '1982-03-14', 44, 'Walk-in', 'Valenzuela', '09087776666', 'jbautista@email.com', '2026-02-14', 'Driver', 'Tagalog');
 
         -- 3. Insert Medical History
         INSERT INTO patient_medical_history (patient_id, drug_allergy_present, drug_allergy_info, pregnancy_status, pregnancy_info, family_history, family_history_info, past_history, past_history_info, medications, medications_info) VALUES
@@ -430,17 +467,40 @@ def add_dummy_data():
         (10, FALSE, NULL, NULL, NULL, NULL, NULL, ARRAY['Hypertension'], 'Uncontrolled', ARRAY['Amlodipine'], 'Non-compliant');
 
         -- 4. Insert Clinical Encounters
-        INSERT INTO clinical_encounters (patient_id, exam_date, master_eye, rifle_eye, flucaine_test, schirmers_test, additional_details) VALUES
-        (1, '2026-01-10', 'OD', 'OD', 'Negative', '15mm OU', 'Routine vision check for new computer glasses'),
-        (2, '2026-01-12', 'OS', 'OS', 'Negative', '12mm OD, 10mm OS', 'Post-LASIK checkup and mild glare complaint'),
-        (3, '2026-01-15', 'OD', 'OD', 'Positive OD (Mild staining)', '5mm OD, 4mm OS', 'Complaining of dry, gritty eyes after prolonged computer use'),
-        (4, '2026-01-18', 'OD', 'OD', 'Negative', '18mm OU', 'Student complaining of blurry distance vision'),
-        (5, '2026-01-20', 'OS', 'OS', 'Negative', '8mm OU', 'Decreased visual acuity OD over past 6 months'),
-        (6, '2026-02-01', 'OD', 'OD', 'Negative', '14mm OU', 'Follow-up on old blunt trauma OD, no active pain'),
-        (7, '2026-02-03', 'OD', 'OD', 'Negative', '20mm OU', 'Failed school vision screening'),
-        (8, '2026-02-05', 'OS', 'OD', 'Negative', '10mm OU', 'Routine POAG suspect check, pressure monitoring'),
-        (9, '2026-02-10', 'OD', 'OD', 'Positive OS (TBUT reduced)', '7mm OS', 'Pregnancy eye consult, soft lens discomfort'),
-        (10, '2026-02-14', 'OD', 'OD', 'Negative', NULL, 'General checkup, headache associated with reading');
+        INSERT INTO clinical_encounters (patient_id, master_eye, rifle_eye, flucaine_test, schirmers_test, additional_details, pd, manifest_ou, manifest_ou_details) VALUES
+        (1, 'OD', 'OD', 'Negative', '15mm OU', 'Routine vision check for new computer glasses', 62, '20/30', 'J+1.00'),
+        (2, 'OS', 'OS', 'Negative', '12mm OD, 10mm OS', 'Post-LASIK checkup and mild glare complaint', 62, '20/20', 'dfgd'),
+        (3, 'OD', 'OD', 'Positive OD (Mild staining)', '5mm OD, 4mm OS', 'Complaining of dry, gritty eyes after prolonged computer use', 62, '20/20', NULL),
+        (4, 'OD', 'OD', 'Negative', '18mm OU', 'Student complaining of blurry distance vision', 62, '20/200', 'dfgdg'),
+        (5, 'OS', 'OS', 'Negative', '8mm OU', 'Decreased visual acuity OD over past 6 months', 62, '20/150', NULL),
+        (6, 'OD', 'OD', 'Negative', '14mm OU', 'Follow-up on old blunt trauma OD, no active pain', 62, '20/20', 'SFSDF'),
+        (7, 'OD', 'OD', 'Negative', '20mm OU', 'Failed school vision screening', 62, '20/20', NULL),
+        (8, 'OS', 'OD', 'Negative', '10mm OU', 'Routine POAG suspect check, pressure monitoring', 62, '20/20', 'SDFSDF'),
+        (9, 'OD', 'OD', 'Positive OS (TBUT reduced)', '7mm OS', 'Pregnancy eye consult, soft lens discomfort', 62, '20/20', NULL),
+        (10, 'OD', 'OD', 'Negative', NULL, 'General checkup, headache associated with reading', 62, '20/20', NULL);
+
+
+        -- 5. Insert Patient Diagnoses
+        INSERT INTO patient_diagnoses (encounter_id, diagnosis) VALUES
+        (1, 'Mild Myopia'),
+        (1, 'Astigmatism'),
+        (2, 'Post-LASIK Status'),
+        (2, 'Mild Glare'),
+        (2, 'Dry Eye Syndrome'),
+        (3, 'Dry Eye Syndrome'),
+        (4, 'High Myopia'),
+        (5, 'Cataract'),
+        (5, 'Hypertension'),
+        (6, 'Old Blunt Trauma OD'),
+        (7, 'School Vision Screening Failure'),
+        (7, 'Mild Myopia'),
+        (7, 'Astigmatism'),
+        (7, 'Hyperopia'),
+        (8, 'POAG Suspect'),
+        (9, 'Pregnancy-related Visual Discomfort'),
+        (10, 'Tension Headache with Visual Strain'),
+        (10, 'Mild Hyperopia');    
+        
 
         -- 5. Insert Eye Examinations
         INSERT INTO eye_examinations (

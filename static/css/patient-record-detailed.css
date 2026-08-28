@@ -364,6 +364,10 @@ body {
     line-height: 1.5;
 }
 
+.additional-details {
+    padding-left: 1rem;
+}
+
 /* =========================================================
    RESPONSIVE & PRINT MEDIA STYLES
 ========================================================= */

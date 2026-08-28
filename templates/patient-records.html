@@ -6,6 +6,7 @@ RefraScan - LASIK Patient Records
 
 {% block additional_css %}
 <link rel="stylesheet" href="/static/css/patient-records.css" />
+<script src="{{ url_for('static', filename='js/patient-records.js') }}"></script>
 {% endblock %}
 
 {% block main %}
@@ -15,10 +16,10 @@ RefraScan - LASIK Patient Records
 			<div class="patient-records-header-heading">
 				<h1 class="patient-records-header-title">Patient Records</h1>
 				
-				<button class="btn1">
-					<input type="text" class="btn-label remove-highlight" placeholder="Search ID or Name" />
-					<img src="static/assets/search-icon.png" class="btn-icon1" />
-				</button>
+				<div class="btn1">
+					<input type="text" id="search-input" class="btn-label remove-highlight" placeholder="Search ID, Name, or Referral" />
+					<img src="{{ url_for('static', filename='assets/search-icon.png') }}" class="btn-icon1" alt="Search" />
+				</div>
 			</div>
 			
 			<form class="patient-records-header-container" action="/add-patient" method="get">
@@ -41,7 +42,7 @@ RefraScan - LASIK Patient Records
 			<div class="history-table-container">
 				<div class="root-table-header">
 					<p class="root-text">Patient ID</p>
-					<p class="root-text">Date & Time</p>
+					<p class="root-text">Date</p>
 					<p class="root-text">Full Name</p>
 					<p class="root-text">Age</p>
 					<p class="root-text">Referred From</p>
@@ -49,46 +50,50 @@ RefraScan - LASIK Patient Records
 				</div>
 
 				<div class="root-table-body">
-					<div class="table-row">
-						<p class="table-row-text">000003</p>
-						<p class="table-row-text">2026-06-04 17:11:45</p>
-						<p class="table-row-text">Aquino, Katrine Ingrid O.</p>								
-						<p class="table-row-text">23</p>
-						<p class="table-row-text">Carlomagno D. Torres, MD</p>
-						<form class="table-row-buttons">
-							<button formaction="/patient-record-detailed" formmethod="get"><img src="static/assets/row-view.png" alt="View"></button>
-							<button formaction="/add-patient" formmethod="get"><img src="static/assets/row-edit.png" alt="Edit"></button>
-							<button type="button" data-popup="delete-confirmation-popup"><img src="static/assets/row-delete.png" alt="Delete"></button>
-						</form>
-					</div>
-					
-					<div class="table-row">
-						<p class="table-row-text">000002</p>
-						<p class="table-row-text">2026-06-04 17:11:45</p>
-						<p class="table-row-text">Gueco, Yerika Elaine S.</p>
-						<p class="table-row-text">20</p>
-						<p class="table-row-text">Armand P. Contreras, MD</p>
-						<form class="table-row-buttons">
-							<button formaction="/patient-record-detailed" formmethod="get"><img src="static/assets/row-view.png" alt="View"></button>
-							<button formaction="/add-patient" formmethod="get"><img src="static/assets/row-edit.png" alt="Edit"></button>
-							<button type="button" data-popup="delete-confirmation-popup"><img src="static/assets/row-delete.png" alt="Delete"></button>
-						</form>
-					</div>
-					
-					<div class="table-row">
-						<p class="table-row-text">000001</p>
-						<p class="table-row-text">2026-06-04 17:11:45</p>
-						<p class="table-row-text">Villanueva, Anne Beatriz M.</p>
-						<p class="table-row-text">21</p>
-						<p class="table-row-text">Maria Rae Celia M. Angeles, MD</p>
-						<form class="table-row-buttons">
-							<button formaction="/patient-record-detailed" formmethod="get"><img src="static/assets/row-view.png" alt="View"></button>
-							<button formaction="/add-patient" formmethod="get"><img src="static/assets/row-edit.png" alt="Edit"></button>
-							<button type="button" data-popup="delete-confirmation-popup"><img src="static/assets/row-delete.png" alt="Delete"></button>
-						</form>
+					{% if records %}
+						{% for record in records %}
+							<div class="table-row">
+								<p class="table-row-text">{{ record.patient_code }}</p>
+								<p class="table-row-text">{{ record.date }}</p>
+								<p class="table-row-text">{{ record.name }}</p>								
+								<p class="table-row-text">{{ record.age }}</p>
+								<p class="table-row-text">{{ record.referred_from }}</p>
+								
+								<form class="table-row-buttons" action="/add-patient" method="POST">
+									<a href="/patient-record-detailed?id={{ record.id }}" class="btn-view">
+										<img src="{{ url_for('static', filename='assets/row-view.png') }}" alt="View" />
+									</a>
+									<input type="hidden" name="id" value="{{ record.id }}">
+									<button type="submit" class="btn-edit" style="border:none; background:transparent; cursor:pointer; padding:0;">
+										<img src="{{ url_for('static', filename='assets/row-edit.png') }}" alt="Edit" />
+									</button>
+									<button type="button" 
+											class="btn-delete"
+											data-popup="delete-confirmation-popup"
+											data-item-type="Patient Record"
+											data-item-name="{{ record.name }} ({{ record.patient_code }})"
+											data-item-id="{{ record.id }}"
+											data-delete-url="/api/delete-patient/{{ record.id }}">
+										<img src="{{ url_for('static', filename='assets/row-delete.png') }}" alt="Delete" />
+									</button>
+								</form>
+							</div>
+						{% endfor %}
+					{% endif %}
+
+					<!-- Toggleable empty row placeholder -->
+					<div class="table-row empty-row" style="{% if records %}display: none;{% endif %}">
+						<p class="table-row-text" style="grid-column: span 6; text-align: center;">No patient records found.</p>
 					</div>
 				</div>
 			</div>
+		</div>
+
+		<!-- Pagination Controls -->
+		<div class="pagination-controls" style="display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-top: 2rem;">
+			<button type="button" id="prev-page" class="btn-secondary">&laquo; Previous</button>
+			<span id="page-info">Page 1 of 1</span>
+			<button type="button" id="next-page" class="btn-secondary">Next &raquo;</button>
 		</div>
 	</div>
 </div>
