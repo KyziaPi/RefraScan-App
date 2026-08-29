@@ -383,7 +383,8 @@ def delete_table():
         "patient_medical_history",
         "inference_history",
         "clinical_encounters",
-        "patients"
+        "patients",
+        "patient_diagnoses"
     ]
     
     try:

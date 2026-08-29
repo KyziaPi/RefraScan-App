@@ -332,6 +332,69 @@ RefraScan - Patient Record Details
         </div>
     </div>
 
+<!-- Inference Results -->
+    {% if patient.inferences and patient.inferences|length > 0 %}
+    <div class="patient-record-details__sheet patient-record-details__sheet--inference">
+        <div class="patient-record-details__sheet-title">INFERENCE RESULTS</div>
+
+        <div class="patient-record-details__inference-grid">
+            
+            <!-- Right Eye (OD) Column -->
+            <div class="patient-record-details__inference-column">
+                <h4 class="patient-record-details__eye-title">RIGHT EYE (OD)</h4>
+                <div class="patient-record-details__inference-list">
+                    {% set ns_od = namespace(count=0) %}
+                    {% for inf in patient.inferences %}
+                        {% if inf.eye_side in ['Right', 'OD'] %}
+                            {% set ns_od.count = ns_od.count + 1 %}
+                            <div class="patient-record-details__inference-card">
+                                <div class="patient-record-details__inference-id">
+                                    <span class="patient-record-details__info-label">Inference ID:</span>
+                                    <span class="patient-record-details__info-value">{{ inf.inference_id }}</span>
+                                </div>
+                                <a href="/inference-results/{{ inf.inference_id }}" class="btn-primary btn-view-inference">
+                                    View Result
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if ns_od.count == 0 %}
+                        <p class="patient-record-details__no-data">No Right Eye inferences recorded.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Left Eye (OS) Column -->
+            <div class="patient-record-details__inference-column">
+                <h4 class="patient-record-details__eye-title">LEFT EYE (OS)</h4>
+                <div class="patient-record-details__inference-list">
+                    {% set ns_os = namespace(count=0) %}
+                    {% for inf in patient.inferences %}
+                        {% if inf.eye_side in ['Left', 'OS'] %}
+                            {% set ns_os.count = ns_os.count + 1 %}
+                            <div class="patient-record-details__inference-card">
+                                <div class="patient-record-details__inference-id">
+                                    <span class="patient-record-details__info-label">Inference ID:</span>
+                                    <span class="patient-record-details__info-value">{{ inf.inference_id }}</span>
+                                </div>
+                                <a href="/inference-results/{{ inf.inference_id }}" class="btn-primary btn-view-inference">
+                                    View Result
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if ns_os.count == 0 %}
+                        <p class="patient-record-details__no-data">No Left Eye inferences recorded.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+    {% endif %}
+
 </div>
 
 {% include 'popup.html' %}

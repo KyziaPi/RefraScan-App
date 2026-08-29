@@ -547,6 +547,7 @@ def fetch_patient_data_by_id(patient_id):
     # Defaults
     patient_data["follow_ups"] = []
     patient_data["diagnosis"] = []
+    patient_data["inferences"] = []  # Added default for AI Inferences
 
     # 2. Fetch Medical History
     mh_query = "SELECT * FROM patient_medical_history WHERE patient_id = %s;"
@@ -568,7 +569,7 @@ def fetch_patient_data_by_id(patient_id):
         
         # Map Encounter Column Name Mismatches
         patient_data['manifest_ou_num'] = fmt_val(encounter.get('manifest_ou'))
-        patient_data['manifest_ou_details'] = fmt_val(encounter.get('manifest_ou_details')) # Mapped correctly to schema
+        patient_data['manifest_ou_details'] = fmt_val(encounter.get('manifest_ou_details'))
         patient_data['pd'] = fmt_val(encounter.get('pd'))
         
         if encounter_id:
@@ -583,10 +584,8 @@ def fetch_patient_data_by_id(patient_id):
                     if not side: 
                         continue
                     
-                    # Basic attributes mapping here
                     for key in ['visual_acuity', 'pinhole', 'eye_movements', 'cover_testing', 'lids', 'conjunctiva', 'cornea', 'anterior_chamber', 'light_reflexes', 'eye_pressure', 'lens', 'nifbut', 'k1', 'k2', 'axis', 'white_to_white', 'scotopic_pupil', 'pachymetry', 'ms39_k1', 'ms39_k2', 'ms39_axis', 'ms39_pachy', 'ms39_class', 'ms39_epi']:
                         mapped_key = f"{side}_{key}" if not key.startswith('ms39') and not key in ['white_to_white', 'scotopic_pupil', 'pachymetry'] else f"ms39_{side}_{key.split('_', 1)[1]}" if key.startswith('ms39') else f"ww_{side}" if key == "white_to_white" else f"scotopic_{side}" if key == "scotopic_pupil" else f"pachy_{side}"
-                        # Simple fix for VA/PH to map cleanly based on your standard mappings
                         if key == 'visual_acuity': mapped_key = f"{side}_va"
                         if key == 'pinhole': mapped_key = f"{side}_ph"
                         if key == 'axis': mapped_key = f"{side}_ax"
@@ -636,13 +635,23 @@ def fetch_patient_data_by_id(patient_id):
             fu_response, fu_status = db.select_rows(fu_query, (encounter_id,), single=False)
             patient_data["follow_ups"] = parse_data(fu_response, fu_status, single=False) or []
 
-    # 8. Date Cleaning
-    for date_key in ['birthdate', 'date', 'created_at', 'updated_at', 'date']:
+    # 8. Fetch AI Inference History
+    inf_query = "SELECT * FROM inference_history WHERE patient_id = %s ORDER BY created_at DESC;"
+    inf_response, inf_status = db.select_rows(inf_query, (patient_id,), single=False)
+    patient_data["inferences"] = parse_data(inf_response, inf_status, single=False) or []
+
+    # 9. Date Cleaning
+    for date_key in ['birthdate', 'date', 'created_at', 'updated_at']:
         if date_key in patient_data and patient_data[date_key]:
             patient_data[date_key] = clean_date(patient_data[date_key])
+            
     for fu in patient_data.get("follow_ups", []):
         if 'follow_up_date' in fu and fu['follow_up_date']:
             fu['follow_up_date'] = clean_date(fu['follow_up_date'])
+
+    for inf in patient_data.get("inferences", []):
+        if 'screening_date' in inf and inf['screening_date']:
+            inf['screening_date'] = clean_date(inf['screening_date'])
 
     return patient_data
 
