@@ -60,9 +60,13 @@ RefraScan - LASIK Patient Records
 								<p class="table-row-text">{{ record.referred_from }}</p>
 								
 								<form class="table-row-buttons" action="/add-patient" method="POST">
-									<a href="/patient-record-detailed?id={{ record.id }}" class="btn-view">
+									<input type="hidden" name="patient_id" id="patient-id" value="{{ record.id if record.id else '' }}">
+									<button href="/patient-record-detailed" class="btn-view" 
+										formaction="/patient-record-detailed"
+										formethod="POST"
+										type="submit">
 										<img src="{{ url_for('static', filename='assets/row-view.png') }}" alt="View" />
-									</a>
+									</button>
 									<input type="hidden" name="id" value="{{ record.id }}">
 									<button type="submit" class="btn-edit" style="border:none; background:transparent; cursor:pointer; padding:0;">
 										<img src="{{ url_for('static', filename='assets/row-edit.png') }}" alt="Edit" />

@@ -11,7 +11,29 @@ RefraScan - Inference Results
 
 {% block main %}
 		<div class="inference-engine-results-results section1">
-			<h2 class="inference-engine-results-subtitle1">Pre-Screening Results</h2>
+			<div class="inference-engine-results-header">
+				<div>
+					<h2 class="inference-engine-results-subtitle1">Pre-Screening Results</h2>
+				</div>
+				<form id="recordActionForm">
+					<input type="hidden" name="patient_id" id="patient-id" value="{{ patient_id if patient_id else '' }}">
+
+					<input type="hidden" name="first_name" value="{{ first_name if first_name else '' }}">
+					<input type="hidden" name="last_name" value="{{ last_name if last_name else '' }}">
+					<input type="hidden" name="middle_name" value="{{ middle_name if middle_name else '' }}">
+					<input type="hidden" name="age" value="{{ age if age else '' }}">
+					<input type="hidden" name="phone" value="{{ phone if phone else '' }}">
+					<input type="hidden" name="email" value="{{ email if email else '' }}">
+
+					<button id="patientRecordBtn" 
+							class="patient-record-btn {% if patient_id %}view-patient-record-btn{% else %}add-patient-record-btn{% endif %}" 
+							type="submit"
+							formaction="{% if patient_id %}/patient-record-detailed{% else %}/add-patient{% endif %}" 
+							formmethod="POST"> 
+						{% if patient_id %}View Patient Record{% else %}Add Patient Record{% endif %}
+					</button>
+				</form>
+			</div>
 			
 			<div class="screening-result-table-container">
 				<!-- ID row -->

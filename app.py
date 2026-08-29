@@ -19,9 +19,9 @@ from utilities.preprocessing import load_and_preprocess_image
 from utilities.explainability import generate_and_save_gradcam
 
 # Create database 
-db.delete_table()
+#db.delete_table()
 db.create_database()
-db.add_dummy_data()
+#db.add_dummy_data()
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -315,7 +315,7 @@ def inference_results(inference_id):
     """Inference Results"""
     select_sql = """
         SELECT 
-            inference_id, patient_id, encounter_id, 
+            inference_id, patient_id, encounter_id, last_name, first_name, middle_name,
             last_name || ', ' || first_name || COALESCE(' ' || LEFT(NULLIF(middle_name, ''), 1) || '.', '') AS "FullName",
             phone, age, email, eye_side, 
             TO_CHAR(screening_date, 'MM-DD-YYYY') AS screening_date, prediction_label, myopia_probability, 
@@ -348,16 +348,20 @@ def inference_results(inference_id):
         page="inference_results",
         inference_id=record.get('inference_id'),
         name=record.get('FullName') or record.get('fullname') or "N/A",
+        first_name=record.get('first_name', ''),
+        last_name=record.get('last_name', ''),
+        middle_name=record.get('middle_name', ''),
         date=record.get('screening_date'),
-        phone=record.get('phone', 'N/A'),
-        email=record.get('email') or "N/A",
-        age=record.get('age'),
+        phone=record.get('phone', ''),
+        email=record.get('email', ''),
+        age=record.get('age', ''),
         eye_side=record.get('eye_side'),
         prediction=pred_label,
         confidence=f"{confidence:.2f}%",
         probabilities=class_probabilities,
         image_path=record.get('original_image_path'),
-        heatmap_path=record.get('heatmap_image_path')
+        heatmap_path=record.get('heatmap_image_path'),
+        patient_id=record.get('patient_id'),
     )
 
 
@@ -653,24 +657,41 @@ def api_get_patient(patient_id):
     return jsonify(patient_data), 200
 
 # ==========================================
-# REFACTORED: Add/Edit Route (Hides ID from URL)
+# Add/Edit/Prefill Route
 # ==========================================
 @app.route("/add-patient", methods=["GET", "POST"])
 def add_patient():
-    """Add Patient Record OR Load Edit View Silently"""
+    """Add Patient Record, Load Edit View, or Pre-fill Screening Data"""
     edit_id = ""
+    prefill = {}
+
     if request.method == "POST":
-        # Extracts ID sent silently via POST request from the Edit Button
-        edit_id = request.form.get("id", "")
-    
-    return render_template("add-patient.html", page="add_patient", edit_id=edit_id)
+        # Extract ID passed from Edit buttons
+        edit_id = request.form.get("id", "") or request.form.get("patient_id", "")
+
+        # Extract pre-fill demographic values passed from screening/inference results
+        prefill = {
+            "first_name": request.form.get("first_name", ""),
+            "last_name": request.form.get("last_name", ""),
+            "middle_name": request.form.get("middle_name", ""),
+            "age": request.form.get("age", ""),
+            "phone": request.form.get("phone", ""),
+            "email": request.form.get("email", "")
+        }
+
+    return render_template(
+        "add-patient.html", 
+        page="add_patient", 
+        edit_id=edit_id, 
+        prefill=prefill
+    )
 
 # ==========================================
-# REFACTORED: Detailed Record Route
+# Detailed Record Route
 # ==========================================
-@app.route("/patient-record-detailed")
+@app.route("/patient-record-detailed", methods=["POST"])
 def patient_record_detailed():
-    patient_id = request.args.get("id")
+    patient_id = request.form.get("id") or request.form.get("patient_id")
     if not patient_id:
         return redirect("/patient-records") 
         
