@@ -8,6 +8,7 @@
 	--color-success: #00a63e;
 	--color-success-strong: #00bc7d;
 	--color-warning: #f0b100;
+	--color-warning-strong: #ff6700;
 	--color-warning-soft: #fff085;
 	--color-warning-muted: #f0f4f7;
 	--color-info: #ad46ff;
@@ -305,6 +306,11 @@ textarea {
 
 .btn-danger {
 	background-color: var(--color-danger);
+	color: var(--color-surface);
+}
+
+.btn-warning {
+	background-color: var(--color-warninng-strong);
 	color: var(--color-surface);
 }
 

@@ -211,7 +211,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const handleRedirect = () => {
         if (newlyCreatedPatientId) {
-            window.location.href = `/patient-record-detailed?id=${newlyCreatedPatientId}`;
+            // Create a dynamic form element
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/patient-record-detailed';
+
+            // Add hidden input for the patient ID
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'id';
+            input.value = newlyCreatedPatientId;
+
+            // Append to DOM and submit
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
         }
     };
 

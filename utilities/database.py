@@ -221,9 +221,7 @@ def create_database():
             original_image_path TEXT,
             heatmap_image_path TEXT,
             
-            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-            CONSTRAINT unique_patient_eye_side UNIQUE (patient_id, eye_side)
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
 
         -- =========================================================

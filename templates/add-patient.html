@@ -64,30 +64,29 @@ RefraScan - LASIK Patient Records
 						<!-- Left side -->
 						<div class="record-sub-container">
 							<div class="form-field">
-								<label for="patient-code">Patient Code</label>
+								<label for="patient-code">Patient Code <span>(leave blank to increment from previous code)</span></label> 
 								<input
 									type="text"
 									id="patient-code"
 									name="patient_code"
 									pattern="[0-9-]+"
 									placeholder="Patient Code"
-									required
 								/>
 							</div>
 
 							<div class="form-field">
 								<label for="last-name">Last Name</label>
-								<input type="text" id="last-name" name="last_name" required>
+								<input type="text" id="last-name" name="last_name" value="{{ prefill.last_name if prefill else '' }}" required>
 							</div>
 
 							<div class="form-field">
 								<label for="first-name">First Name</label>
-								<input type="text" id="first-name" name="first_name" required>
+								<input type="text" id="first-name" name="first_name" value="{{ prefill.first_name if prefill else '' }}" required>
 							</div>
 
 							<div class="form-field">
 								<label for="middle-name">Middle Name <span>(optional)</span></label>
-								<input type="text" id="middle-name" name="middle_name">
+								<input type="text" id="middle-name" name="middle_name" value="{{ prefill.middle_name if prefill else '' }}">
 							</div>
 
 							<div class="form-field">
@@ -97,12 +96,12 @@ RefraScan - LASIK Patient Records
 
 							<div class="form-field">
 								<label for="phone">Phone</label>
-								<input type="tel" id="phone" name="phone" required>
+								<input type="tel" id="phone" name="phone" value="{{ prefill.phone if prefill else '' }}" required>
 							</div>
 
 							<div class="form-field">
 								<label for="email">Email <span>(optional)</span></label>
-								<input type="email" id="email" name="email">
+								<input type="email" id="email" name="email" value="{{ prefill.email if prefill else '' }}">
 							</div>
 						</div>
 
@@ -131,7 +130,7 @@ RefraScan - LASIK Patient Records
 							</div>
 
 							<div class="form-field">
-								<label for="date">Date</label>
+								<label for="date">Date <span>(leave blank to set to today)</span></label>
 								<input type="date" id="date" name="date" required>
 							</div>
 
@@ -147,7 +146,7 @@ RefraScan - LASIK Patient Records
 
 							<div class="form-field">
 								<label for="age">Age</label>
-								<input type="number" id="age" name="age" min="0" required>
+								<input type="number" id="age" name="age" min="0" value="{{ prefill.age if prefill else '' }}" required>
 							</div>
 
 							<div class="form-field">
