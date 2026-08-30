@@ -6,7 +6,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 # 2. (Optional) Turn off the oneDNN notice explicitly
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
-from flask import Flask, request, jsonify, render_template, abort, redirect, url_for, flash
+from flask import Flask, Response, request, jsonify, render_template, redirect, url_for, send_file
 import cv2
 import numpy as np
 from tensorflow import keras
@@ -14,9 +14,14 @@ import joblib
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from email.utils import parsedate_to_datetime
+import re
+import io
+import pandas as pd
+
 import utilities.database as db
 from utilities.preprocessing import load_and_preprocess_image
 from utilities.explainability import generate_and_save_gradcam
+
 
 # Create database 
 #db.delete_table()
@@ -1036,6 +1041,251 @@ def api_delete_follow_up(fu_id):
     if status == 200:
         return jsonify({"success": True, "message": "Follow-up deleted successfully."}), 200
     return jsonify({"error": "Failed to delete follow-up."}), 500
+
+# ==========================================
+# EXPORT EXCEL ROUTE (All Tables)
+# ==========================================
+@app.route("/export-excel", methods=["POST"])
+def export_excel():
+    """Generates and downloads an Excel file based on selected fields."""
+    selected_fields = request.form.getlist("export_fields[]")
+    if not selected_fields:
+        return redirect("/patient-records")
+    
+    # 1. Fetch all patient IDs
+    res, status = db.select_rows("SELECT id FROM patients ORDER BY id DESC;", ())
+    raw_data = res.get_json() if hasattr(res, 'get_json') else res
+    p_ids = [row['id'] for row in (raw_data.get('data', []) if isinstance(raw_data, dict) else raw_data)]
+    
+    # 2. Gather Data
+    export_data = []
+    for pid in p_ids:
+        p_data = fetch_patient_data_by_id(pid)
+        if not p_data: continue
+        
+        row_dict = {}
+        for field in selected_fields:
+            val = p_data.get(field, "")
+            
+            # Formatter for Follow Ups (List of Dictionaries)
+            if field == 'follow_ups' and isinstance(val, list):
+                fu_strings = []
+                for fu in val:
+                    fu_date = fu.get('follow_up_date', 'No Date')
+                    fu_detail = fu.get('details', 'No Details')
+                    fu_strings.append(f"[{fu_date}] {fu_detail}")
+                
+                # Joins multiple follow ups with a clean divider
+                row_dict[field] = "  |  ".join(fu_strings)
+            
+            # Formatter for other lists (like Diagnosis)
+            elif isinstance(val, list):
+                row_dict[field] = ", ".join(str(v) for v in val)
+                
+            else:
+                row_dict[field] = val
+            
+        export_data.append(row_dict)
+        
+    # 3. Create Excel File
+    df = pd.DataFrame(export_data)
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Patient_Records')
+    output.seek(0)
+    
+    return send_file(
+        output,
+        download_name="RefraScan_Patient_Export.xlsx",
+        as_attachment=True,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+
+# ==========================================
+# IMPORT EXCEL ROUTES (All Tables)
+# ==========================================
+@app.route("/api/download-template", methods=["GET"])
+def download_import_template():
+    """Provides a blank Excel template with all supported columns."""
+    # This covers Demographics, History, Encounter, Eye Exams, Refractions, and Diagnoses
+    fields = [
+        'patient_code', 'last_name', 'first_name', 'middle_name', 'gender', 'birthdate', 'age', 'phone', 'email', 'location', 'occupation', 'language_spoken', 'referred_from', 'date',
+        'drug_allergy_present', 'drug_allergy_info', 'pregnancy_status', 'pregnancy_info', 'family_history', 'family_history_info', 'past_history', 'past_history_info', 'medications', 'medications_info',
+        'pd', 'manifest_ou', 'manifest_ou_details', 'master_eye', 'rifle_eye', 'flucaine_test', 'schirmers_test',
+        'od_va', 'os_va', 'od_ph', 'os_ph', 'od_eye_movements', 'os_eye_movements', 'od_cover_testing', 'os_cover_testing', 'od_lids', 'os_lids', 'od_conjunctiva', 'os_conjunctiva', 'od_cornea', 'os_cornea', 'od_anterior_chamber', 'os_anterior_chamber', 'od_light_reflexes', 'os_light_reflexes', 'od_eye_pressure', 'os_eye_pressure', 'od_lens', 'os_lens', 'od_nifbut', 'os_nifbut',
+        'od_k1', 'od_k2', 'od_ax', 'os_k1', 'os_k2', 'os_ax', 'ww_od', 'ww_os', 'scotopic_od', 'scotopic_os', 'pachy_od', 'pachy_os',
+        'ms39_od_k1', 'ms39_od_k2', 'ms39_od_axis', 'ms39_od_pachy', 'ms39_od_class', 'ms39_od_epi', 'ms39_os_k1', 'ms39_os_k2', 'ms39_os_axis', 'ms39_os_pachy', 'ms39_os_class', 'ms39_os_epi',
+        'ar_od_ds', 'ar_od_cyl', 'ar_od_axis', 'ar_os_ds', 'ar_os_cyl', 'ar_os_axis',
+        'old_od_ds', 'old_od_cyl', 'old_od_axis', 'old_od_j', 'old_os_ds', 'old_os_cyl', 'old_os_axis', 'old_os_j',
+        'manifest_by', 'manifest_od_ds', 'manifest_od_cyl', 'manifest_od_axis', 'manifest_od_j', 'manifest_os_ds', 'manifest_os_cyl', 'manifest_os_axis', 'manifest_os_j', 'manifest_add_od_ds', 'manifest_add_od_n', 'manifest_add_os_ds', 'manifest_add_os_n',
+        'cyclo_by', 'cyclo_od_ds', 'cyclo_od_cyl', 'cyclo_od_axis', 'cyclo_od_vision', 'cyclo_od_j', 'cyclo_os_ds', 'cyclo_os_cyl', 'cyclo_os_axis', 'cyclo_os_vision', 'cyclo_os_j', 'cyclo_add_od_ds', 'cyclo_add_od_n', 'cyclo_add_os_ds', 'cyclo_add_os_n',
+        'diagnosis', 'follow_ups'
+    ]
+    
+    df = pd.DataFrame(columns=fields)
+    # Add a sample row to guide users
+    df.loc[0] = ['26-00001', 'Doe', 'John', 'Smith', 'Male', '1990-01-01', 36, '09123456789', 'john@email.com', 'Manila', 'Engineer', 'English', 'Walk-in', '2026-01-01'] + ([''] * (len(fields) - 14))
+    df.at[0, 'diagnosis'] = "Myopia, Dry Eye"
+    df.at[0, 'follow_ups'] = "[2026-02-14] Patient responded well to medication  |  [2026-03-01] Second checkup cleared"
+    df.at[0, 'drug_allergy_present'] = "No"
+
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Template')
+    output.seek(0)
+    
+    return send_file(
+        output,
+        download_name="RefraScan_Import_Template.xlsx",
+        as_attachment=True,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+@app.route("/api/import-excel", methods=["POST"])
+def import_excel():
+    """Parses uploaded Excel and inserts into all 7 tables."""
+    file = request.files.get('excel_file')
+    if not file or not file.filename.endswith('.xlsx'):
+        return render_template('index.html', error='Invalid file format. Please upload an .xlsx file.')
+
+    try:
+        # Parse Excel and convert NaNs to empty strings
+        df = pd.read_excel(file)
+        df = df.fillna("")
+        records = df.to_dict(orient="records")
+        
+        for row in records:
+            last_name = str(row.get('last_name', '')).strip()
+            first_name = str(row.get('first_name', '')).strip()
+            if not last_name or not first_name:
+                continue # Skip blank rows
+                
+            patient_code = str(row.get('patient_code', '')).strip()
+            
+            # 1. Generate patient code if missing
+            if not patient_code:
+                max_res, max_status = db.select_rows("SELECT patient_code FROM patients ORDER BY id DESC LIMIT 1;", single=True)
+                try:
+                    last_code = max_res.get_json()['data']['patient_code']
+                    next_num = int(last_code.split("-")[1]) + 1
+                except:
+                    next_num = 1
+                patient_code = f"{datetime.now().strftime('%y')}-{next_num:05d}"
+            
+            # 2. PATIENTS TABLE
+            patient_query = """
+                INSERT INTO patients (
+                    patient_code, last_name, first_name, middle_name, gender, birthdate, 
+                    age, phone, email, location, occupation, language_spoken, referred_from, date
+                ) VALUES (%s, %s, %s, %s, %s, NULLIF(%s, ''), %s, %s, %s, %s, %s, %s, %s, COALESCE(NULLIF(%s, '')::DATE, CURRENT_DATE))
+                ON CONFLICT (patient_code) DO UPDATE SET 
+                    phone = EXCLUDED.phone, age = EXCLUDED.age, location = EXCLUDED.location
+                RETURNING id;
+            """
+            p_vals = (
+                patient_code, last_name, first_name, row.get('middle_name'), row.get('gender', 'Other'), 
+                row.get('birthdate'), to_num(row.get('age')), row.get('phone'), row.get('email'), 
+                row.get('location'), row.get('occupation'), row.get('language_spoken'), row.get('referred_from'), row.get('date')
+            )
+            p_res, p_stat = db.add_row("Import Patient", patient_query, p_vals)
+            
+            # Get Patient ID to link the rest of the tables
+            if p_stat in [200, 201]:
+                p_json = p_res.get_json() if hasattr(p_res, 'get_json') else p_res
+                patient_id = p_json.get('data', {}).get('id') if 'data' in p_json else p_json.get('id')
+            else:
+                continue
+
+            # 3. MEDICAL HISTORY TABLE
+            mh_query = """
+                INSERT INTO patient_medical_history (
+                    patient_id, drug_allergy_present, drug_allergy_info, pregnancy_status, pregnancy_info,
+                    family_history, family_history_info, past_history, past_history_info, medications, medications_info
+                ) VALUES (%s, %s, %s, string_to_array(%s, ','), %s, string_to_array(%s, ','), %s, string_to_array(%s, ','), %s, string_to_array(%s, ','), %s)
+                ON CONFLICT DO NOTHING;
+            """
+            db.add_row("Import Medical History", mh_query, (
+                patient_id, str(row.get('drug_allergy_present', '')).lower() == 'yes', row.get('drug_allergy_info'),
+                row.get('pregnancy_status'), row.get('pregnancy_info'), row.get('family_history'), row.get('family_history_info'),
+                row.get('past_history'), row.get('past_history_info'), row.get('medications'), row.get('medications_info')
+            ))
+
+            # 4. CLINICAL ENCOUNTERS TABLE
+            ce_query = """
+                INSERT INTO clinical_encounters (
+                    patient_id, pd, manifest_ou, manifest_ou_details, master_eye, rifle_eye, flucaine_test, schirmers_test
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;
+            """
+            ce_res, ce_stat = db.add_row("Import Encounter", ce_query, (
+                patient_id, to_num(row.get('pd')), row.get('manifest_ou'), row.get('manifest_ou_details'),
+                row.get('master_eye'), row.get('rifle_eye'), row.get('flucaine_test'), row.get('schirmers_test')
+            ))
+            
+            if ce_stat in [200, 201]:
+                ce_json = ce_res.get_json() if hasattr(ce_res, 'get_json') else ce_res
+                encounter_id = ce_json.get('data', {}).get('id') if 'data' in ce_json else ce_json.get('id')
+            else:
+                continue
+
+            # 5. EYE EXAMINATIONS (OD & OS)
+            ee_query = """
+                INSERT INTO eye_examinations (
+                    encounter_id, eye_side, visual_acuity, pinhole, eye_movements, cover_testing, lids, conjunctiva, cornea, anterior_chamber, light_reflexes, eye_pressure, lens, nifbut,
+                    k1, k2, axis, white_to_white, scotopic_pupil, pachymetry, ms39_k1, ms39_k2, ms39_axis, ms39_pachy, ms39_class, ms39_epi
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+            """
+            for side in ['od', 'os']:
+                db.add_row("Import Eye Exam", ee_query, (
+                    encounter_id, side.upper(), row.get(f'{side}_va'), row.get(f'{side}_ph'), row.get(f'{side}_eye_movements'), row.get(f'{side}_cover_testing'),
+                    row.get(f'{side}_lids'), row.get(f'{side}_conjunctiva'), row.get(f'{side}_cornea'), row.get(f'{side}_anterior_chamber'), row.get(f'{side}_light_reflexes'),
+                    row.get(f'{side}_eye_pressure'), row.get(f'{side}_lens'), row.get(f'{side}_nifbut'),
+                    to_num(row.get(f'{side}_k1')), to_num(row.get(f'{side}_k2')), to_num(row.get(f'{side}_ax')), to_num(row.get(f'ww_{side}')), to_num(row.get(f'scotopic_{side}')), to_num(row.get(f'pachy_{side}')),
+                    to_num(row.get(f'ms39_{side}_k1')), to_num(row.get(f'ms39_{side}_k2')), to_num(row.get(f'ms39_{side}_axis')), to_num(row.get(f'ms39_{side}_pachy')), row.get(f'ms39_{side}_class'), row.get(f'ms39_{side}_epi')
+                ))
+
+            # 6. REFRACTIONS
+            ref_query = """
+                INSERT INTO refractions (encounter_id, refraction_type, eye_side, sphere, cylinder, axis, add_sphere, near_va, distance_va, performed_by)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+            """
+            ref_types = [('Autorefraction', 'ar'), ('Old_Prescription', 'old'), ('Manifest', 'manifest'), ('Cycloplegic', 'cyclo')]
+            for ref_name, prefix in ref_types:
+                performed_by = row.get(f'{prefix}_by', '') if prefix in ['manifest', 'cyclo'] else ''
+                for side in ['od', 'os']:
+                    db.add_row("Import Refraction", ref_query, (
+                        encounter_id, ref_name, side.upper(), to_num(row.get(f'{prefix}_{side}_ds')), to_num(row.get(f'{prefix}_{side}_cyl')), to_num(row.get(f'{prefix}_{side}_axis')),
+                        to_num(row.get(f'{prefix}_add_{side}_ds')), row.get(f'{prefix}_add_{side}_n') or row.get(f'{prefix}_{side}_j', ''), row.get(f'{prefix}_{side}_vision', ''), performed_by
+                    ))
+
+            # 7. DIAGNOSES
+            diags = str(row.get('diagnosis', '')).split(',')
+            for diag in diags:
+                if diag.strip():
+                    db.add_row("Import Diagnosis", "INSERT INTO patient_diagnoses (encounter_id, diagnosis) VALUES (%s, %s);", (encounter_id, diag.strip()))
+
+            # 8. FOLLOW UPS (Parsing from formatted string)
+            fu_str = str(row.get('follow_ups', '')).strip()
+            if fu_str:
+                fu_list = fu_str.split('  |  ')
+                for i, fu_item in enumerate(fu_list):
+                    # Uses regex to split "[2026-02-14] My Details" into Date and Details
+                    match = re.match(r'\[(.*?)\]\s*(.*)', fu_item.strip())
+                    if match:
+                        fu_date, fu_detail = match.groups()
+                        fu_date = fu_date if fu_date and fu_date != 'No Date' else None
+                    else:
+                        fu_date, fu_detail = None, fu_item.strip()
+                    
+                    if fu_detail:
+                        db.add_row("Import Follow Up", 
+                                   "INSERT INTO patient_follow_ups (encounter_id, follow_up_number, follow_up_date, details) VALUES (%s, %s, COALESCE(NULLIF(%s, '')::DATE, CURRENT_DATE), %s);", 
+                                   (encounter_id, i+1, fu_date, fu_detail))
+
+        return redirect("/patient-records")
+        
+    except Exception as e:
+        return f"An error occurred during import: {str(e)}"
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)

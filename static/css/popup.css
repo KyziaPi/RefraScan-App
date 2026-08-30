@@ -277,6 +277,30 @@
     border: 1px solid var(--color-border, #ccc);
 }
 
+.popup-import-csv p {
+    margin-bottom: 1rem;
+}
+
+.popup-import-csv a {
+    color: var(--color-brand, #007bff); 
+    text-decoration: underline; 
+    font-weight: bold;
+}
+
+.popup-import-csv input[type="file"] {
+    width: 100%; 
+    padding: 0.8rem; 
+    border: 1px dashed var(--color-border, #ccc); 
+    border-radius: 6px; 
+    cursor: pointer;
+}
+
+.popup-import-csv label {
+    font-weight: 500; 
+    margin-bottom: 0.5rem; 
+    display: block;
+}
+
 /* Mobile */
 
 @media screen and (max-width: 576px) {

@@ -167,7 +167,7 @@
                 <button type="button" class="popup-close">&times;</button>
             </div>
 
-            <form action="/export-csv" method="post" class="popup-form">
+            <form action="/export-excel" method="post" class="popup-form">
                 
                 <div class="popup-content popup-scrollable">
                     <p class="export-subtitle">Select fields to include in the exported CSV file:</p>
@@ -185,7 +185,7 @@
                                 <label><input type="checkbox" class="section-toggle" checked> <strong>Patient Details</strong></label>
                             </div>
                             <div class="export-checkbox-grid">
-                                <label><input type="checkbox" name="export_fields[]" value="patient_id" checked> Patient ID</label>
+                                <label><input type="checkbox" name="export_fields[]" value="patient_code" checked> Patient ID</label>
                                 <label><input type="checkbox" name="export_fields[]" value="last_name" checked> Last Name</label>
                                 <label><input type="checkbox" name="export_fields[]" value="first_name" checked> First Name</label>
                                 <label><input type="checkbox" name="export_fields[]" value="middle_name" checked> Middle Name</label>
@@ -193,8 +193,8 @@
                                 <label><input type="checkbox" name="export_fields[]" value="phone" checked> Phone</label>
                                 <label><input type="checkbox" name="export_fields[]" value="email" checked> Email</label>
                                 <label><input type="checkbox" name="export_fields[]" value="gender" checked> Gender</label>
-                                <label><input type="checkbox" name="export_fields[]" value="language" checked> Language Spoken</label>
-                                <label><input type="checkbox" name="export_fields[]" value="exam_datetime" checked> Date / Time</label>
+                                <label><input type="checkbox" name="export_fields[]" value="language_spoken" checked> Language Spoken</label>
+                                <label><input type="checkbox" name="export_fields[]" value="date" checked> Date / Time</label>
                                 <label><input type="checkbox" name="export_fields[]" value="occupation" checked> Occupation</label>
                                 <label><input type="checkbox" name="export_fields[]" value="birthdate" checked> Birthdate</label>
                                 <label><input type="checkbox" name="export_fields[]" value="age" checked> Age</label>
@@ -283,7 +283,6 @@
                                 <label><input type="checkbox" name="export_fields[]" value="scotopic_os" checked> Scotopic Pupil OS</label>
                                 <label><input type="checkbox" name="export_fields[]" value="pachy_od" checked> Pachymetry OD</label>
                                 <label><input type="checkbox" name="export_fields[]" value="pachy_os" checked> Pachymetry OS</label>
-                                <label><input type="checkbox" name="export_fields[]" value="additional_details" checked> Additional Details</label>
                             </div>
                         </div>
 
@@ -405,6 +404,9 @@
                             <div class="export-checkbox-grid">
                                 <label><input type="checkbox" class="section-toggle" checked> <strong>Follow Up Details</strong></label>
                             </div>
+                            <div class="export-checkbox-grid">
+                                <label><input type="checkbox" name="export_fields[]" value="follow_ups" checked> Follow Up Records</label>
+                            </div>
                         </div>
 
                     </div>
@@ -421,6 +423,32 @@
 
             </form>
 
+        </div>
+    </div>
+
+    <!-- 7. Import CSV Popup -->
+    <div class="popup-overlay popup-import-csv" id="import-csv-popup">
+        <div class="popup-container">
+            <div class="popup-header">
+                <h2>Import Patient Records (Excel)</h2>
+                <button type="button" class="popup-close">&times;</button>
+            </div>
+
+            <form action="/api/import-excel" method="post" enctype="multipart/form-data" class="popup-form">
+                <div class="popup-content">
+                    <p>Upload an Excel file containing master demographic patient data. Please ensure the column names match our <a href="/api/download-template">Import Template</a>.</p>
+                    
+                    <div class="form-field">
+                        <label for="excel_file">Select Excel File (.xlsx)</label>
+                        <input type="file" id="excel_file" name="excel_file" accept=".xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
+                    </div>
+                </div>
+
+                <div class="popup-actions">
+                    <button type="button" class="btn-secondary popup-cancel">Cancel</button>
+                    <button type="submit" class="btn-primary">Import Data</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>    

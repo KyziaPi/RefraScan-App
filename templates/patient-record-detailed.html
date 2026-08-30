@@ -260,7 +260,7 @@ RefraScan - Patient Record Details
                         <span class="additional-details"><strong>OU:</strong> {{ patient.manifest_ou_num or '—' }} <span class="additional-details"><strong>Additional Info:</strong> {{ patient.manifest_ou_details or '—' }}</span></span>
                     </div>
                     <div class="patient-record-details__refraction-row patient-record-details__refraction-row--add-line">
-                        <span><strong>Add:</strong> OD {{ patient.manifest_add_od_ds or '—' }} &nbsp;|&nbsp; OS {{ patient.manifest_add_os_ds or '—' }}</span>
+                        <span><strong>Add:</strong> OD: {{ patient.manifest_add_od_ds or '—' }} {{ patient.manifest_add_od_n or '' }} &nbsp;|&nbsp; OS: {{ patient.manifest_add_os_ds or '—' }} {{ patient.manifest_add_os_n or '' }}</span>
                     </div>
                 </div>
 
@@ -271,10 +271,10 @@ RefraScan - Patient Record Details
                         <span>by: <strong>{{ patient.cyclo_by or '—' }}</strong></span>
                     </div>
                     <div class="patient-record-details__refraction-row">
-                        <span><strong>OD:</strong> {{ patient.cyclo_od_ds or '—' }} Ds {{ patient.cyclo_od_cyl or '—' }} Cyl x {{ patient.cyclo_od_axis or '—' }}° &nbsp;|&nbsp; 6/{{ patient.cyclo_od_vision or '—' }}</span>
+                        <span><strong>OD:</strong> {{ patient.cyclo_od_ds or '—' }} Ds {{ patient.cyclo_od_cyl or '—' }} Cyl x {{ patient.cyclo_od_axis or '—' }}° &nbsp;|&nbsp; 6/{{ patient.cyclo_od_vision or '—' }} &nbsp;|&nbsp; {{ patient.cyclo_od_j or '—' }}</span>
                     </div>
                     <div class="patient-record-details__refraction-row">
-                        <span><strong>OS:</strong> {{ patient.cyclo_os_ds or '—' }} Ds {{ patient.cyclo_os_cyl or '—' }} Cyl x {{ patient.cyclo_os_axis or '—' }}° &nbsp;|&nbsp; 6/{{ patient.cyclo_os_vision or '—' }}</span>
+                        <span><strong>OS:</strong> {{ patient.cyclo_os_ds or '—' }} Ds {{ patient.cyclo_os_cyl or '—' }} Cyl x {{ patient.cyclo_os_axis or '—' }}° &nbsp;|&nbsp; 6/{{ patient.cyclo_os_vision or '—' }} &nbsp;|&nbsp; {{ patient.cyclo_os_j or '—' }}</span>
                     </div>
                 </div>
 
