@@ -115,7 +115,6 @@ def create_database():
             rifle_eye VARCHAR(10) CHECK (rifle_eye IN ('OD', 'OS')),
             flucaine_test VARCHAR(100),
             schirmers_test VARCHAR(100),
-            additional_details TEXT,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
         
@@ -465,17 +464,17 @@ def add_dummy_data():
         (10, FALSE, NULL, NULL, NULL, NULL, NULL, ARRAY['Hypertension'], 'Uncontrolled', ARRAY['Amlodipine'], 'Non-compliant');
 
         -- 4. Insert Clinical Encounters
-        INSERT INTO clinical_encounters (patient_id, master_eye, rifle_eye, flucaine_test, schirmers_test, additional_details, pd, manifest_ou, manifest_ou_details) VALUES
-        (1, 'OD', 'OD', 'Negative', '15mm OU', 'Routine vision check for new computer glasses', 62, '20/30', 'J+1.00'),
-        (2, 'OS', 'OS', 'Negative', '12mm OD, 10mm OS', 'Post-LASIK checkup and mild glare complaint', 62, '20/20', 'dfgd'),
-        (3, 'OD', 'OD', 'Positive OD (Mild staining)', '5mm OD, 4mm OS', 'Complaining of dry, gritty eyes after prolonged computer use', 62, '20/20', NULL),
-        (4, 'OD', 'OD', 'Negative', '18mm OU', 'Student complaining of blurry distance vision', 62, '20/200', 'dfgdg'),
-        (5, 'OS', 'OS', 'Negative', '8mm OU', 'Decreased visual acuity OD over past 6 months', 62, '20/150', NULL),
-        (6, 'OD', 'OD', 'Negative', '14mm OU', 'Follow-up on old blunt trauma OD, no active pain', 62, '20/20', 'SFSDF'),
-        (7, 'OD', 'OD', 'Negative', '20mm OU', 'Failed school vision screening', 62, '20/20', NULL),
-        (8, 'OS', 'OD', 'Negative', '10mm OU', 'Routine POAG suspect check, pressure monitoring', 62, '20/20', 'SDFSDF'),
-        (9, 'OD', 'OD', 'Positive OS (TBUT reduced)', '7mm OS', 'Pregnancy eye consult, soft lens discomfort', 62, '20/20', NULL),
-        (10, 'OD', 'OD', 'Negative', NULL, 'General checkup, headache associated with reading', 62, '20/20', NULL);
+        INSERT INTO clinical_encounters (patient_id, master_eye, rifle_eye, flucaine_test, schirmers_test, pd, manifest_ou, manifest_ou_details) VALUES
+        (1, 'OD', 'OD', 'Negative', '15mm OU', 62, '20/30', 'J+1.00'),
+        (2, 'OS', 'OS', 'Negative', '12mm OD, 10mm OS', 62, '20/20', 'dfgd'),
+        (3, 'OD', 'OD', 'Positive OD (Mild staining)', '5mm OD, 4mm OS', 62, '20/20', NULL),
+        (4, 'OD', 'OD', 'Negative', '18mm OU', 62, '20/200', 'dfgdg'),
+        (5, 'OS', 'OS', 'Negative', '8mm OU', 62, '20/150', NULL),
+        (6, 'OD', 'OD', 'Negative', '14mm OU', 62, '20/20', 'SFSDF'),
+        (7, 'OD', 'OD', 'Negative', '20mm OU', 62, '20/20', NULL),
+        (8, 'OS', 'OD', 'Negative', '10mm OU', 62, '20/20', 'SDFSDF'),
+        (9, 'OD', 'OD', 'Positive OS (TBUT reduced)', '7mm OS', 62, '20/20', NULL),
+        (10, 'OD', 'OD', 'Negative', NULL, 62, '20/20', NULL);
 
 
         -- 5. Insert Patient Diagnoses

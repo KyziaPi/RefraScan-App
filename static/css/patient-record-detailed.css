@@ -435,12 +435,25 @@ body {
 }
 
 @media print {
+    /* 1. FORCE ANCESTORS TO ALLOW PAGE BREAKS */
+    /* This overrides any Flex, Grid, or Overflow restrictions in layout.html */
+    html, body, main, .root-main-content, .patient-record-details {
+        display: block !important;
+        height: auto !important;
+        overflow: visible !important;
+        position: static !important;
+    }
+
     body {
         background: var(--color-surface) !important;
         color: var(--color-black) !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
-    .patient-record-details__header, .patient-record-details__back-link {
+    .patient-record-details__header, 
+    .patient-record-details__back-link,
+    .patient-record-details__actions {
         display: none !important;
     }
 
@@ -450,20 +463,37 @@ body {
         font-size: 10pt;
     }
 
+    /* 2. APPLY STRICT PAGE BREAK RULES */
     .patient-record-details__sheet {
-        page-break-after: always;
+        display: block !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        
         box-shadow: none;
         border: 1px solid var(--color-black) !important;
         background: var(--color-surface) !important;
+        margin-bottom: 2rem !important;
+    }
+
+    /* Prevent a blank page at the very end of the PDF */
+    .patient-record-details__sheet:last-of-type {
+        page-break-after: auto !important;
+        break-after: auto !important;
     }
 
     .patient-record-details__sheet-title {
         background: var(--color-black) !important;
         color: var(--color-surface) !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
 
     .patient-record-details__box {
         border-color: var(--color-black) !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
 
     .patient-record-details__sheet--inference {
