@@ -1,6 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     const deleteForm = document.getElementById("delete-popup-form");
     const hiddenIdInput = document.getElementById("delete-item-id");
+
+    const importForm = document.querySelector("#import-csv-popup form");
+    const conflictPopup = document.getElementById("import-conflict-popup");
+    const importPopup = document.getElementById("import-csv-popup");
     
     // Form input autocomplete off for all input fields
     document.querySelectorAll('input').forEach(input => {
@@ -129,4 +133,163 @@ document.addEventListener('DOMContentLoaded', () => {
             checkboxes.forEach(cb => cb.checked = e.target.checked);
         });
     });
+
+    // ==========================================
+    // EXCEL IMPORT & CONFLICT RESOLUTION LOGIC
+    // ==========================================
+    if (importForm && conflictPopup) {
+            let conflictsList = [];
+            let currentConflictIndex = 0;
+            let tempFilename = "";
+            let resolutionsMap = {};
+
+            // Helper to send cleanup signal to backend
+            const cleanupTempFile = () => {
+                if (tempFilename) {
+                    navigator.sendBeacon(
+                        "/api/cancel-import",
+                        JSON.stringify({ temp_file: tempFilename })
+                    );
+                    tempFilename = "";
+                }
+            };
+
+            // Listen for modal close triggers (&times; buttons, Cancel buttons, background overlays)
+            document.querySelectorAll(
+                "#import-csv-popup .popup-close, #import-csv-popup .popup-cancel, " +
+                "#import-conflict-popup .popup-close, #import-conflict-popup .popup-cancel"
+            ).forEach(btn => {
+                btn.addEventListener("click", () => {
+                    cleanupTempFile();
+                });
+            });
+
+            // Cleanup if user reloads or navigates away while modal is active
+            window.addEventListener("beforeunload", () => {
+                cleanupTempFile();
+            });
+
+            // 1. Intercept file upload
+            importForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const formData = new FormData(importForm);
+                const submitBtn = importForm.querySelector('button[type="submit"]');
+                
+                submitBtn.textContent = "Validating File...";
+                submitBtn.disabled = true;
+
+                try {
+                    const res = await fetch("/api/validate-import", { method: "POST", body: formData });
+                    const data = await res.json();
+
+                    if (data.error) {
+                        alert(data.error);
+                        submitBtn.textContent = "Import Data";
+                        submitBtn.disabled = false;
+                        return;
+                    }
+
+                    tempFilename = data.temp_file;
+
+                    if (data.has_conflicts && data.conflicts.length > 0) {
+                        conflictsList = data.conflicts;
+                        currentConflictIndex = 0;
+                        resolutionsMap = {};
+                        
+                        importPopup.classList.remove("active");
+                        showConflictData(0);
+                        conflictPopup.classList.add("active");
+                    } else {
+                        executeFinalImport(tempFilename, {}, null);
+                    }
+                } catch (err) {
+                    console.error("Validation Error:", err);
+                    alert("A validation error occurred: " + err.message);
+                    cleanupTempFile();
+                } finally {
+                    submitBtn.textContent = "Import Data";
+                    submitBtn.disabled = false;
+                }
+            });
+
+            // 2. Render current conflict into the UI
+            function showConflictData(index) {
+                const conflict = conflictsList[index];
+                if (!conflict) return;
+
+                const codeEl = document.getElementById("conflict-patient-code");
+                if (codeEl) codeEl.textContent = conflict.patient_code || '';
+                
+                const dbName = document.getElementById("db-name");
+                const dbPhone = document.getElementById("db-phone");
+                const dbAge = document.getElementById("db-age");
+                const dbDate = document.getElementById("db-date");
+
+                if (dbName) dbName.textContent = conflict.db_data.name || '—';
+                if (dbPhone) dbPhone.textContent = conflict.db_data.phone || '—';
+                if (dbAge) dbAge.textContent = conflict.db_data.age || '—';
+                if (dbDate) dbDate.textContent = conflict.db_data.date || '—';
+
+                const exName = document.getElementById("ex-name");
+                const exPhone = document.getElementById("ex-phone");
+                const exAge = document.getElementById("ex-age");
+                const exDate = document.getElementById("ex-date");
+
+                if (exName) exName.textContent = conflict.excel_data.name || '—';
+                if (exPhone) exPhone.textContent = conflict.excel_data.phone || '—';
+                if (exAge) exAge.textContent = conflict.excel_data.age || '—';
+                if (exDate) exDate.textContent = conflict.excel_data.date || '—';
+            }
+
+            // 3. Handle Individual Decisions
+            function resolveCurrent(actionType) {
+                const code = conflictsList[currentConflictIndex].patient_code;
+                resolutionsMap[code] = actionType;
+                currentConflictIndex++;
+                
+                if (currentConflictIndex >= conflictsList.length) {
+                    executeFinalImport(tempFilename, resolutionsMap, null);
+                } else {
+                    showConflictData(currentConflictIndex);
+                }
+            }
+
+            document.getElementById("btn-keep-current")?.addEventListener("click", () => resolveCurrent('keep'));
+            document.getElementById("btn-update")?.addEventListener("click", () => resolveCurrent('update'));
+            
+            // 4. Handle Global Decisions
+            document.getElementById("btn-keep-all")?.addEventListener("click", () => executeFinalImport(tempFilename, {}, 'keep_all'));
+            document.getElementById("btn-update-all")?.addEventListener("click", () => executeFinalImport(tempFilename, {}, 'update_all'));
+
+            // 5. Execute Final Command
+            async function executeFinalImport(filename, resolutions, globalAction) {
+                conflictPopup.classList.remove("active");
+                importPopup.classList.remove("active");
+                
+                const activeTempFile = tempFilename;
+                tempFilename = ""; // Reset variable so double cleanup isn't fired
+
+                try {
+                    const response = await fetch("/api/execute-import", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            temp_file: activeTempFile,
+                            resolutions: resolutions,
+                            global_action: globalAction
+                        })
+                    });
+                    
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else {
+                        const result = await response.json();
+                        alert(result.error || "Failed to finalize import.");
+                    }
+                } catch (err) {
+                    console.error("Execution Error:", err);
+                    alert("Execution failed to complete.");
+                }
+            }
+        }
 });

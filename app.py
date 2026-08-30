@@ -6,7 +6,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 # 2. (Optional) Turn off the oneDNN notice explicitly
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
-from flask import Flask, Response, request, jsonify, render_template, redirect, url_for, send_file
+from flask import Flask, Response, request, jsonify, render_template, redirect, url_for, send_file, flash
 import cv2
 import numpy as np
 from tensorflow import keras
@@ -17,6 +17,7 @@ from email.utils import parsedate_to_datetime
 import re
 import io
 import pandas as pd
+import uuid
 
 import utilities.database as db
 from utilities.preprocessing import load_and_preprocess_image
@@ -46,6 +47,10 @@ HEATMAP_FOLDER = os.path.join('static/uploads', 'heatmaps')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(HEATMAP_FOLDER, exist_ok=True)
+
+# Temp folder exists for validation step before importing excel to database
+TEMP_DIR = os.path.join('static', 'uploads', 'temp')
+os.makedirs(TEMP_DIR, exist_ok=True)
 
 # Refractive Error class labels
 CLASS_NAMES = ["Emmetropia", "Myopia", "Hyperopia"]
@@ -1107,28 +1112,67 @@ def export_excel():
 # ==========================================
 @app.route("/api/download-template", methods=["GET"])
 def download_import_template():
-    """Provides a blank Excel template with all supported columns."""
-    # This covers Demographics, History, Encounter, Eye Exams, Refractions, and Diagnoses
+    """Provides a blank Excel template with all supported columns matching the export format."""
+    
     fields = [
-        'patient_code', 'last_name', 'first_name', 'middle_name', 'gender', 'birthdate', 'age', 'phone', 'email', 'location', 'occupation', 'language_spoken', 'referred_from', 'date',
+        # Patient Details
+        'patient_code', 'last_name', 'first_name', 'middle_name', 'location', 'phone', 'email', 'gender', 'language_spoken', 'date', 'occupation', 'birthdate', 'age', 'referred_from',
+        
+        # History
         'drug_allergy_present', 'drug_allergy_info', 'pregnancy_status', 'pregnancy_info', 'family_history', 'family_history_info', 'past_history', 'past_history_info', 'medications', 'medications_info',
-        'pd', 'manifest_ou', 'manifest_ou_details', 'master_eye', 'rifle_eye', 'flucaine_test', 'schirmers_test',
+        
+        # Eye Details
         'od_va', 'os_va', 'od_ph', 'os_ph', 'od_eye_movements', 'os_eye_movements', 'od_cover_testing', 'os_cover_testing', 'od_lids', 'os_lids', 'od_conjunctiva', 'os_conjunctiva', 'od_cornea', 'os_cornea', 'od_anterior_chamber', 'os_anterior_chamber', 'od_light_reflexes', 'os_light_reflexes', 'od_eye_pressure', 'os_eye_pressure', 'od_lens', 'os_lens', 'od_nifbut', 'os_nifbut',
-        'od_k1', 'od_k2', 'od_ax', 'os_k1', 'os_k2', 'os_ax', 'ww_od', 'ww_os', 'scotopic_od', 'scotopic_os', 'pachy_od', 'pachy_os',
+        
+        # Diagnosis
+        'diagnosis',
+        
+        # Measurements
+        'od_k1', 'od_k2', 'od_ax', 'os_k1', 'os_k2', 'os_ax', 'pd', 'ww_od', 'ww_os', 'scotopic_od', 'scotopic_os', 'pachy_od', 'pachy_os',
+        
+        # MS39
         'ms39_od_k1', 'ms39_od_k2', 'ms39_od_axis', 'ms39_od_pachy', 'ms39_od_class', 'ms39_od_epi', 'ms39_os_k1', 'ms39_os_k2', 'ms39_os_axis', 'ms39_os_pachy', 'ms39_os_class', 'ms39_os_epi',
+        
+        # Autorefraction (AR)
         'ar_od_ds', 'ar_od_cyl', 'ar_od_axis', 'ar_os_ds', 'ar_os_cyl', 'ar_os_axis',
+        
+        # Old Refraction
         'old_od_ds', 'old_od_cyl', 'old_od_axis', 'old_od_j', 'old_os_ds', 'old_os_cyl', 'old_os_axis', 'old_os_j',
-        'manifest_by', 'manifest_od_ds', 'manifest_od_cyl', 'manifest_od_axis', 'manifest_od_j', 'manifest_os_ds', 'manifest_os_cyl', 'manifest_os_axis', 'manifest_os_j', 'manifest_add_od_ds', 'manifest_add_od_n', 'manifest_add_os_ds', 'manifest_add_os_n',
+        
+        # Manifest Refraction
+        'manifest_by', 'manifest_od_ds', 'manifest_od_cyl', 'manifest_od_axis', 'manifest_od_j', 'manifest_os_ds', 'manifest_os_cyl', 'manifest_os_axis', 'manifest_os_j', 'manifest_ou_details', 'manifest_add_od_ds', 'manifest_add_od_n', 'manifest_add_os_ds', 'manifest_add_os_n',
+        
+        # Cyclo Refraction
         'cyclo_by', 'cyclo_od_ds', 'cyclo_od_cyl', 'cyclo_od_axis', 'cyclo_od_vision', 'cyclo_od_j', 'cyclo_os_ds', 'cyclo_os_cyl', 'cyclo_os_axis', 'cyclo_os_vision', 'cyclo_os_j', 'cyclo_add_od_ds', 'cyclo_add_od_n', 'cyclo_add_os_ds', 'cyclo_add_os_n',
-        'diagnosis', 'follow_ups'
+        
+        # Additional Tests
+        'master_eye', 'rifle_eye', 'flucaine_test', 'schirmers_test',
+        
+        # Follow Up Details
+        'follow_ups'
     ]
     
     df = pd.DataFrame(columns=fields)
-    # Add a sample row to guide users
-    df.loc[0] = ['26-00001', 'Doe', 'John', 'Smith', 'Male', '1990-01-01', 36, '09123456789', 'john@email.com', 'Manila', 'Engineer', 'English', 'Walk-in', '2026-01-01'] + ([''] * (len(fields) - 14))
-    df.at[0, 'diagnosis'] = "Myopia, Dry Eye"
-    df.at[0, 'follow_ups'] = "[2026-02-14] Patient responded well to medication  |  [2026-03-01] Second checkup cleared"
-    df.at[0, 'drug_allergy_present'] = "No"
+    
+    # Create sample row values ensuring they match the length of `fields`
+    sample_row = [''] * len(fields)
+    
+    # Assign specific demo values to guide the user
+    sample_data_map = {
+        'patient_code': '26-00001', 'last_name': 'Doe', 'first_name': 'John', 'middle_name': 'Smith', 
+        'location': 'Manila', 'phone': '09123456789', 'email': 'john@email.com', 'gender': 'Male', 
+        'language_spoken': 'English', 'date': '2026-01-01', 'occupation': 'Engineer', 
+        'birthdate': '1990-01-01', 'age': 36, 'referred_from': 'Walk-in',
+        'diagnosis': 'Myopia, Dry Eye',
+        'drug_allergy_present': 'No',
+        'follow_ups': '[2026-02-14] Patient responded well  |  [2026-03-01] Cleared'
+    }
+    
+    for key, value in sample_data_map.items():
+        if key in fields:
+            sample_row[fields.index(key)] = value
+            
+    df.loc[0] = sample_row
 
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
@@ -1142,150 +1186,279 @@ def download_import_template():
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-@app.route("/api/import-excel", methods=["POST"])
-def import_excel():
-    """Parses uploaded Excel and inserts into all 7 tables."""
+@app.route("/api/validate-import", methods=["POST"])
+def validate_import():
+    """Step 1: Reads Excel, checks for conflicts, and returns them to the frontend."""
     file = request.files.get('excel_file')
     if not file or not file.filename.endswith('.xlsx'):
-        return render_template('index.html', error='Invalid file format. Please upload an .xlsx file.')
+        return jsonify({'error': 'Invalid file format. Please upload an .xlsx file.'}), 400
+
+    temp_filename = f"import_{uuid.uuid4().hex}.xlsx"
+    filepath = os.path.join(TEMP_DIR, temp_filename)
+    file.save(filepath)
 
     try:
-        # Parse Excel and convert NaNs to empty strings
-        df = pd.read_excel(file)
+        df = pd.read_excel(filepath, dtype=str)
         df = df.fillna("")
         records = df.to_dict(orient="records")
         
-        for row in records:
-            last_name = str(row.get('last_name', '')).strip()
-            first_name = str(row.get('first_name', '')).strip()
-            if not last_name or not first_name:
-                continue # Skip blank rows
-                
-            patient_code = str(row.get('patient_code', '')).strip()
+        # Extract patient codes to check
+        excel_codes = [str(r.get('patient_code', '')).strip() for r in records if str(r.get('patient_code', '')).strip()]
+        
+        conflicts = []
+        if excel_codes:
+            placeholders = ', '.join(['%s'] * len(excel_codes))
+            # TO_CHAR forces PostgreSQL date to string to guarantee JSON serializability
+            query = f"SELECT patient_code, first_name, last_name, phone, age, TO_CHAR(date, 'YYYY-MM-DD') AS date FROM patients WHERE patient_code IN ({placeholders})"
+            res, status = db.select_rows(query, tuple(excel_codes), single=False)
             
+            if status == 200:
+                raw_data = res.get_json() if hasattr(res, 'get_json') else res
+                db_patients = raw_data.get('data', []) if isinstance(raw_data, dict) else raw_data
+                db_map = {p['patient_code']: p for p in db_patients}
+                
+                # Compare DB against Excel
+                for row in records:
+                    code = str(row.get('patient_code', '')).strip()
+                    if code in db_map:
+                        db_p = db_map[code]
+                        conflicts.append({
+                            'patient_code': code,
+                            'db_data': {
+                                'name': f"{db_p.get('first_name', '')} {db_p.get('last_name', '')}".strip() or 'None',
+                                'phone': str(db_p.get('phone', '') or 'None'),
+                                'age': str(db_p.get('age', '') or 'None'),
+                                'date': clean_date(db_p.get('date', '')) or 'None'
+                            },
+                            'excel_data': {
+                                'name': f"{str(row.get('first_name', '')).strip()} {str(row.get('last_name', '')).strip()}".strip() or 'None',
+                                'phone': str(row.get('phone', '')).strip() or 'None',
+                                'age': str(row.get('age', '')).strip() or 'None',
+                                'date': clean_date(str(row.get('date', '')).strip()) or 'None'
+                            }
+                        })
+
+        return jsonify({
+            "has_conflicts": len(conflicts) > 0,
+            "temp_file": temp_filename,
+            "conflicts": conflicts
+        }), 200
+
+    except Exception as e:
+        if os.path.exists(filepath):
+            try:
+                os.remove(filepath)
+            except Exception:
+                pass
+        return jsonify({'error': str(e)}), 500
+
+@app.route("/api/cancel-import", methods=["POST"])
+def cancel_import():
+    """Deletes temporary upload file when the user cancels or exits the modal."""
+    data = request.json or {}
+    temp_file = data.get("temp_file")
+    
+    if temp_file:
+        # Sanitize filename to prevent directory traversal
+        safe_filename = os.path.basename(temp_file)
+        filepath = os.path.join(TEMP_DIR, safe_filename)
+        if os.path.exists(filepath):
+            try:
+                os.remove(filepath)
+                return jsonify({"success": True, "message": "Temp file deleted."}), 200
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
+
+    return jsonify({"message": "No active temp file to clean up."}), 200
+
+@app.route("/api/execute-import", methods=["POST"])
+def execute_import():
+    """Step 2: Executes the import using user resolutions and deletes the temp file."""
+    data = request.json
+    temp_file = data.get('temp_file')
+    resolutions = data.get('resolutions', {})
+    global_action = data.get('global_action')
+
+    if not temp_file:
+        return jsonify({"error": "Missing temp file reference."}), 400
+
+    filepath = os.path.join(TEMP_DIR, os.path.basename(temp_file))
+    if not os.path.exists(filepath):
+        return jsonify({"error": "Temporary file missing or expired."}), 400
+
+    try:
+        df = pd.read_excel(filepath, dtype=str).fillna("")
+        records = df.to_dict(orient="records")
+        
+        success_count = 0
+        skipped_count = 0
+        
+        def clean_val(val):
+            v = str(val).strip()
+            if v == '—' or v.lower() in ['nan', 'nat', 'none', '']:
+                return None
+            return v
+
+        # Re-fetch DB codes to apply resolution rules
+        excel_codes = [str(r.get('patient_code', '')).strip() for r in records if str(r.get('patient_code', '')).strip()]
+        db_codes = set()
+        if excel_codes:
+            placeholders = ', '.join(['%s'] * len(excel_codes))
+            res, stat = db.select_rows(f"SELECT patient_code FROM patients WHERE patient_code IN ({placeholders})", tuple(excel_codes), single=False)
+            if stat == 200:
+                raw = res.get_json() if hasattr(res, 'get_json') else res
+                db_codes = set(p['patient_code'] for p in (raw.get('data', []) if isinstance(raw, dict) else raw))
+        
+        for index, row in enumerate(records):
+            code = clean_val(row.get('patient_code'))
+            
+            # --- CONFLICT RESOLUTION HANDLER ---
+            if code in db_codes:
+                if global_action == 'keep_all':
+                    skipped_count += 1
+                    continue
+                elif global_action == 'update_all':
+                    pass # Proceed to update
+                elif resolutions.get(code) == 'keep':
+                    skipped_count += 1
+                    continue
+                elif resolutions.get(code) == 'update':
+                    pass # Proceed to update
+                else:
+                    skipped_count += 1
+                    continue # Fallback: Skip if not explicitly approved
+            
+            # --- DATA IMPORT LOGIC ---
+            last_name = clean_val(row.get('last_name'))
+            first_name = clean_val(row.get('first_name'))
+            if not last_name or not first_name:
+                skipped_count += 1
+                continue 
+                
             # 1. Generate patient code if missing
-            if not patient_code:
+            if not code:
                 max_res, max_status = db.select_rows("SELECT patient_code FROM patients ORDER BY id DESC LIMIT 1;", single=True)
                 try:
                     last_code = max_res.get_json()['data']['patient_code']
-                    next_num = int(last_code.split("-")[1]) + 1
+                    code = f"{datetime.now().strftime('%y')}-{(int(last_code.split('-')[1]) + 1):05d}"
                 except:
-                    next_num = 1
-                patient_code = f"{datetime.now().strftime('%y')}-{next_num:05d}"
+                    code = f"{datetime.now().strftime('%y')}-00001"
             
             # 2. PATIENTS TABLE
             patient_query = """
                 INSERT INTO patients (
                     patient_code, last_name, first_name, middle_name, gender, birthdate, 
                     age, phone, email, location, occupation, language_spoken, referred_from, date
-                ) VALUES (%s, %s, %s, %s, %s, NULLIF(%s, ''), %s, %s, %s, %s, %s, %s, %s, COALESCE(NULLIF(%s, '')::DATE, CURRENT_DATE))
+                ) VALUES (%s, %s, %s, %s, %s, CAST(%s AS DATE), %s, %s, %s, %s, %s, %s, %s, COALESCE(CAST(%s AS DATE), CURRENT_DATE))
                 ON CONFLICT (patient_code) DO UPDATE SET 
                     phone = EXCLUDED.phone, age = EXCLUDED.age, location = EXCLUDED.location
                 RETURNING id;
             """
             p_vals = (
-                patient_code, last_name, first_name, row.get('middle_name'), row.get('gender', 'Other'), 
-                row.get('birthdate'), to_num(row.get('age')), row.get('phone'), row.get('email'), 
-                row.get('location'), row.get('occupation'), row.get('language_spoken'), row.get('referred_from'), row.get('date')
+                code, last_name, first_name, clean_val(row.get('middle_name')), clean_val(row.get('gender')) or 'Other', 
+                clean_val(row.get('birthdate')), to_num(clean_val(row.get('age'))), clean_val(row.get('phone')), 
+                clean_val(row.get('email')), clean_val(row.get('location')), clean_val(row.get('occupation')), 
+                clean_val(row.get('language_spoken')), clean_val(row.get('referred_from')), clean_val(row.get('date'))
             )
             p_res, p_stat = db.add_row("Import Patient", patient_query, p_vals)
             
-            # Get Patient ID to link the rest of the tables
             if p_stat in [200, 201]:
                 p_json = p_res.get_json() if hasattr(p_res, 'get_json') else p_res
                 patient_id = p_json.get('data', {}).get('id') if 'data' in p_json else p_json.get('id')
+                success_count += 1
             else:
+                skipped_count += 1
                 continue
 
             # 3. MEDICAL HISTORY TABLE
-            mh_query = """
-                INSERT INTO patient_medical_history (
-                    patient_id, drug_allergy_present, drug_allergy_info, pregnancy_status, pregnancy_info,
-                    family_history, family_history_info, past_history, past_history_info, medications, medications_info
-                ) VALUES (%s, %s, %s, string_to_array(%s, ','), %s, string_to_array(%s, ','), %s, string_to_array(%s, ','), %s, string_to_array(%s, ','), %s)
-                ON CONFLICT DO NOTHING;
-            """
-            db.add_row("Import Medical History", mh_query, (
-                patient_id, str(row.get('drug_allergy_present', '')).lower() == 'yes', row.get('drug_allergy_info'),
-                row.get('pregnancy_status'), row.get('pregnancy_info'), row.get('family_history'), row.get('family_history_info'),
-                row.get('past_history'), row.get('past_history_info'), row.get('medications'), row.get('medications_info')
-            ))
-
-            # 4. CLINICAL ENCOUNTERS TABLE
-            ce_query = """
-                INSERT INTO clinical_encounters (
-                    patient_id, pd, manifest_ou, manifest_ou_details, master_eye, rifle_eye, flucaine_test, schirmers_test
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;
-            """
-            ce_res, ce_stat = db.add_row("Import Encounter", ce_query, (
-                patient_id, to_num(row.get('pd')), row.get('manifest_ou'), row.get('manifest_ou_details'),
-                row.get('master_eye'), row.get('rifle_eye'), row.get('flucaine_test'), row.get('schirmers_test')
-            ))
+            mh_check_q = "SELECT id FROM patient_medical_history WHERE patient_id = %s;"
+            mh_check_res, mh_check_status = db.select_rows(mh_check_q, (patient_id,), single=True)
+            mh_vals = (
+                str(row.get('drug_allergy_present', '')).lower() == 'yes', clean_val(row.get('drug_allergy_info')), clean_val(row.get('pregnancy_status')), clean_val(row.get('pregnancy_info')), 
+                clean_val(row.get('family_history')), clean_val(row.get('family_history_info')), clean_val(row.get('past_history')), clean_val(row.get('past_history_info')), clean_val(row.get('medications')), clean_val(row.get('medications_info'))
+            )
             
-            if ce_stat in [200, 201]:
-                ce_json = ce_res.get_json() if hasattr(ce_res, 'get_json') else ce_res
-                encounter_id = ce_json.get('data', {}).get('id') if 'data' in ce_json else ce_json.get('id')
+            if mh_check_status == 200 and mh_check_res.get_json():
+                mh_query = "UPDATE patient_medical_history SET drug_allergy_present = %s, drug_allergy_info = %s, pregnancy_status = string_to_array(%s, ','), pregnancy_info = %s, family_history = string_to_array(%s, ','), family_history_info = %s, past_history = string_to_array(%s, ','), past_history_info = %s, medications = string_to_array(%s, ','), medications_info = %s WHERE patient_id = %s;"
+                db.update_row("Update Medical History", mh_query, mh_vals + (patient_id,))
             else:
-                continue
+                mh_query = "INSERT INTO patient_medical_history (drug_allergy_present, drug_allergy_info, pregnancy_status, pregnancy_info, family_history, family_history_info, past_history, past_history_info, medications, medications_info, patient_id) VALUES (%s, %s, string_to_array(%s, ','), %s, string_to_array(%s, ','), %s, string_to_array(%s, ','), %s, string_to_array(%s, ','), %s, %s);"
+                db.add_row("Import Medical History", mh_query, mh_vals + (patient_id,))
+
+            # 4. CLINICAL ENCOUNTERS (Update newest visit to sync, or create new)
+            ce_check_res, ce_check_status = db.select_rows("SELECT id FROM clinical_encounters WHERE patient_id = %s ORDER BY id DESC LIMIT 1;", (patient_id,), single=True)
+            encounter_id = None
+            if ce_check_status == 200:
+                ce_check_json = ce_check_res.get_json() if hasattr(ce_check_res, 'get_json') else ce_check_res
+                encounter_id = ce_check_json.get('data', {}).get('id') if 'data' in ce_check_json else ce_check_json.get('id')
+            
+            ce_vals = (
+                to_num(clean_val(row.get('pd'))), clean_val(row.get('manifest_ou')), clean_val(row.get('manifest_ou_details')), clean_val(row.get('master_eye')), clean_val(row.get('rifle_eye')), clean_val(row.get('flucaine_test')), clean_val(row.get('schirmers_test'))
+            )
+            
+            if encounter_id:
+                db.update_row("Update Encounter", "UPDATE clinical_encounters SET pd = %s, manifest_ou = %s, manifest_ou_details = %s, master_eye = %s, rifle_eye = %s, flucaine_test = %s, schirmers_test = %s WHERE id = %s;", ce_vals + (encounter_id,))
+                for table in ['eye_examinations', 'refractions', 'patient_diagnoses', 'patient_follow_ups']:
+                    db.delete_row(f"Wipe {table}", f"DELETE FROM {table} WHERE encounter_id = %s;", (encounter_id,))
+            else:
+                ce_res, ce_stat = db.add_row("Import Encounter", "INSERT INTO clinical_encounters (pd, manifest_ou, manifest_ou_details, master_eye, rifle_eye, flucaine_test, schirmers_test, patient_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;", ce_vals + (patient_id,))
+                if ce_stat in [200, 201]:
+                    ce_json = ce_res.get_json() if hasattr(ce_res, 'get_json') else ce_res
+                    encounter_id = ce_json.get('data', {}).get('id') if 'data' in ce_json else ce_json.get('id')
+                else: continue
 
             # 5. EYE EXAMINATIONS (OD & OS)
-            ee_query = """
-                INSERT INTO eye_examinations (
-                    encounter_id, eye_side, visual_acuity, pinhole, eye_movements, cover_testing, lids, conjunctiva, cornea, anterior_chamber, light_reflexes, eye_pressure, lens, nifbut,
-                    k1, k2, axis, white_to_white, scotopic_pupil, pachymetry, ms39_k1, ms39_k2, ms39_axis, ms39_pachy, ms39_class, ms39_epi
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-            """
+            ee_query = "INSERT INTO eye_examinations (encounter_id, eye_side, visual_acuity, pinhole, eye_movements, cover_testing, lids, conjunctiva, cornea, anterior_chamber, light_reflexes, eye_pressure, lens, nifbut, k1, k2, axis, white_to_white, scotopic_pupil, pachymetry, ms39_k1, ms39_k2, ms39_axis, ms39_pachy, ms39_class, ms39_epi) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
             for side in ['od', 'os']:
                 db.add_row("Import Eye Exam", ee_query, (
-                    encounter_id, side.upper(), row.get(f'{side}_va'), row.get(f'{side}_ph'), row.get(f'{side}_eye_movements'), row.get(f'{side}_cover_testing'),
-                    row.get(f'{side}_lids'), row.get(f'{side}_conjunctiva'), row.get(f'{side}_cornea'), row.get(f'{side}_anterior_chamber'), row.get(f'{side}_light_reflexes'),
-                    row.get(f'{side}_eye_pressure'), row.get(f'{side}_lens'), row.get(f'{side}_nifbut'),
-                    to_num(row.get(f'{side}_k1')), to_num(row.get(f'{side}_k2')), to_num(row.get(f'{side}_ax')), to_num(row.get(f'ww_{side}')), to_num(row.get(f'scotopic_{side}')), to_num(row.get(f'pachy_{side}')),
-                    to_num(row.get(f'ms39_{side}_k1')), to_num(row.get(f'ms39_{side}_k2')), to_num(row.get(f'ms39_{side}_axis')), to_num(row.get(f'ms39_{side}_pachy')), row.get(f'ms39_{side}_class'), row.get(f'ms39_{side}_epi')
+                    encounter_id, side.upper(), clean_val(row.get(f'{side}_va')), clean_val(row.get(f'{side}_ph')), clean_val(row.get(f'{side}_eye_movements')), clean_val(row.get(f'{side}_cover_testing')), clean_val(row.get(f'{side}_lids')), clean_val(row.get(f'{side}_conjunctiva')), clean_val(row.get(f'{side}_cornea')), clean_val(row.get(f'{side}_anterior_chamber')), clean_val(row.get(f'{side}_light_reflexes')), clean_val(row.get(f'{side}_eye_pressure')), clean_val(row.get(f'{side}_lens')), clean_val(row.get(f'{side}_nifbut')), to_num(clean_val(row.get(f'{side}_k1'))), to_num(clean_val(row.get(f'{side}_k2'))), to_num(clean_val(row.get(f'{side}_ax'))), to_num(clean_val(row.get(f'ww_{side}'))), to_num(clean_val(row.get(f'scotopic_{side}'))), to_num(clean_val(row.get(f'pachy_{side}'))), to_num(clean_val(row.get(f'ms39_{side}_k1'))), to_num(clean_val(row.get(f'ms39_{side}_k2'))), to_num(clean_val(row.get(f'ms39_{side}_axis'))), to_num(clean_val(row.get(f'ms39_{side}_pachy'))), clean_val(row.get(f'ms39_{side}_class')), clean_val(row.get(f'ms39_{side}_epi'))
                 ))
 
             # 6. REFRACTIONS
-            ref_query = """
-                INSERT INTO refractions (encounter_id, refraction_type, eye_side, sphere, cylinder, axis, add_sphere, near_va, distance_va, performed_by)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-            """
-            ref_types = [('Autorefraction', 'ar'), ('Old_Prescription', 'old'), ('Manifest', 'manifest'), ('Cycloplegic', 'cyclo')]
-            for ref_name, prefix in ref_types:
-                performed_by = row.get(f'{prefix}_by', '') if prefix in ['manifest', 'cyclo'] else ''
+            ref_query = "INSERT INTO refractions (encounter_id, refraction_type, eye_side, sphere, cylinder, axis, add_sphere, near_va, distance_va, performed_by) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
+            for ref_name, prefix in [('Autorefraction', 'ar'), ('Old_Prescription', 'old'), ('Manifest', 'manifest'), ('Cycloplegic', 'cyclo')]:
+                performed_by = clean_val(row.get(f'{prefix}_by')) if prefix in ['manifest', 'cyclo'] else None
                 for side in ['od', 'os']:
-                    db.add_row("Import Refraction", ref_query, (
-                        encounter_id, ref_name, side.upper(), to_num(row.get(f'{prefix}_{side}_ds')), to_num(row.get(f'{prefix}_{side}_cyl')), to_num(row.get(f'{prefix}_{side}_axis')),
-                        to_num(row.get(f'{prefix}_add_{side}_ds')), row.get(f'{prefix}_add_{side}_n') or row.get(f'{prefix}_{side}_j', ''), row.get(f'{prefix}_{side}_vision', ''), performed_by
-                    ))
+                    db.add_row("Import Refraction", ref_query, (encounter_id, ref_name, side.upper(), to_num(clean_val(row.get(f'{prefix}_{side}_ds'))), to_num(clean_val(row.get(f'{prefix}_{side}_cyl'))), to_num(clean_val(row.get(f'{prefix}_{side}_axis'))), to_num(clean_val(row.get(f'{prefix}_add_{side}_ds'))), clean_val(row.get(f'{prefix}_add_{side}_n')) or clean_val(row.get(f'{prefix}_{side}_j')), clean_val(row.get(f'{prefix}_{side}_vision')), performed_by))
 
             # 7. DIAGNOSES
-            diags = str(row.get('diagnosis', '')).split(',')
-            for diag in diags:
-                if diag.strip():
-                    db.add_row("Import Diagnosis", "INSERT INTO patient_diagnoses (encounter_id, diagnosis) VALUES (%s, %s);", (encounter_id, diag.strip()))
+            for diag in str(row.get('diagnosis', '')).split(','):
+                d = clean_val(diag)
+                if d: db.add_row("Import Diagnosis", "INSERT INTO patient_diagnoses (encounter_id, diagnosis) VALUES (%s, %s);", (encounter_id, d))
 
-            # 8. FOLLOW UPS (Parsing from formatted string)
-            fu_str = str(row.get('follow_ups', '')).strip()
+            # 8. FOLLOW UPS
+            fu_str = clean_val(row.get('follow_ups'))
             if fu_str:
-                fu_list = fu_str.split('  |  ')
-                for i, fu_item in enumerate(fu_list):
-                    # Uses regex to split "[2026-02-14] My Details" into Date and Details
+                for i, fu_item in enumerate(fu_str.split('  |  ')):
                     match = re.match(r'\[(.*?)\]\s*(.*)', fu_item.strip())
                     if match:
                         fu_date, fu_detail = match.groups()
-                        fu_date = fu_date if fu_date and fu_date != 'No Date' else None
+                        fu_date = clean_val(fu_date)
+                        if fu_date and fu_date.lower() == 'no date': fu_date = None
                     else:
                         fu_date, fu_detail = None, fu_item.strip()
                     
-                    if fu_detail:
-                        db.add_row("Import Follow Up", 
-                                   "INSERT INTO patient_follow_ups (encounter_id, follow_up_number, follow_up_date, details) VALUES (%s, %s, COALESCE(NULLIF(%s, '')::DATE, CURRENT_DATE), %s);", 
-                                   (encounter_id, i+1, fu_date, fu_detail))
+                    if clean_val(fu_detail):
+                        db.add_row("Import Follow Up", "INSERT INTO patient_follow_ups (encounter_id, follow_up_number, follow_up_date, details) VALUES (%s, %s, CAST(%s AS DATE), %s);", (encounter_id, i+1, fu_date, clean_val(fu_detail)))
 
+        # Cleanup Temp File
+        if os.path.exists(filepath):
+            os.remove(filepath)
+            
+        print(f"Import Complete: {success_count} succeeded, {skipped_count} skipped.")
         return redirect("/patient-records")
         
     except Exception as e:
-        return f"An error occurred during import: {str(e)}"
+        if os.path.exists(filepath): os.remove(filepath)
+        return jsonify({"error": str(e)}), 500
+    
+    finally:
+        # Guaranteed cleanup regardless of success or exception
+        if os.path.exists(filepath):
+            try:
+                os.remove(filepath)
+            except Exception as cleanup_err:
+                print(f"Failed to delete temp file: {cleanup_err}")
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)

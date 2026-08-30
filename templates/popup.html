@@ -426,7 +426,7 @@
         </div>
     </div>
 
-    <!-- 7. Import CSV Popup -->
+<!-- 7. Import Excel Popup -->
     <div class="popup-overlay popup-import-csv" id="import-csv-popup">
         <div class="popup-container">
             <div class="popup-header">
@@ -436,11 +436,14 @@
 
             <form action="/api/import-excel" method="post" enctype="multipart/form-data" class="popup-form">
                 <div class="popup-content">
-                    <p>Upload an Excel file containing master demographic patient data. Please ensure the column names match our <a href="/api/download-template">Import Template</a>.</p>
+                    <p class="import-desc">
+                        Upload an Excel file containing complete patient records. Please ensure the column names match our 
+                        <a href="/api/download-template" class="import-template-link">Import Template</a>.
+                    </p>
                     
                     <div class="form-field">
-                        <label for="excel_file">Select Excel File (.xlsx)</label>
-                        <input type="file" id="excel_file" name="excel_file" accept=".xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
+                        <label for="excel_file" class="file-upload-label">Select Excel File (.xlsx)</label>
+                        <input type="file" id="excel_file" name="excel_file" accept=".xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required class="file-upload-input">
                     </div>
                 </div>
 
@@ -449,6 +452,56 @@
                     <button type="submit" class="btn-primary">Import Data</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- 8. Import Conflict Resolution Popup -->
+    <div class="popup-overlay popup-import-conflict" id="import-conflict-popup">
+        <div class="popup-container popup-container-large">
+            <div class="popup-header">
+                <h2>Conflict Detected</h2>
+                <button type="button" class="popup-close">&times;</button>
+            </div>
+            
+            <div class="popup-content">
+                <p>Patient code <strong id="conflict-patient-code" class="conflict-highlight"></strong> already exists in the database. Choose how to handle this record:</p>
+                
+                <div class="conflict-cards-container">
+                    <!-- Database Record Card -->
+                    <div class="conflict-card db-card">
+                        <h3>Current Database Record</h3>
+                        <p><strong>Name:</strong> <span id="db-name"></span></p>
+                        <p><strong>Phone:</strong> <span id="db-phone"></span></p>
+                        <p><strong>Age:</strong> <span id="db-age"></span></p>
+                        <p><strong>Date:</strong> <span id="db-date"></span></p>
+                    </div>
+                    
+                    <!-- Excel Record Card -->
+                    <div class="conflict-card ex-card">
+                        <h3>New Excel Record</h3>
+                        <p><strong>Name:</strong> <span id="ex-name"></span></p>
+                        <p><strong>Phone:</strong> <span id="ex-phone"></span></p>
+                        <p><strong>Age:</strong> <span id="ex-age"></span></p>
+                        <p><strong>Date:</strong> <span id="ex-date"></span></p>
+                    </div>
+                </div>
+                
+                <p class="conflict-warning-text">
+                    * <strong>Update:</strong> Overwrites demographics and <em>most recent visit</em> with Excel data.<br>
+                    * <strong>Keep Current:</strong> Skips this Excel row, leaving the database untouched.
+                </p>
+            </div>
+            
+            <div class="popup-actions conflict-actions">
+                <div class="conflict-actions-group">
+                    <button type="button" class="btn-secondary" id="btn-keep-all">Keep All Current</button>
+                    <button type="button" class="btn-primary" id="btn-update-all">Update All</button>
+                </div>
+                <div class="conflict-actions-group">
+                    <button type="button" class="btn-secondary" id="btn-keep-current">Keep Current (Skip)</button>
+                    <button type="button" class="btn-primary" id="btn-update">Update Record</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>    

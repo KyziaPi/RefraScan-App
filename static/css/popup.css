@@ -277,28 +277,92 @@
     border: 1px solid var(--color-border, #ccc);
 }
 
-.popup-import-csv p {
+/* =========================================
+   Import & Conflict Popups
+========================================= */
+.import-desc {
     margin-bottom: 1rem;
 }
 
-.popup-import-csv a {
-    color: var(--color-brand, #007bff); 
-    text-decoration: underline; 
+.import-template-link {
+    color: var(--color-brand, #007bff);
+    text-decoration: underline;
     font-weight: bold;
 }
 
-.popup-import-csv input[type="file"] {
-    width: 100%; 
-    padding: 0.8rem; 
-    border: 1px dashed var(--color-border, #ccc); 
-    border-radius: 6px; 
+.file-upload-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.file-upload-input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px dashed var(--color-border, #ccc);
+    border-radius: 6px;
     cursor: pointer;
 }
 
-.popup-import-csv label {
-    font-weight: 500; 
-    margin-bottom: 0.5rem; 
-    display: block;
+.conflict-highlight {
+    color: var(--color-brand, #007bff);
+}
+
+.conflict-cards-container {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.conflict-card {
+    flex: 1;
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.conflict-card.db-card {
+    border: 1px solid var(--color-border, #ccc);
+    background: var(--color-surface, #fafafa);
+}
+
+.conflict-card.ex-card {
+    border: 1px solid var(--color-brand, #007bff);
+    background: #fff;
+}
+
+.conflict-card h3 {
+    margin-top: 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border, #ddd);
+    font-size: 1.4rem;
+}
+
+.conflict-card.ex-card h3 {
+    color: var(--color-brand, #007bff);
+}
+
+.conflict-card p {
+    margin: 0.8rem 0;
+    font-size: 1.3rem;
+}
+
+.conflict-warning-text {
+    margin-top: 1.5rem;
+    font-size: 1.2rem;
+    color: #666;
+    line-height: 1.5;
+}
+
+.popup-actions.conflict-actions {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+}
+
+.conflict-actions-group {
+    display: flex;
+    gap: 1rem;
 }
 
 /* Mobile */
