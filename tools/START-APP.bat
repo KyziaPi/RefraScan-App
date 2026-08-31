@@ -6,7 +6,7 @@ setlocal enabledelayedexpansion
 
 REM Get the directory where this batch file is located
 set "SCRIPT_DIR=%~dp0"
-cd /d "%SCRIPT_DIR%"
+cd /d "%SCRIPT_DIR%..\Refrascan"
 
 REM Check if .venv exists
 if not exist ".venv" (

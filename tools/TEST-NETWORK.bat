@@ -3,6 +3,11 @@ REM RefraScan App - Network Configuration Helper
 REM This script helps verify network setup for multi-computer deployment
 
 setlocal enabledelayedexpansion
+
+REM Get the directory where this batch file is located
+set "SCRIPT_DIR=%~dp0"
+cd /d "%SCRIPT_DIR%..\Refrascan"
+
 color 0F
 
 echo.
