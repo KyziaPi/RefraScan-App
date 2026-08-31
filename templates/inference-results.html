@@ -16,7 +16,11 @@ RefraScan - Inference Results
 					<h2 class="inference-engine-results-subtitle1">Pre-Screening Results</h2>
 				</div>
 				<form id="recordActionForm">
+				{% if patient_id %}
 					<input type="hidden" name="patient_id" id="patient-id" value="{{ patient_id if patient_id else '' }}">
+
+				{% else %}
+					<input type="hidden" name="inference_id" id="inference-id" value="{{ inf_id if inf_id else '' }}">
 
 					<input type="hidden" name="first_name" value="{{ first_name if first_name else '' }}">
 					<input type="hidden" name="last_name" value="{{ last_name if last_name else '' }}">
@@ -24,12 +28,13 @@ RefraScan - Inference Results
 					<input type="hidden" name="age" value="{{ age if age else '' }}">
 					<input type="hidden" name="phone" value="{{ phone if phone else '' }}">
 					<input type="hidden" name="email" value="{{ email if email else '' }}">
+				{% endif %}
 
 					<button id="patientRecordBtn" 
 							class="patient-record-btn hover-bright {% if patient_id %}view-patient-record-btn{% else %}add-patient-record-btn{% endif %}" 
 							type="submit"
 							formaction="{% if patient_id %}/patient-record-detailed{% else %}/add-patient{% endif %}" 
-							formmethod="POST"> 
+							formmethod="{% if patient_id %}GET{% else %}POST{% endif %}"> 
 						{% if patient_id %}View Patient Record{% else %}Add Patient Record{% endif %}
 					</button>
 				</form>

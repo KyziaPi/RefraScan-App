@@ -29,7 +29,8 @@ RefraScan - Patient Record Details
         </div>
         <form class="patient-record-details__actions">
             <button class="btn-secondary" type="button" onclick="window.print()">Print Card Sheet</button>
-            <input type="hidden" name="id" value="{{ patient.patient_id }}">
+            <input type="hidden" name="patient_id" value="{{ patient.patient_id }}">
+            <input type="hidden" name="encounter_id" value="{{ patient.id }}">
             <button class="btn-primary" formaction="/add-patient" formmethod="POST" type="submit">Edit Record</button>
             <button class="btn-danger" 
                 data-popup="delete-confirmation-popup"
@@ -79,7 +80,7 @@ RefraScan - Patient Record Details
                 <h3 class="patient-record-details__box-title">History</h3>
                 <div class="patient-record-details__history">
                     <div>
-                        <p><strong>Drug Allergy:</strong> {{ 'Yes' if patient.drug_allergy_present else ('No' if patient.drug_allergy_present == False else '—') }}</p>
+                        <p><strong>Drug Allergy:</strong> {{ patient.drug_allergy_present or '—' }}</p>
                         {% if patient.drug_allergy_info %} 
                             <p class="additional-details"><strong>Additional Info:</strong> {{ patient.drug_allergy_info }}</p>
                         {% endif %} 

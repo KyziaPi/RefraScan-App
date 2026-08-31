@@ -42,8 +42,25 @@ def _patched_dense_init(self, *args, quantization_config=None, **kwargs):
 keras.layers.Dense.__init__ = _patched_dense_init
 # --------------------------------------------------
 
-UPLOAD_FOLDER = os.path.join('static/uploads', 'images')
-HEATMAP_FOLDER = os.path.join('static/uploads', 'heatmaps')
+# --- NETWORK/LOCAL PATH CONFIGURATION ---
+# Check if using network shared folder or local uploads
+UPLOAD_BASE_PATH = os.getenv("UPLOAD_BASE_PATH", "").strip()
+
+if UPLOAD_BASE_PATH and os.path.isdir(UPLOAD_BASE_PATH):
+    # Using network shared folder
+    UPLOAD_FOLDER = os.path.join(UPLOAD_BASE_PATH, 'images')
+    HEATMAP_FOLDER = os.path.join(UPLOAD_BASE_PATH, 'heatmaps')
+    TEMP_DIR = os.path.join(UPLOAD_BASE_PATH, 'temp')
+    print(f"✓ Using network shared folder: {UPLOAD_BASE_PATH}")
+else:
+    # Using local folder (default)
+    UPLOAD_FOLDER = os.path.join('static/uploads', 'images')
+    HEATMAP_FOLDER = os.path.join('static/uploads', 'heatmaps')
+    TEMP_DIR = os.path.join('static', 'uploads', 'temp')
+    if UPLOAD_BASE_PATH:
+        print(f"⚠ Network path not accessible: {UPLOAD_BASE_PATH}")
+        print(f"⚠ Falling back to local folder: {UPLOAD_FOLDER}")
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(HEATMAP_FOLDER, exist_ok=True)
@@ -325,7 +342,7 @@ def inference_results(inference_id):
     """Inference Results"""
     select_sql = """
         SELECT 
-            inference_id, patient_id, encounter_id, last_name, first_name, middle_name,
+            id as inf_id, inference_id, patient_id, encounter_id, last_name, first_name, middle_name,
             last_name || ', ' || first_name || COALESCE(' ' || LEFT(NULLIF(middle_name, ''), 1) || '.', '') AS "FullName",
             phone, age, email, eye_side, 
             TO_CHAR(screening_date, 'MM-DD-YYYY') AS screening_date, prediction_label, myopia_probability, 
@@ -356,6 +373,7 @@ def inference_results(inference_id):
     return render_template(
         'inference-results.html',
         page="inference_results",
+        inf_id=record.get('inf_id'),
         inference_id=record.get('inference_id'),
         name=record.get('FullName') or record.get('fullname') or "N/A",
         first_name=record.get('first_name', ''),
@@ -480,7 +498,14 @@ def patient_records():
             p.last_name || ', ' || p.first_name || COALESCE(' ' || LEFT(NULLIF(p.middle_name, ''), 1) || '.', '') AS "full_name",
             p.age,
             COALESCE(p.referred_from, '—') AS referred_from,
-            TO_CHAR(p.date, 'MM-DD-YYYY') AS date
+            TO_CHAR(p.date, 'MM-DD-YYYY') AS date,
+            (
+                SELECT id 
+                FROM clinical_encounters 
+                WHERE patient_id = p.id 
+                ORDER BY id DESC 
+                LIMIT 1
+            ) AS encounter_id
         FROM patients p
         ORDER BY p.id DESC;
     """
@@ -498,7 +523,8 @@ def patient_records():
                 'date': record.get('date') or 'N/A',
                 'name': record.get('full_name') or 'N/A',
                 'age': record.get('age') if record.get('age') is not None else 'N/A',
-                'referred_from': record.get('referred_from') or '—'
+                'referred_from': record.get('referred_from') or '—',
+                'encounter_id': record.get('encounter_id')
             })
 
     return render_template(
@@ -681,12 +707,16 @@ def api_get_patient(patient_id):
 @app.route("/add-patient", methods=["GET", "POST"])
 def add_patient():
     """Add Patient Record, Load Edit View, or Pre-fill Screening Data"""
-    edit_id = ""
+    encounter_id = ""
+    patient_id = ""
+    inference_id = ""
     prefill = {}
 
     if request.method == "POST":
         # Extract ID passed from Edit buttons
-        edit_id = request.form.get("id", "") or request.form.get("patient_id", "")
+        patient_id = request.form.get("patient_id", "")
+        encounter_id = request.form.get("encounter_id", "")
+        inference_id = request.form.get("inference_id", "")
 
         # Extract pre-fill demographic values passed from screening/inference results
         prefill = {
@@ -701,25 +731,31 @@ def add_patient():
     return render_template(
         "add-patient.html", 
         page="add_patient", 
-        edit_id=edit_id, 
-        prefill=prefill
+        patient_id=patient_id,
+        encounter_id=encounter_id,
+        prefill=prefill,
+        inference_id=inference_id
     )
 
 # ==========================================
 # Detailed Record Route
 # ==========================================
-@app.route("/patient-record-detailed", methods=["POST"])
+@app.route("/patient-record-detailed", methods=["GET"])
 def patient_record_detailed():
-    patient_id = request.form.get("id") or request.form.get("patient_id")
+    """Detailed Patient Record View"""
+    patient_id = request.args.get("id") or request.args.get("patient_id")
     if not patient_id:
         return redirect("/patient-records") 
-        
+
     patient_data = fetch_patient_data_by_id(patient_id)
-    
     if not patient_data:
         return redirect("/patient-records")
-        
-    return render_template("patient-record-detailed.html", page="patient_record_detailed", patient=patient_data)
+
+    return render_template(
+        "patient-record-detailed.html", 
+        page="patient_record_detailed", 
+        patient=patient_data
+    )
 
 
 def to_num(val):
@@ -837,7 +873,7 @@ def api_add_patient():
     # 2. PATIENT MEDICAL HISTORY
     # =========================================================
     mh_values = (
-        data.get('drug_allergy_present') == 'Yes', data.get('drug_allergy_info', ''),
+        data.get('drug_allergy_present'), data.get('drug_allergy_info', ''),
         get_list_param('pregnancy_status'), data.get('pregnancy_info', ''),
         get_list_param('family_history'), data.get('family_history_info', ''),
         get_list_param('past_history'), data.get('past_history_info', ''),
@@ -969,7 +1005,18 @@ def api_add_patient():
             if diag_clean:
                 db.add_row("Add Diagnosis", diag_query, (encounter_id, diag_clean))
 
-    return jsonify({"success": True, "patient_id": patient_id}), 201
+    # LINK INFERENCE HISTORY
+    inference_id = data.get('inference_id')
+    if inference_id:
+        update_inf_query = """
+            UPDATE inference_history 
+            SET patient_id = NULLIF(%s, '')::INTEGER, 
+                encounter_id = NULLIF(%s, '')::INTEGER 
+            WHERE id = %s;
+        """
+        db.update_row("Link Inference to Patient", update_inf_query, (str(patient_id) if patient_id else None, str(encounter_id) if encounter_id else None, inference_id))
+
+    return jsonify({"success": True, "patient_id": patient_id, "encounter_id": encounter_id}), 201
 
 @app.route('/api/delete-patient/<int:patient_id>', methods=['DELETE'])
 def api_delete_patient(patient_id):
