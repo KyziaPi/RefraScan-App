@@ -61,6 +61,8 @@ RefraScan - LASIK Patient Records
 								
 								<form class="table-row-buttons" action="/add-patient" method="POST">
 									<input type="hidden" name="patient_id" id="patient-id" value="{{ record.id if record.id else '' }}">
+									<input type="hidden" name="encounter_id" id="encounter-id" value="{{ record.encounter_id if record.encounter_id else '' }}">
+
 									<button href="/patient-record-detailed" class="btn-view" 
 										formaction="/patient-record-detailed"
 										formethod="POST"

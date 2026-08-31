@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const form = document.getElementById('add-patient-form');
     const successPopup = document.getElementById('record-success-popup');
     const diagnosisList = document.getElementById("diagnosis-list");
-    const hiddenIdInput = document.getElementById('id');
+    const hiddenIdInput = document.getElementById('patient-id');
     const patientId = hiddenIdInput ? hiddenIdInput.value : null;
 
     let newlyCreatedPatientId = null;

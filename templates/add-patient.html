@@ -17,8 +17,9 @@ RefraScan - LASIK Patient Records
 		<form class="form-layout-container" id="add-patient-form">
 		
 			<!-- Hidden ID (Will be empty for new patients, populated for edits) -->
-			<input type="hidden" name="id" id="id" value="{{ edit_id }}">
+			<input type="hidden" name="encounter_id" id="encounter-id" value="{{ encounter_id }}">
 			<input type="hidden" name="patient_id" id="patient-id" value="{{ patient_id }}">
+			<input type="hidden" name="inference_id" id="inference-id" value="{{ inference_id }}">
 			
 			<!-- Sticky Section Navigation Sidebar -->
 			<nav class="section-nav-pane">
@@ -130,11 +131,6 @@ RefraScan - LASIK Patient Records
 							</div>
 
 							<div class="form-field">
-								<label for="date">Date <span>(leave blank to set to today)</span></label>
-								<input type="date" id="date" name="date" required>
-							</div>
-
-							<div class="form-field">
 								<label for="occupation">Occupation</label>
 								<input type="text" id="occupation" name="occupation" required>
 							</div>
@@ -152,6 +148,11 @@ RefraScan - LASIK Patient Records
 							<div class="form-field">
 								<label for="referred-from">Referred From</label>
 								<input type="text" id="referred-from" name="referred_from" required>
+							</div>
+
+							<div class="form-field">
+								<label for="date">Date <span>(leave blank to set to today)</span></label>
+								<input type="date" id="date" name="date" >
 							</div>
 						</div>
 					</div>
@@ -176,7 +177,7 @@ RefraScan - LASIK Patient Records
 										<span>Yes</span>
 									</label>
 									<label class="checkbox-item">
-										<input type="radio" name="drug_allergy_present" value="No">
+										<input type="radio" name="drug_allergy_present" value="No" checked>
 										<span>No</span>
 									</label>
 								</div>
