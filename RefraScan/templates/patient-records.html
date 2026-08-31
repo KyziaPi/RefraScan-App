@@ -1,0 +1,108 @@
+{% extends "layout.html" %}
+
+{% block title %}
+RefraScan - LASIK Patient Records
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="/static/css/patient-records.css" />
+<script src="{{ url_for('static', filename='js/patient-records.js') }}"></script>
+{% endblock %}
+
+{% block main %}
+<div class="patient-records-main-content">
+	<div class="patient-records-patient">
+		<div class="patient-records-header patient-records-header1">
+			<div class="patient-records-header-heading">
+				<h1 class="patient-records-header-title">Patient Records</h1>
+				
+				<div class="btn1">
+					<input type="text" id="search-input" class="btn-label remove-highlight" placeholder="Search ID, Name, or Referral" />
+					<img src="{{ url_for('static', filename='assets/search-icon.png') }}" class="btn-icon1" alt="Search" />
+				</div>
+			</div>
+			
+			<form class="patient-records-header-container" action="/add-patient" method="get">
+				<button type="button" class="card-btn card-btn3 hover-bright" data-popup="import-csv-popup">
+					<img src="static/assets/import-icon.png" class="card-btn-icon" />
+					<p class="card-btn-text">Import Excel</p>
+				</button>
+				<button type="button" class="card-btn card-btn1 hover-bright" data-popup="export-csv-popup">
+					<img src="static/assets/export-icon.png" class="card-btn-icon" />
+					<p class="card-btn-text">Export Excel</p>
+				</button>
+				<button type="submit" class="card-btn card-btn2 hover-bright">
+					<img src="static/assets/add-icon.png" class="card-btn-icon" />
+					<p class="card-btn-text">Add Patient Record</p>
+				</button>
+			</form>
+		</div>
+		
+		<div id="sec-history-table" class="history-table-wrapper">
+			<div class="history-table-container">
+				<div class="root-table-header">
+					<p class="root-text">Patient ID</p>
+					<p class="root-text">Date</p>
+					<p class="root-text">Full Name</p>
+					<p class="root-text">Age</p>
+					<p class="root-text">Referred From</p>
+					<p class="root-text">Action</p>
+				</div>
+
+				<div class="root-table-body">
+					{% if records %}
+						{% for record in records %}
+							<div class="table-row">
+								<p class="table-row-text">{{ record.patient_code }}</p>
+								<p class="table-row-text">{{ record.date }}</p>
+								<p class="table-row-text">{{ record.name }}</p>								
+								<p class="table-row-text">{{ record.age }}</p>
+								<p class="table-row-text">{{ record.referred_from }}</p>
+								
+								<form class="table-row-buttons" action="/add-patient" method="POST">
+									<input type="hidden" name="patient_id" id="patient-id" value="{{ record.id if record.id else '' }}">
+									<input type="hidden" name="encounter_id" id="encounter-id" value="{{ record.encounter_id if record.encounter_id else '' }}">
+
+									<button href="/patient-record-detailed" class="btn-view" 
+										formaction="/patient-record-detailed"
+										formethod="POST"
+										type="submit">
+										<img src="{{ url_for('static', filename='assets/row-view.png') }}" alt="View" />
+									</button>
+									<input type="hidden" name="id" value="{{ record.id }}">
+									<button type="submit" class="btn-edit" style="border:none; background:transparent; cursor:pointer; padding:0;">
+										<img src="{{ url_for('static', filename='assets/row-edit.png') }}" alt="Edit" />
+									</button>
+									<button type="button" 
+											class="btn-delete"
+											data-popup="delete-confirmation-popup"
+											data-item-type="Patient Record"
+											data-item-name="{{ record.name }} ({{ record.patient_code }})"
+											data-item-id="{{ record.id }}"
+											data-delete-url="/api/delete-patient/{{ record.id }}">
+										<img src="{{ url_for('static', filename='assets/row-delete.png') }}" alt="Delete" />
+									</button>
+								</form>
+							</div>
+						{% endfor %}
+					{% endif %}
+
+					<!-- Toggleable empty row placeholder -->
+					<div class="table-row empty-row" style="{% if records %}display: none;{% endif %}">
+						<p class="table-row-text" style="grid-column: span 6; text-align: center;">No patient records found.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Pagination Controls -->
+		<div class="pagination-controls" style="display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-top: 2rem;">
+			<button type="button" id="prev-page" class="btn-secondary">&laquo; Previous</button>
+			<span id="page-info">Page 1 of 1</span>
+			<button type="button" id="next-page" class="btn-secondary">Next &raquo;</button>
+		</div>
+	</div>
+</div>
+
+{% include "popup.html" %}
+{% endblock %}

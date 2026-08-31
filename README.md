@@ -1,295 +1,134 @@
-# RefraScan App - Complete Deployment Guide
+# RefraScan App
 
-Welcome! Your RefraScan app is ready to deploy. Choose the setup that matches your needs.
-
----
-
-## 🎯 Quick Navigation
-
-**Just starting out?** → [Single Computer Setup](#single-computer-setup)
-**Need network access?** → [Multi-Computer Network Setup](#multi-computer-network-setup)
-**Technical details?** → [Architecture & Troubleshooting](#architecture--troubleshooting)
+RefraScan is a Flask-based web application designed for managing patient ophthalmic records for The Lasik Surgery Clinic - AUFMC and performing AI-assisted fundus image screening with explainable Grad-CAM heatmaps.
 
 ---
 
-## 📋 What's Included
+## ⚡ Features
 
-| File | Purpose |
-|------|---------|
-| `SETUP.bat` | ⭐ Run this ONCE to install dependencies |
-| `START-APP.bat` | ⭐ Run this to start the app (every time) |
-| `README-STARTUP.md` | Instructions for non-technical users |
-| `run-app.py` | Python launcher script |
-| `.env.example` | Template for configuration |
-| `TEST-NETWORK.bat` | Verify network setup (optional) |
-| `NETWORK-QUICK-START.md` | Network setup guide (optional) |
-| `NETWORK-SETUP.md` | Detailed network guide (optional) |
+* **Patient & Clinical Record Management:** Normalized storage for patient demographics, clinical encounters, eye examinations, refractions, and follow-up schedules.
 
----
 
-## Single Computer Setup
+* **AI Ophthalmic Screening:** Automated image processing and model inference with Grad-CAM heatmap visualization.
 
-### First Time Only
-1. Double-click **SETUP.bat**
-2. Wait for dependencies to install (5-10 minutes)
-3. Press any key when done
 
-### Every Time You Use It
-1. Double-click **START-APP.bat**
-2. Browser opens automatically to `http://localhost:5000`
-3. To stop: Press Ctrl+C in the command window
+* **Network & Multi-User Deployment:** Centralized PostgreSQL database support with synchronized, shared network upload storage across multiple client PCs.
 
-✅ That's it! No technical knowledge needed.
+
+* **Data Mobility:** Built-in Excel template import and export features.
+
+
 
 ---
 
-## Multi-Computer Network Setup
+## 📁 Repository Structure
 
-**Goal:** Multiple computers share the same database and upload folders
+```text
+RefraScan-App/
+├── Refrascan/              # Core application source code
+│   ├── app.py              # Main Flask application
+│   ├── run-app.py          # Application launcher script
+│   ├── static/             # Static assets, image uploads, and heatmaps
+│   ├── templates/          # HTML view templates
+│   └── utilities/          # Database and explainability helper scripts
+│   └── requirements.txt    # Python package dependencies
+├── tools/                  # Windows helper batch scripts
+│   ├── SETUP.bat           # Initializes .venv and installs dependencies
+│   ├── START-APP.bat       # Activates virtual environment and launches app
+│   └── TEST-NETWORK.bat    # Validates database connection & network path
+├── guides/                 # Detailed documentation and user manuals
+├── .env.example            # Environment variables template
 
-### Architecture
-```
-Server PC (Database + Shared Uploads)
-    ↓ (Network Share)
-Multiple Client PCs (Read & Write same data)
-```
 
-**Key:** Clients can both upload and download images - everything is shared!
-
-### Prerequisites
-- All computers on same network (same WiFi/LAN)
-- Server machine: Runs database and shares upload folders
-- Client machines: Access server's data
-
-### Setup Overview (Detailed in NETWORK-QUICK-START.md)
-
-#### On Server Machine:
-1. Share `static/uploads` folder
-2. Configure PostgreSQL for network access
-3. Create `.env` file with database settings
-4. Test with `START-APP.bat`
-
-#### On Each Client Machine:
-1. Map shared folder as network drive (e.g., Z:)
-2. Create `.env` file pointing to server
-3. Run `START-APP.bat` - done!
-
-**For detailed steps:** Read [NETWORK-QUICK-START.md](NETWORK-QUICK-START.md)
-
-### Multi-User Workflow Example
-```
-Timeline: All computers see changes instantly
-
-10:00 AM - Server uploads patient X image
-10:01 AM - Client #1 sees patient X in records
-10:02 AM - Client #1 uploads patient Y image  
-10:03 AM - Server sees patient Y (refreshes page)
-10:04 AM - Client #2 sees both patients X and Y
-10:05 AM - Client #2 uploads patient Z image
-         ✓ All machines see patients X, Y, Z
-         ✓ All images in shared uploads folder
-         ✓ Database synchronized across network
 ```
 
 ---
 
-## Configuration Files
+## 💻 Requirements
 
-### .env File (Required for Network Setup)
+* **OS:** Windows 10 or later
 
-Copy `.env.example` to `.env` and update:
 
-```
-# Local Only
+* **Language:** Python 3.8+
+
+
+* **Database:** PostgreSQL
+
+
+* **Core Dependencies:** Flask, TensorFlow, OpenCV, NumPy, Pandas, OpenPyXL, Psycopg2-Binary, Joblib, Scikit-Learn, Python-Dotenv
+
+
+
+---
+
+## 🚀 Quick Start
+
+### 1. Configuration
+
+Copy `.env.example` to `.env` in the RefraScan folder and configure your database and file paths:
+
+```ini
+DB_NAME=refrascan_db
+DB_USER=postgres
+DB_PASSWORD=your_password
 DB_HOST=127.0.0.1
+DB_PORT=5432
 UPLOAD_BASE_PATH=
 
-# Network Setup
-DB_HOST=192.168.1.100        (server IP)
-UPLOAD_BASE_PATH=Z:\         (mapped drive)
 ```
 
-### .env.example (Template)
-Shows all available options with documentation
+### 2. Initial Setup
+
+Run `tools\SETUP.bat` once to create the local Python virtual environment (`.venv`) and install required packages from `requirements.txt`.
+
+### 3. Start the Application
+
+Run `tools\START-APP.bat`. The launcher will start the Flask server and open `http://localhost:5000` automatically in your web browser.
 
 ---
 
-## Verification & Testing
+## 🌐 Multi-Computer Network Setup
 
-### Single Computer
-- App opens automatically in browser
-- Can upload images
-- Data persists between sessions
+To share data and uploads across multiple client machines on a LAN:
 
-### Network Setup
-- Run `TEST-NETWORK.bat` to verify configuration
-- Should show ✓ for database and uploads
-- If ✗ appears, check NETWORK-QUICK-START.md troubleshooting
+1. **Server PC:** Share the `static/uploads` directory over the local network and set up PostgreSQL to accept incoming network connections.
 
----
 
-## Architecture & Troubleshooting
+2. **Client PCs:** Map the server's shared folder as a network drive (e.g., `Z:\`).
 
-### Single Computer Architecture
-```
-Local Machine
-├── Python 3.10
-├── Virtual Environment (.venv)
-├── Flask App (localhost:5000)
-├── PostgreSQL Database (local)
-└── Uploads Folder (local)
-```
 
-### Network Architecture
-```
-Server Machine
-├── PostgreSQL Database (listening to network)
-└── Shared Uploads Folder (\\SERVER\uploads)
-        ↑
-        └─→ Network Connection
-            ↓
-Client Machine #1
-├── Flask App
-├── .env → points to server
-└── Mapped Drive (Z:)
+3. **Configure `.env`:** Point `DB_HOST` to the Server IP and `UPLOAD_BASE_PATH` to the mapped drive.
 
-Client Machine #2
-├── Flask App
-├── .env → points to server
-└── Mapped Drive (Z:)
+
+
+```ini
+DB_HOST=192.168.1.100
+UPLOAD_BASE_PATH=Z:\
+
 ```
 
----
 
-## Troubleshooting
-
-### App Won't Start
-- Check Python is installed: `python --version`
-- Check virtual environment: `.venv` folder should exist
-- Delete `.venv` and run `SETUP.bat` again
-
-### Browser Doesn't Open Automatically
-- App is still running on http://localhost:5000
-- Open browser manually and go to that URL
-
-### Database Connection Error
-- PostgreSQL service running? Check Windows Services
-- Port 5432 open? Test with: `netstat -an | findstr 5432`
-- .env has correct password? Update and restart
-
-### Network Issues (After Sharing)
-- Can't see network path? Run `TEST-NETWORK.bat`
-- Mapped drive offline? Disconnect and re-map
-- Database won't connect? Check server IP address
-
-### "Port 5000 already in use"
-- Another app using port 5000
-- Kill it: `netstat -ano | findstr :5000`
-- Then: `taskkill /PID <PID> /F`
+4. **Diagnostic Check:** Run `tools\TEST-NETWORK.bat` to verify database connectivity and network drive access.
 
 ---
 
-## User Documentation
+## 🔧 Troubleshooting
 
-### For Non-Technical Users
-→ Give them: [README-STARTUP.md](README-STARTUP.md)
+* **Python missing error:** Ensure Python 3.8+ is installed and checked for **"Add Python to PATH"** during installation.
 
-Just needs to know:
-1. Run `SETUP.bat` once
-2. Run `START-APP.bat` every time
-3. Done!
 
-### For Technical Managers
-→ Give them: This file + [NETWORK-QUICK-START.md](NETWORK-QUICK-START.md)
+* **Database connection failed:** Check that the PostgreSQL service is active and credentials in `.env` match.
 
-Key points:
-- Database is PostgreSQL
-- Runs on Flask framework
-- Supports network deployment
-- All configuration via .env
+
+* **Port 5000 in use:** Stop competing processes on port 5000 using `netstat -ano | findstr :5000` then get the rightmost value which contains the PID. Lastly, type `taskkill /PID <PID> /F` substitute <PID> with the value you copied earlier.
+
+
+* **Network share offline:** Ensure the mapped drive is active on client PCs before launching.
+
+
 
 ---
 
-## System Requirements
+**Version:** 1.0
 
-### Minimum (Single Computer)
-- Windows 10+
-- Python 3.8+
-- 4GB RAM
-- 3GB disk space (mostly for TensorFlow)
-- PostgreSQL installed and running
-
-### Network Setup
-- Same as above, plus:
-- Network connectivity (WiFi/LAN)
-- Static server IP (recommended)
-- File sharing enabled on server
-
----
-
-## Features
-
-✅ Web-based interface (no installation per-user)
-✅ Multiple users simultaneously on same machine or network
-✅ **Client machines can upload AND download images** (everything shared!)
-✅ Patient record management
-✅ Medical imaging with AI inference
-✅ Heatmap/explainability visualization
-✅ Data export (Excel)
-✅ Data import (Excel templates)
-✅ Multi-computer network support
-✅ Automatic synchronization across network
-
----
-
-## Support & Maintenance
-
-### Backing Up Data
-- Database: Back up PostgreSQL (contact database admin)
-- Files: Back up `static/uploads` folder
-- Configuration: Back up `.env` file (keep password safe!)
-
-### Updating the App
-- Download new version
-- Copy files over existing (except .env, static/uploads)
-- Run `SETUP.bat` if requirements.txt changed
-- Run `START-APP.bat` as normal
-
-### Monitoring
-- Check `static/uploads` folder for disk space
-- Monitor PostgreSQL database size
-- Check network connectivity if multi-computer
-
----
-
-## Quick Reference
-
-| Action | Command |
-|--------|---------|
-| First time setup | `SETUP.bat` |
-| Start app | `START-APP.bat` |
-| Stop app | Ctrl+C in console |
-| Check network | `TEST-NETWORK.bat` |
-| View configuration | Open `.env` file |
-
----
-
-## Next Steps
-
-1. **Single Computer?**
-   - Run `SETUP.bat` → `START-APP.bat` → Done!
-
-2. **Network Setup?**
-   - Read [NETWORK-QUICK-START.md](NETWORK-QUICK-START.md)
-   - Follow 5 steps
-   - Run `TEST-NETWORK.bat` to verify
-
-3. **Share with Users?**
-   - Give them [README-STARTUP.md](README-STARTUP.md)
-   - They only need to know: `SETUP.bat` (once) → `START-APP.bat` (always)
-
----
-
-**Version:** 1.0  
-**Updated:** August 2026  
 **Contact:** guecoyerikaelaine@gmail.com
