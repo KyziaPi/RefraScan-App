@@ -1,0 +1,85 @@
+{% extends "layout.html" %}
+
+{% block title %}Audit Logs - RefraScan{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="/static/css/patient-records.css" />
+<style>
+    /* Custom Grid Layout strictly for the Audit Logs Table */
+    .audit-table .root-table-header,
+    .audit-table .table-row {
+        display: grid;
+        grid-template-columns: 
+            minmax(14rem, 1fr)  /* Timestamp */
+            minmax(12rem, 1fr)  /* User */
+            minmax(10rem, 0.8fr) /* Role */
+            minmax(10rem, 0.8fr) /* Action */
+            minmax(20rem, 3fr)   /* Description */
+            minmax(12rem, 1fr);  /* IP Address */
+        column-gap: 1.5rem;
+    }
+    
+    .badge-log {
+        display: inline-block;
+        padding: 0.4rem 1rem;
+        border-radius: 6px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--color-surface);
+        text-align: center;
+    }
+    .badge-log.login { background-color: var(--color-info); }
+    .badge-log.view { background-color: var(--color-success); }
+    .badge-log.create { background-color: var(--color-brand); }
+    .badge-log.edit { background-color: var(--color-warning-strong); }
+    .badge-log.delete { background-color: var(--color-danger); }
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="patient-records-main-content">
+    <div class="patient-records-patient">
+        
+        <div class="patient-records-header">
+            <div class="patient-records-header-heading">
+                <h1 class="patient-records-header-title">System Audit Logs</h1>
+            </div>
+        </div>
+        
+        <div class="history-table-wrapper">
+            <div class="history-table-container audit-table">
+                <div class="root-table-header">
+                    <p class="root-text">Timestamp</p>
+                    <p class="root-text">User</p>
+                    <p class="root-text">Role</p>
+                    <p class="root-text">Action</p>
+                    <p class="root-text">Description</p>
+                    <p class="root-text">IP Address</p>
+                </div>
+
+                <div class="root-table-body">
+                    {% if logs %}
+                        {% for log in logs %}
+                            <div class="table-row">
+                                <p class="table-row-text">{{ log.created_at }}</p>
+                                <p class="table-row-text">{{ log.username }}</p>
+                                <p class="table-row-text" style="text-transform: capitalize;">{{ log.user_role }}</p>
+                                <p class="table-row-text">
+                                    <span class="badge-log {{ log.action_type|lower }}">{{ log.action_type }}</span>
+                                </p>
+                                <p class="table-row-text" style="color: var(--color-text-secondary);">{{ log.description }}</p>
+                                <p class="table-row-text">{{ log.ip_address }}</p>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="table-row empty-row">
+                            <p class="table-row-text" style="grid-column: span 6; text-align: center;">No audit logs found.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

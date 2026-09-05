@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block title %}Login - RefraScan{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="/static/css/auth.css" />
+<link rel="stylesheet" href="/static/css/add-patient.css" /> <!-- Reusing form-field styles -->
+{% endblock %}
+
+{% block main %}
+<div class="auth-main-content">
+    <div class="auth-card">
+        
+        <div class="auth-header">
+            <h1 class="auth-title">Welcome Back</h1>
+            <p class="auth-subtitle">Login to access RefraScan</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                <div class="alert {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+
+        <form class="auth-form" method="POST" action="/login">
+            <div class="form-field">
+                <label for="identity">Username or Email</label>
+                <input type="text" id="identity" name="identity" placeholder="Enter username or email" required>
+            </div>
+            
+            <div class="form-field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter password" required>
+            </div>
+            
+            <button type="submit" class="btn-main hover-bright" style="margin-top: 1rem;">Login</button>
+            
+            <div class="auth-links">
+                <a href="/forgot-password" class="auth-link">Forgot Password?</a>
+                <a href="/register" class="auth-link">Create an Account</a>
+            </div>
+        </form>
+        
+    </div>
+</div>
+{% endblock %}
