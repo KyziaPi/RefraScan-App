@@ -39,7 +39,6 @@ RefraScan-App/
 ├── guides/                 # Detailed documentation and user manuals
 ├── .env.example            # Environment variables template
 
-
 ```
 
 ---

@@ -6,7 +6,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 # 2. (Optional) Turn off the oneDNN notice explicitly
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
-from flask import Flask, Response, request, jsonify, render_template, redirect, url_for, send_file, flash
+from flask import Flask, Response, request, jsonify, render_template, redirect, url_for, send_file, flash, session
 import cv2
 import numpy as np
 from tensorflow import keras
@@ -1506,6 +1506,45 @@ def execute_import():
                 os.remove(filepath)
             except Exception as cleanup_err:
                 print(f"Failed to delete temp file: {cleanup_err}")
+                
+# =========================================================
+# AUTHENTICATION ROUTES
+# =========================================================
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        return render_template("login.html")
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "GET":
+        return render_template("register.html")
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "GET":
+        return render_template("forgot-password.html")
+
+@app.route("/reset-password", methods=["GET", "POST"])
+def reset_password():
+    if request.method == "GET":
+        return render_template("reset-password.html")
+    
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/login")
+
+# =========================================================
+# AUDIT LOGS VIEW (Superadmin Only)
+# =========================================================
+@app.route("/audit-logs")
+def audit_logs():
+    """Superadmin-only view to monitor all user actions across accounts."""
+    query = "SELECT * FROM account_activity_logs ORDER BY id DESC LIMIT 200;"
+    response, status = db.select_rows(query)
+    logs = response.get_json() if status == 200 else []
+    return render_template("audit-logs.html", page="audit_logs", logs=logs)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
