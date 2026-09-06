@@ -76,7 +76,7 @@ def create_database():
             location VARCHAR(255),
             phone VARCHAR(50),
             email VARCHAR(255),
-            date DATE NOT NULL DEFAULT CURRENT_DATE,
+            "date" DATE NOT NULL DEFAULT CURRENT_DATE,
             occupation VARCHAR(255),
             language_spoken VARCHAR(100),
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -117,7 +117,7 @@ def create_database():
             schirmers_test VARCHAR(100),
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
-        
+
         -- =========================================================
         -- DIAGNOSES (1:N relationship per Clinical Encounter)
         -- =========================================================
@@ -127,7 +127,7 @@ def create_database():
             diagnosis VARCHAR(255) NOT NULL,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
-        
+
         -- =========================================================
         -- 4) EYE EXAMINATIONS (1 entry per eye per encounter)
         -- =========================================================
@@ -197,7 +197,7 @@ def create_database():
         -- =========================================================
         CREATE TABLE IF NOT EXISTS inference_history (
             id SERIAL PRIMARY KEY,
-            inference_id VARCHAR(50) UNIQUE NOT NULL DEFAULT 'INF-' || TO_CHAR(CURRENT_TIMESTAMP, 'YYYYMMDDHH24MISS'),
+            inference_id VARCHAR(50) UNIQUE NOT NULL DEFAULT ('INF-' || TO_CHAR(CURRENT_TIMESTAMP, 'YYYYMMDDHH24MISS')),
             
             patient_id INTEGER REFERENCES patients(id) ON DELETE SET NULL,
             encounter_id INTEGER REFERENCES clinical_encounters(id) ON DELETE SET NULL,
@@ -234,6 +234,36 @@ def create_database():
             details TEXT NOT NULL,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             UNIQUE (encounter_id, follow_up_number)
+        );
+
+        -- =========================================================
+        -- 8) USERS & ACCOUNTS (Authentication & User Roles)
+        -- =========================================================
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            username VARCHAR(100) UNIQUE NOT NULL,
+            email VARCHAR(255) UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            full_name VARCHAR(150),
+            role VARCHAR(20) NOT NULL CHECK (role IN ('superadmin', 'admin', 'user')) DEFAULT 'user',
+            reset_token VARCHAR(255),
+            reset_token_expiry TIMESTAMP,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- =========================================================
+        -- 9) ACCOUNT ACTIVITY LOGS (Auditing for Superadmin)
+        -- =========================================================
+        CREATE TABLE IF NOT EXISTS account_activity_logs (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+            username VARCHAR(100),
+            user_role VARCHAR(20),
+            action_type VARCHAR(20) NOT NULL CHECK (action_type IN ('VIEW', 'CREATE', 'EDIT', 'DELETE', 'LOGIN')),
+            description TEXT NOT NULL,
+            ip_address VARCHAR(45),
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
                                 """
         new_cursor.execute(create_table_query)
