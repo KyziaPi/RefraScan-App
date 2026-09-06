@@ -29,8 +29,17 @@
 			</div>
 			
 			<div class="site-header__nav">
-				<a class="site-header__nav-link" href="/patient-records">Patient Records</a>
-				<a class="site-header__nav-link" href="/inference-history">Inference History</a>
+				{% if session.get('user_id') %}
+					<!-- Logged In Links -->
+					<a class="site-header__nav-link" href="/patient-records">Patient Records</a>
+					<a class="site-header__nav-link" href="/inference-history">Inference History</a>
+					<a class="site-header__nav-link" href="/logout">Logout</a>
+				{% else %}
+					<!-- Logged Out Links -->
+					<a class="site-header__nav-link" href="/login">Login</a>
+					<a class="site-header__nav-link" href="/register">Register</a>
+					<a class="site-header__nav-link" href="/forgot-password">Forgot Password</a>
+				{% endif %}
 			</div>
 
 			<!-- Mobile Toggle Button (Visible < 610px) -->

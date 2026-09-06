@@ -12,6 +12,7 @@ RefraScan - Inference Engine
 {% block main %}
 
 		<div class="inference-engine-main-content section1">
+			{% if session.get('user_id') %}
 			<h1 class="inference-engine-title title">
 				Fundus Image-Based Refractive Error Classification
 			</h1>
@@ -140,5 +141,47 @@ RefraScan - Inference Engine
 
 				</div>
 			</form>
+			{% else %}
+			<section class="refrascan-landing" aria-labelledby="landing-title">
+				<div class="refrascan-landing__copy">
+					<p class="refrascan-landing__eyebrow">Clinical decision support for eye care</p>
+					<h1 id="landing-title" class="refrascan-landing__title">
+						See refractive error patterns with greater clarity.
+					</h1>
+					<p class="refrascan-landing__description">
+						RefraScan is a deep learning clinical decision support application for fundus image-based refractive error classification.
+					</p>
+					<div class="refrascan-landing__actions">
+						<a class="btn-main refrascan-landing__primary hover-bright" href="/login">Login to RefraScan</a>
+						<a class="refrascan-landing__secondary" href="/about-the-study">Learn about the study <span aria-hidden="true">&rarr;</span></a>
+					</div>
+				</div>
+
+				<div class="refrascan-landing__visual" aria-label="Fundus image analysis preview">
+					<div class="refrascan-landing__image-frame">
+						<img src="/static/assets/sample-fundus.png" alt="Sample fundus image" />
+					</div>
+					<div class="refrascan-landing__signal">
+						<span class="refrascan-landing__signal-dot"></span>
+						<span>AI-assisted screening</span>
+					</div>
+				</div>
+			</section>
+
+			<div class="refrascan-landing__features" aria-label="RefraScan capabilities">
+				<div class="refrascan-landing__feature">
+					<strong>01</strong>
+					<span>Fundus image-based classification</span>
+				</div>
+				<div class="refrascan-landing__feature">
+					<strong>02</strong>
+					<span>Explainable results for clinical review</span>
+				</div>
+				<div class="refrascan-landing__feature">
+					<strong>03</strong>
+					<span>Organized patient and inference records</span>
+				</div>
+			</div>
+			{% endif %}
 		</div>
 {% endblock %}
