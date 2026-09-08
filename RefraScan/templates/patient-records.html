@@ -23,18 +23,23 @@ RefraScan - LASIK Patient Records
 			</div>
 			
 			<form class="patient-records-header-container" action="/add-patient" method="get">
+				
+				{% if session.get('role') != 'user' %}
 				<button type="button" class="card-btn card-btn3 hover-bright" data-popup="import-csv-popup">
 					<img src="static/assets/import-icon.png" class="card-btn-icon" />
 					<p class="card-btn-text">Import Excel</p>
 				</button>
+				{% endif %}
 				<button type="button" class="card-btn card-btn1 hover-bright" data-popup="export-csv-popup">
 					<img src="static/assets/export-icon.png" class="card-btn-icon" />
 					<p class="card-btn-text">Export Excel</p>
 				</button>
+				{% if session.get('role') != 'user' %}
 				<button type="submit" class="card-btn card-btn2 hover-bright">
 					<img src="static/assets/add-icon.png" class="card-btn-icon" />
 					<p class="card-btn-text">Add Patient Record</p>
 				</button>
+				{% endif %}
 			</form>
 		</div>
 		
@@ -59,18 +64,20 @@ RefraScan - LASIK Patient Records
 								<p class="table-row-text">{{ record.age }}</p>
 								<p class="table-row-text">{{ record.referred_from }}</p>
 								
-								<form class="table-row-buttons" action="/add-patient" method="POST">
+								<form class="table-row-buttons">
 									<input type="hidden" name="patient_id" id="patient-id" value="{{ record.id if record.id else '' }}">
 									<input type="hidden" name="encounter_id" id="encounter-id" value="{{ record.encounter_id if record.encounter_id else '' }}">
 
 									<button href="/patient-record-detailed" class="btn-view" 
-										formaction="/patient-record-detailed"
-										formethod="POST"
+										formaction="/patient-record-detailed?id={{ record.id }}"
+										formethod="GET"
 										type="submit">
 										<img src="{{ url_for('static', filename='assets/row-view.png') }}" alt="View" />
 									</button>
-									<input type="hidden" name="id" value="{{ record.id }}">
-									<button type="submit" class="btn-edit" style="border:none; background:transparent; cursor:pointer; padding:0;">
+									{% if session.get('role') != 'user' %}
+									<button type="submit" class="btn-edit" style="border:none; background:transparent; cursor:pointer; padding:0;"
+										formaction="/add-patient"
+										formethod="POST">
 										<img src="{{ url_for('static', filename='assets/row-edit.png') }}" alt="Edit" />
 									</button>
 									<button type="button" 
@@ -82,6 +89,7 @@ RefraScan - LASIK Patient Records
 											data-delete-url="/api/delete-patient/{{ record.id }}">
 										<img src="{{ url_for('static', filename='assets/row-delete.png') }}" alt="Delete" />
 									</button>
+									{% endif %}
 								</form>
 							</div>
 						{% endfor %}

@@ -12,7 +12,8 @@ RefraScan - Inference Engine
 {% block main %}
 
 		<div class="inference-engine-main-content section1">
-			{% if session.get('user_id') %}
+			<input type="hidden" id="user_id" name="user_id" value="{{ session.get('user_id') }}">
+			{% if session.get('user_id') and session.get('role') != 'user' %}
 			<h1 class="inference-engine-title title">
 				Fundus Image-Based Refractive Error Classification
 			</h1>
@@ -152,7 +153,9 @@ RefraScan - Inference Engine
 						RefraScan is a deep learning clinical decision support application for fundus image-based refractive error classification.
 					</p>
 					<div class="refrascan-landing__actions">
+						{% if not session.get('user_id') %}
 						<a class="btn-main refrascan-landing__primary hover-bright" href="/login">Login to RefraScan</a>
+						{% endif %}
 						<a class="refrascan-landing__secondary" href="/about-the-study">Learn about the study <span aria-hidden="true">&rarr;</span></a>
 					</div>
 				</div>

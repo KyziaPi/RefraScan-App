@@ -1,0 +1,61 @@
+    /* Custom Grid Layout strictly for the Audit Logs Table */
+    .audit-table .root-table-header,
+    .audit-table .table-row {
+        display: grid;
+        grid-template-columns: 
+            minmax(14rem, 1fr)  /* Timestamp */
+            minmax(12rem, 1fr)  /* User */
+            minmax(10rem, 0.8fr) /* Role */
+            minmax(10rem, 0.8fr) /* Action */
+            minmax(20rem, 3fr)   /* Description */
+            minmax(12rem, 1fr);  /* IP Address */
+        column-gap: 1.5rem;
+    }
+    
+    .badge-log {
+        display: inline-block;
+        padding: 0.4rem 1rem;
+        border-radius: 6px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--color-surface);
+        text-align: center;
+    }
+    .badge-log.login { background-color: var(--color-info); }
+    .badge-log.view { background-color: var(--color-success); }
+    .badge-log.create { background-color: var(--color-brand); }
+    .badge-log.edit { background-color: var(--color-warning-strong); }
+    .badge-log.delete { background-color: var(--color-danger); }
+
+
+/* Screen width <= 1080px: Center the header title container */
+@media screen and (max-width: 1080px) {
+    .patient-records-header-heading {
+        justify-content: center;
+        width: 100%;
+        text-align: center;
+    }
+
+    .patient-records-header {
+        flex-direction: column;
+        justify-content: center;
+    }
+}
+
+/* Screen width <= 765px: Stack search & filter inputs vertically and center them */
+@media screen and (max-width: 765px) {
+    .history-search-main-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        gap: 2.5rem;
+    }
+
+    .history-search-container,
+    .history-filter-container {
+        width: 100%;
+        max-width: 100%;
+    }
+}

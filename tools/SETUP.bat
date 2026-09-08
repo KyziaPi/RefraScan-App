@@ -79,6 +79,23 @@ if errorlevel 1 (
     echo.
 )
 
+REM ============================================================
+REM Check .env file and generate SECRET_KEY
+REM ============================================================
+echo.
+echo Checking .env configuration...
+if not exist ".env" (
+    if exist ".env.example" (
+        echo Creating .env from .env.example...
+        copy .env.example .env >nul
+    ) else (
+        echo Creating new .env file...
+        type nul > .env
+    )
+)
+
+python -c "import os, secrets; env='.env'; text=open(env,'r',encoding='utf-8').read() if os.path.exists(env) else ''; (open(env,'a',encoding='utf-8').write(f'\nSECRET_KEY={secrets.token_hex(32)}\n'), print('✓ Generated new SECRET_KEY in .env')) if 'SECRET_KEY=' not in text else print('✓ SECRET_KEY already configured in .env')"
+
 echo.
 echo ✓ Setup complete!
 echo.

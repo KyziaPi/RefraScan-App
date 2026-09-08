@@ -4,36 +4,9 @@
 
 {% block additional_css %}
 <link rel="stylesheet" href="/static/css/patient-records.css" />
-<style>
-    /* Custom Grid Layout strictly for the Audit Logs Table */
-    .audit-table .root-table-header,
-    .audit-table .table-row {
-        display: grid;
-        grid-template-columns: 
-            minmax(14rem, 1fr)  /* Timestamp */
-            minmax(12rem, 1fr)  /* User */
-            minmax(10rem, 0.8fr) /* Role */
-            minmax(10rem, 0.8fr) /* Action */
-            minmax(20rem, 3fr)   /* Description */
-            minmax(12rem, 1fr);  /* IP Address */
-        column-gap: 1.5rem;
-    }
-    
-    .badge-log {
-        display: inline-block;
-        padding: 0.4rem 1rem;
-        border-radius: 6px;
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: var(--color-surface);
-        text-align: center;
-    }
-    .badge-log.login { background-color: var(--color-info); }
-    .badge-log.view { background-color: var(--color-success); }
-    .badge-log.create { background-color: var(--color-brand); }
-    .badge-log.edit { background-color: var(--color-warning-strong); }
-    .badge-log.delete { background-color: var(--color-danger); }
-</style>
+<link rel="stylesheet" href="/static/css/inference-history.css" />
+<link rel="stylesheet" href="/static/css/audit-logs.css" />
+<script src="{{ url_for('static', filename='js/audit-logs.js') }}"></script>
 {% endblock %}
 
 {% block main %}
@@ -43,6 +16,46 @@
         <div class="patient-records-header">
             <div class="patient-records-header-heading">
                 <h1 class="patient-records-header-title">System Audit Logs</h1>
+            </div>
+
+            <div class="history-search-main-container">
+                <div class="history-search-container">
+                    <input type="text" id="search-input" class="history-search-container-text remove-highlight" placeholder="Search User" />
+                    <img src="{{ url_for('static', filename='assets/search-icon.png') }}" class="history-search-container-icon" alt="Search" />
+                </div>
+                
+                <div class="history-filter-container history-filter-container1">
+                    <div class="history-filter-wrapper">
+                        <select class="history-filter-dropbox" id="filter-action-type">
+                            <option value="">All Actions</option>
+                            <option value="login">Login</option>
+                            <option value="view">View</option>
+                            <option value="edit">Edit</option>
+                            <option value="delete">Delete</option>
+                        </select>
+                        <img src="{{ url_for('static', filename='assets/filter-dropbox-icon.png') }}" class="history-filter-dropbox-icon" alt="Dropdown Icon" />
+                    </div>
+
+                    <div class="history-filter-container-label">
+                        <p class="history-filter-container-text">Filter By Action Type</p>
+                    </div>
+                </div>
+                
+                <div class="history-filter-container history-filter-container1">
+                    <div class="history-filter-wrapper">
+                        <select class="history-filter-dropbox" id="filter-user-type">
+                            <option value="">All User Types</option>
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                            <option value="superadmin">Super Admin</option>
+                        </select>
+                        <img src="{{ url_for('static', filename='assets/filter-dropbox-icon.png') }}" class="history-filter-dropbox-icon" alt="Dropdown Icon" />
+                    </div>
+
+                    <div class="history-filter-container-label">
+                        <p class="history-filter-container-text">Filter By User Type</p>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -78,6 +91,13 @@
                     {% endif %}
                 </div>
             </div>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-controls" style="display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-top: 2rem;">
+            <button type="button" id="prev-page" class="btn-secondary">&laquo; Previous</button>
+            <span id="page-info">Page 1 of 1</span>
+            <button type="button" id="next-page" class="btn-secondary">Next &raquo;</button>
         </div>
 
     </div>

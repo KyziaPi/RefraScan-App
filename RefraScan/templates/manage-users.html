@@ -1,0 +1,92 @@
+{% extends "layout.html" %}
+
+{% block title %}Manage Users - RefraScan{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="/static/css/manage-users.css" />
+<link rel="stylesheet" href="/static/css/patient-records.css" />
+<script src="/static/js/manage-users.js"></script>
+{% endblock %}
+
+{% block main %}
+<div class="patient-records-main-content">
+    <div class="patient-records-patient">
+        
+        <div class="patient-records-header">
+            <div class="patient-records-header-heading">
+                <h1 class="patient-records-header-title">User Accounts Management</h1>
+            </div>
+        </div>
+        
+        <div class="history-table-wrapper">
+            <div class="history-table-container manage-users-table">
+                <div class="root-table-header">
+                    <p class="root-text">ID</p>
+                    <p class="root-text">Full Name</p>
+                    <p class="root-text">Username</p>
+                    <p class="root-text">Email</p>
+                    <p class="root-text">Role</p>
+                    <p class="root-text">Date Joined</p>
+                    <p class="root-text">Actions</p>
+                </div>
+
+                <div class="root-table-body">
+                    {% if users and users|length > 0 %}
+                        {% for u in users %}
+                            <div class="table-row">
+                                <p class="table-row-text">#{{ u.id }}</p>
+                                <p class="table-row-text"><strong>{{ u.full_name or 'N/A' }}</strong></p>
+                                <p class="table-row-text">{{ u.username }}</p>
+                                <p class="table-row-text">{{ u.email }}</p>
+                                <p class="table-row-text">
+                                    <span class="badge-role {{ u.role|lower }}">{{ u.role }}</span>
+                                </p>
+                                <p class="table-row-text">{{ u.created_at or 'N/A' }}</p>
+                                
+                                <div class="table-row-buttons">
+                                    <button type="button" 
+                                            class="edit-role-btn" 
+                                            data-popup="edit-role-popup"
+                                            data-user-id="{{ u.id }}" 
+                                            data-username="{{ u.username }}" 
+                                            data-role="{{ u.role }}"
+                                            style="border:none; background:transparent; cursor:pointer; padding:0;">
+                                        <img src="{{ url_for('static', filename='assets/row-edit.png') }}" alt="Edit Role" />
+                                    </button>
+
+                                    {% if u.id != session.get('user_id') %}
+                                    <button type="button" 
+                                            class="btn-delete" 
+                                            data-popup="delete-confirmation-popup"
+                                            data-item-type="User Account"
+                                            data-item-name="{{ u.username }}"
+                                            data-item-id="{{ u.id }}"
+                                            data-delete-url="/api/delete-user/{{ u.id }}"
+                                            style="border:none; background:transparent; cursor:pointer; padding:0;">
+                                        <img src="{{ url_for('static', filename='assets/row-delete.png') }}" alt="Delete" />
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="table-row empty-row">
+                            <p class="table-row-text" style="grid-column: span 7; text-align: center;">No user accounts found.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-controls" style="display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-top: 2rem;">
+            <button type="button" id="prev-page" class="btn-secondary">&laquo; Previous</button>
+            <span id="page-info">Page 1 of 1</span>
+            <button type="button" id="next-page" class="btn-secondary">Next &raquo;</button>
+        </div>
+
+    </div>
+</div>
+
+{% include "popup.html" %}
+{% endblock %}

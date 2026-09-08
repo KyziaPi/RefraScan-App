@@ -29,14 +29,27 @@ RefraScan - Inference Results
 					<input type="hidden" name="phone" value="{{ phone if phone else '' }}">
 					<input type="hidden" name="email" value="{{ email if email else '' }}">
 				{% endif %}
-
+					
+				{% if patient_id and patient_id != 'None' and patient_id != 'null' %}
+					<!-- 1. VIEW PATIENT RECORD: Shown to ALL roles (User, Admin, Superadmin) if patient_id exists -->
 					<button id="patientRecordBtn" 
-							class="patient-record-btn hover-bright {% if patient_id %}view-patient-record-btn{% else %}add-patient-record-btn{% endif %}" 
+							class="patient-record-btn hover-bright view-patient-record-btn" 
 							type="submit"
-							formaction="{% if patient_id %}/patient-record-detailed{% else %}/add-patient{% endif %}" 
-							formmethod="{% if patient_id %}GET{% else %}POST{% endif %}"> 
-						{% if patient_id %}View Patient Record{% else %}Add Patient Record{% endif %}
+							formaction="/patient-record-detailed" 
+							formmethod="GET"> 
+						View Patient Record
 					</button>
+
+				{% elif session.get('role') != 'user' %}
+					<!-- 2. ADD PATIENT RECORD: Hidden if role == 'user', shown to Admin/Superadmin if no patient_id -->
+					<button id="patientRecordBtn" 
+							class="patient-record-btn hover-bright add-patient-record-btn" 
+							type="submit"
+							formaction="/add-patient" 
+							formmethod="POST"> 
+						Add Patient Record
+					</button>
+				{% endif %}
 				</form>
 			</div>
 			

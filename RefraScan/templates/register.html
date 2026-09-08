@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
 
-{% block title %}Register - RefraScan{% endblock %}
+{% block title %}
+{% if is_setup_mode %}First-Time Setup - Superadmin Registration{% else %}Register - RefraScan{% endif %}
+{% endblock %}
 
 {% block additional_css %}
 <link rel="stylesheet" href="/static/css/auth.css" />
@@ -11,9 +13,24 @@
 <div class="auth-main-content">
     <div class="auth-card">
         
+        {% if is_setup_mode %}
+        <!-- Visual Setup Banner for Superadmin Account -->
+        <div class="superadmin-badge-banner">
+            <div class="superadmin-badge-icon">🛡️</div>
+            <div class="superadmin-badge-text">
+                <strong>Initial System Setup</strong>
+                <span>No Superadmin account was detected. This registration will create the <b>Master Superadmin Account</b> with full system control.</span>
+            </div>
+        </div>
+        {% endif %}
+
         <div class="auth-header">
-            <h1 class="auth-title">Create Account</h1>
-            <p class="auth-subtitle">Join the RefraScan network</p>
+            <h1 class="auth-title">
+                {% if is_setup_mode %}Create Superadmin Account{% else %}Create Account{% endif %}
+            </h1>
+            <p class="auth-subtitle">
+                {% if is_setup_mode %}Set up administrative credentials for RefraScan{% else %}Join the RefraScan network{% endif %}
+            </p>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -29,7 +46,7 @@
         <form class="auth-form" method="POST" action="/register">
             <div class="form-field">
                 <label for="full_name">Full Name</label>
-                <input type="text" id="full_name" name="full_name" placeholder="Juan Dela Cruz" required>
+                <input type="text" id="full_name" name="full_name" placeholder="Dr. Jane Doe" required>
             </div>
             
             <div class="form-field">
@@ -39,7 +56,7 @@
 
             <div class="form-field">
                 <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" placeholder="name@clinic.com" required>
+                <input type="email" id="email" name="email" placeholder="admin@clinic.com" required>
             </div>
             
             <div class="form-field">
@@ -47,11 +64,15 @@
                 <input type="password" id="password" name="password" placeholder="Create a strong password" required>
             </div>
             
-            <button type="submit" class="btn-main hover-bright" style="margin-top: 1rem;">Register Account</button>
+            <button type="submit" class="btn-main hover-bright {% if is_setup_mode %}btn-superadmin-submit{% endif %}" style="margin-top: 1rem;">
+                {% if is_setup_mode %}Register Superadmin Account{% else %}Register Account{% endif %}
+            </button>
             
+            {% if not is_setup_mode %}
             <div class="auth-links" style="justify-content: center;">
                 <a href="/login" class="auth-link">Already have an account? Log in</a>
             </div>
+            {% endif %}
         </form>
         
     </div>
