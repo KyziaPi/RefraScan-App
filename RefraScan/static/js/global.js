@@ -1,10 +1,71 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const dropdownToggle = document.getElementById("dropdownToggle");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+
+    const menuToggle = document.getElementById("menuToggle");
+    const navMenu = document.querySelector(".site-header__nav");
+
     const deleteForm = document.getElementById("delete-popup-form");
     const hiddenIdInput = document.getElementById("delete-item-id");
 
     const importForm = document.querySelector("#import-csv-popup form");
     const conflictPopup = document.getElementById("import-conflict-popup");
     const importPopup = document.getElementById("import-csv-popup");
+    
+    if (dropdownToggle && dropdownMenu) {
+        // Toggle menu visibility
+        dropdownToggle.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const isOpen = dropdownMenu.classList.toggle("show");
+            dropdownToggle.setAttribute("aria-expanded", isOpen);
+        });
+
+        // Close menu when clicking anywhere outside
+        document.addEventListener("click", (e) => {
+            if (!dropdownMenu.contains(e.target) && !dropdownToggle.contains(e.target)) {
+                dropdownMenu.classList.remove("show");
+                dropdownToggle.setAttribute("aria-expanded", "false");
+            }
+        });
+
+        // Close menu on ESC key
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && dropdownMenu.classList.contains("show")) {
+                dropdownMenu.classList.remove("show");
+                dropdownToggle.setAttribute("aria-expanded", "false");
+                dropdownToggle.focus();
+            }
+        });
+    }
+
+    if (menuToggle && navMenu) {
+        // Toggle mobile menu visibility
+        menuToggle.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const isOpen = navMenu.classList.toggle("is-active");
+            menuToggle.classList.toggle("is-active", isOpen);
+            menuToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener("click", (e) => {
+            if (!navMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                navMenu.classList.remove("is-active");
+                menuToggle.classList.remove("is-active");
+                menuToggle.setAttribute("aria-expanded", "false");
+            }
+        });
+
+        // Close mobile menu on ESC key press
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && navMenu.classList.contains("is-active")) {
+                navMenu.classList.remove("is-active");
+                menuToggle.classList.remove("is-active");
+                menuToggle.setAttribute("aria-expanded", "false");
+                menuToggle.focus();
+            }
+        });
+    }
     
     // Form input autocomplete off for all input fields
     document.querySelectorAll('input').forEach(input => {
@@ -51,6 +112,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 
+                // Check if opening the dynamic Edit Role modal
+                if (popupId === "edit-role-popup") {
+                    const userId = button.dataset.userId || "";
+                    const username = button.dataset.username || "";
+                    const role = button.dataset.role || "user";
+
+                    const editUserIdInput = popup.querySelector("#edit-user-id");
+                    const editUsernameEl = popup.querySelector("#edit-role-username");
+                    const editRoleSelect = popup.querySelector("#edit-role-select");
+
+                    if (editUserIdInput) editUserIdInput.value = userId;
+                    if (editUsernameEl) editUsernameEl.textContent = username;
+                    if (editRoleSelect) editRoleSelect.value = role;
+                }
+
                 popup.classList.add("active");
             }
         });

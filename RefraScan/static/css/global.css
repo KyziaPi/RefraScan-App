@@ -118,6 +118,15 @@ body {
 	font-weight: 600;
 }
 
+@media screen and (max-width: 576px) {
+	body h1.auth-title,
+	body h1.patient-records-header-title,
+	body h1.patient-record-details__header h1,
+	body h1#landing-title {
+		font-size: 2.2rem;
+	}
+}
+
 
 
 /* section utility classes */
@@ -475,15 +484,120 @@ textarea {
     height: 0.2rem;
     background-color: var(--color-surface);
     border-radius: 2px;
+	transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-/* Container Query for width < 610px */
-@container site-header (width < 610px) {
+/* =========================================================
+   NAV DROPDOWN MENU
+========================================================= */
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-toggle {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1.6rem;
+    color: var(--color-white-80);
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.dropdown-toggle:hover {
+    color: var(--color-surface);
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 1.2rem);
+    background-color: var(--color-surface);
+    min-width: 18rem;
+    border: 1px solid var(--color-border-soft);
+    border-radius: 8px;
+    box-shadow: var(--shadow-panel);
+    z-index: 200;
+    overflow: hidden;
+}
+
+/* Class toggled by JavaScript */
+.dropdown-menu.show {
+    display: flex;
+    flex-direction: column;
+}
+
+.dropdown-item {
+    padding: 1.2rem 1.6rem;
+    color: var(--color-text);
+    font-size: 1.4rem;
+    font-weight: 500;
+    text-decoration: none;
+    text-align: left;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.dropdown-item:hover {
+    background-color: var(--color-surface-soft);
+    color: var(--color-brand);
+}
+
+/* Hide mobile-only links on desktop screens */
+.mobile-only-link {
+    display: none;
+}
+
+.site-header__brand-name:hover, .site-header__about-link:hover, .site-header__nav-link:hover {
+	-webkit-text-stroke: 0.5px currentColor;
+}
+
+/* Flash Messages */
+.flash-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+}
+
+.alert {
+    padding: 1.2rem;
+    border-radius: 6px;
+    font-size: 1.4rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+.alert.error { 
+    background-color: #fee2e2; 
+    color: #991b1b; 
+    border: 1px solid #f87171; 
+}
+
+.alert.success { 
+    background-color: #dcfce7; 
+    color: #166534; 
+    border: 1px solid #4ade80; 
+}
+
+.alert.info { 
+    background-color: #e0f2fe; 
+    color: #075985; 
+    border: 1px solid #38bdf8; 
+}
+
+/* Container Query for width < 700px */
+@container site-header (width < 700px) {
     .site-header__inner {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        position: relative;
+        position: static;
         width: 100%;
         min-height: 4.8rem;
     }
@@ -511,6 +625,69 @@ textarea {
     .site-header__mobile-toggle {
         display: flex;
         margin-left: auto;
+    }
+
+	/* MOBILE SLIDE-DOWN NAV WHEN TOGGLED (.is-active) */
+    .site-header__nav.is-active {
+        display: flex !important;
+        flex-direction: column;
+        align-items: flex-start;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: var(--color-brand);
+        padding: 1.6rem 2.4rem;
+        box-shadow: var(--shadow-panel);
+        gap: 1.2rem;
+        border-top: 1px solid var(--color-white-20);
+        z-index: 150;
+    }
+
+    .site-header__nav.is-active .site-header__nav-link,
+    .site-header__nav.is-active .dropdown-toggle {
+        font-size: 1.6rem;
+        padding: 0.6rem 0;
+        width: 100%;
+        text-align: left;
+    }
+
+    /* Mobile Dropdown Position Adjustments */
+    .site-header__nav.is-active .dropdown {
+        width: 100%;
+    }
+
+    .site-header__nav.is-active .dropdown-menu {
+        position: static;
+        width: 100%;
+        box-shadow: none;
+        background-color: rgba(255, 255, 255, 0.1);
+        border: none;
+        margin-top: 0.8rem;
+    }
+
+    .site-header__nav.is-active .dropdown-item {
+        color: var(--color-surface);
+    }
+
+	.site-header__nav.is-active .dropdown-item:hover {
+		color: var(--color-brand);
+	}
+
+	/* Display the link inside the mobile dropdown menu */
+    .site-header__nav.is-active .mobile-only-link {
+        display: block;
+    }
+
+    /* Transform Hamburger Icon into an 'X' when open */
+    .site-header__mobile-toggle.is-active .hamburger-bar:nth-child(1) {
+        transform: translateY(6px) rotate(45deg);
+    }
+    .site-header__mobile-toggle.is-active .hamburger-bar:nth-child(2) {
+        opacity: 0;
+    }
+    .site-header__mobile-toggle.is-active .hamburger-bar:nth-child(3) {
+        transform: translateY(-6px) rotate(-45deg);
     }
 }
 

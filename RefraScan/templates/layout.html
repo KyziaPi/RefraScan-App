@@ -29,11 +29,26 @@
 			</div>
 			
 			<div class="site-header__nav">
+				<!-- Link for Mobile Menu Only -->
+				<a class="site-header__nav-link mobile-only-link" href="/about-the-study">About the Study</a>
+
 				{% if session.get('user_id') %}
 					<!-- Logged In Links -->
 					<a class="site-header__nav-link" href="/patient-records">Patient Records</a>
 					<a class="site-header__nav-link" href="/inference-history">Inference History</a>
-					<a class="site-header__nav-link" href="/logout">Logout</a>
+					<div class="dropdown">
+						<button type="button" class="dropdown-toggle site-header__nav-link" id="dropdownToggle" aria-haspopup="true" aria-expanded="false">
+							{{ session.get('username', 'Account') }} &#9662;
+						</button>
+						<div class="dropdown-menu" id="dropdownMenu">
+							<a class="dropdown-item" href="/change-password">Change Password</a>
+							{% if session.get('role') == 'superadmin' %}
+								<a class="dropdown-item" href="/audit-logs">Audit Logs</a>
+								<a class="dropdown-item" href="/manage-users">Manage Users</a>
+							{% endif %}
+							<a class="dropdown-item" href="/logout">Logout</a>
+						</div>
+					</div>
 				{% else %}
 					<!-- Logged Out Links -->
 					<a class="site-header__nav-link" href="/login">Login</a>
@@ -43,7 +58,12 @@
 			</div>
 
 			<!-- Mobile Toggle Button (Visible < 610px) -->
-			<button type="button" class="site-header__mobile-toggle" id="menuToggle" aria-label="Toggle navigation">
+			<button type="button" 
+					class="site-header__mobile-toggle" 
+					id="menuToggle" 
+					aria-label="Toggle navigation" 
+					aria-expanded="false" 
+					aria-controls="mainNav">
 				<span class="hamburger-bar"></span>
 				<span class="hamburger-bar"></span>
 				<span class="hamburger-bar"></span>

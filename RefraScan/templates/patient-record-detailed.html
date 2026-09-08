@@ -20,15 +20,18 @@ RefraScan - Patient Record Details
                 <h1>Patient Record Details</h1>
             </div>
 
+            {% if session.get('role') != 'user' %}
             <div class="patient-record-details__header-action">
                 <button type="button" class="btn-secondary btn-add-fu" 
                 data-popup="follow-up-popup" data-encounter-id="{{ patient.encounter_id or patient.id }}">
                     New Follow Up Details
                 </button>
             </div>
+            {% endif %}
         </div>
         <form class="patient-record-details__actions">
             <button class="btn-secondary" type="button" onclick="window.print()">Print Card Sheet</button>
+            {% if session.get('role') != 'user' %}
             <input type="hidden" name="patient_id" value="{{ patient.patient_id }}">
             <input type="hidden" name="encounter_id" value="{{ patient.id }}">
             <button class="btn-primary" formaction="/add-patient" formmethod="POST" type="submit">Edit Record</button>
@@ -41,6 +44,7 @@ RefraScan - Patient Record Details
                 type="button">
                 Delete Record
             </button>
+            {% endif %}
         </form>
     </div>
 
@@ -306,6 +310,7 @@ RefraScan - Patient Record Details
                     </div>
                     <div class="patient-record-details__follow-up-actions">
                         
+                        {% if session.get('role') != 'user' %}
                         <!-- EDIT BUTTON -->
                         <button data-popup="follow-up-popup" type="button" class="edit-fu-btn"
                             data-fu-id="{{ fu.id }}"
@@ -323,6 +328,7 @@ RefraScan - Patient Record Details
                             data-delete-url="/api/delete-follow-up/{{ fu.id }}">
                             <img src="/static/assets/row-delete.png" alt="Delete" />
                         </button>
+                        {% endif %}
                         
                     </div>
                 </div>

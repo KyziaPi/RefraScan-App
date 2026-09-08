@@ -12,12 +12,16 @@ import numpy as np
 from tensorflow import keras
 import joblib
 from werkzeug.utils import secure_filename
-from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime, timedelta
 from email.utils import parsedate_to_datetime
 import re
 import io
 import pandas as pd
 import uuid
+from dotenv import load_dotenv
+import secrets
+from functools import wraps
 
 import utilities.database as db
 from utilities.preprocessing import load_and_preprocess_image
@@ -29,8 +33,11 @@ from utilities.explainability import generate_and_save_gradcam
 db.create_database()
 #db.add_dummy_data()
 
+# Load the .env file
+load_dotenv()
+
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
+app.secret_key = os.getenv("SECRET_KEY") or os.urandom(24)
 
 # --- MONKEY-PATCH FOR KERAS 3 VERSION MISMATCH ---
 _original_dense_init = keras.layers.Dense.__init__
@@ -84,6 +91,301 @@ print(f"Model's input names: {input_names}")
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# =========================================================
+# HELPER & FIRST-RUN INTERACTIVE CHECK
+# =========================================================
+def has_superadmin():
+    """Checks if at least one superadmin account exists in the database."""
+    check_query = "SELECT id FROM users WHERE role = 'superadmin' LIMIT 1;"
+    res, status = db.select_rows(check_query, single=True)
+    if status == 200:
+        data = res.get_json() if hasattr(res, 'get_json') else res
+        return bool(data)
+    return False
+
+@app.before_request
+def check_first_run_setup():
+    """Redirects all traffic to /register if no Superadmin exists in the database."""
+    # Allow static assets and the register endpoint to load
+    if request.endpoint in ['static', 'register']:
+        return None
+
+    if not has_superadmin():
+        flash("First-time setup required: Please create the Superadmin account.", "info")
+        return redirect(url_for('register'))
+
+# =========================================================
+# HELPER: AUDIT LOGGING & AUTHORIZATION DECORATORS
+# =========================================================
+def log_activity(action_type, description):
+    """Logs view, edit, create, and delete actions for Superadmin auditing."""
+    user_id = session.get('user_id')
+    username = session.get('username', 'Anonymous')
+    role = session.get('role', 'guest')
+    ip_address = request.remote_addr
+
+    query = """
+        INSERT INTO account_activity_logs (user_id, username, user_role, action_type, description, ip_address)
+        VALUES (%s, %s, %s, %s, %s, %s);
+    """
+    db.add_row("Log Activity", query, (user_id, username, role, action_type, description, ip_address))
+
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash("Please log in to access this page.", "error")
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+def roles_required(*allowed_roles):
+    """Enforces role-based permissions on routes."""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if 'user_id' not in session:
+                return redirect(url_for('login'))
+            if session.get('role') not in allowed_roles:
+                return jsonify({"error": "Unauthorized: You do not have permission to perform this action."}), 403
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+                
+# =========================================================
+# AUTHENTICATION ROUTES
+# =========================================================
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        identity = request.form.get("identity", "").strip() # Accepts username or email
+        password = request.form.get("password", "")
+
+        query = "SELECT id, username, email, password_hash, role, full_name FROM users WHERE username = %s OR email = %s;"
+        res, status = db.select_rows(query, (identity, identity), single=True)
+
+        if status == 200:
+            user = res.get_json() if hasattr(res, 'get_json') else res
+            if user and check_password_hash(user['password_hash'], password):
+                session['user_id'] = user['id']
+                session['username'] = user['username']
+                session['role'] = user['role']
+                session['full_name'] = user['full_name']
+
+                log_activity("LOGIN", f"User {user['username']} logged in.")
+                if user['role'] == 'user':
+                    return redirect(url_for('inference_engine'))
+                return redirect(url_for('patient_records'))
+
+        flash("Invalid username/email or password.", "error")
+    
+    return render_template("login.html")
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    is_setup_mode = not has_superadmin()
+
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        email = request.form.get("email", "").strip()
+        full_name = request.form.get("full_name", "").strip()
+        password = request.form.get("password", "")
+
+        hashed_pw = generate_password_hash(password, method='scrypt')
+
+        # Automatically assign 'superadmin' if this is the first registration
+        target_role = 'superadmin' if is_setup_mode else 'user'
+
+        query = """
+            INSERT INTO users (username, email, password_hash, full_name, role)
+            VALUES (%s, %s, %s, %s, %s);
+        """
+        response, status = db.add_row("Register User", query, (username, email, hashed_pw, full_name, target_role))
+
+        if status == 201:
+            if target_role == 'superadmin':
+                flash("Superadmin account created successfully! Please log in to continue.", "success")
+            else:
+                flash("Account registered successfully! Please log in.", "success")
+            return redirect(url_for('login'))
+        else:
+            flash("Username or Email already exists.", "error")
+
+    return render_template("register.html", is_setup_mode=is_setup_mode)
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        email = request.form.get("email", "").strip()
+        token = secrets.token_urlsafe(32)
+        expiry = datetime.now() + timedelta(hours=1)
+
+        query = "UPDATE users SET reset_token = %s, reset_token_expiry = %s WHERE email = %s;"
+        res, status = db.update_row("Request Password Reset", query, (token, expiry, email))
+
+        if status == 200:
+            # Here you would typically send an email with: url_for('reset_password', token=token, _external=True)
+            flash(f"Password reset link generated. Reset token: {token}", "info")
+            return redirect(url_for('reset_password', token=token))
+        else:
+            flash("Email address not found.", "error")
+            
+    return render_template("forgot-password.html")
+
+@app.route("/reset-password", methods=["GET", "POST"])
+def reset_password():
+    # 1. Grab token from query params (GET) or form submission (POST)
+    token = request.args.get("token") or request.form.get("token", "").strip()
+
+    if request.method == "POST":
+        new_password = request.form.get("password")
+        
+        if not token:
+            flash("Missing or invalid reset token.", "error")
+            return render_template("reset-password.html", token=token)
+
+        hashed_pw = generate_password_hash(new_password, method='scrypt')
+
+        query = """
+            UPDATE users 
+            SET password_hash = %s, reset_token = NULL, reset_token_expiry = NULL 
+            WHERE reset_token = %s AND reset_token_expiry > CURRENT_TIMESTAMP
+            RETURNING id;
+        """
+        res, status = db.update_row("Reset Password", query, (hashed_pw, token))
+
+        if status == 200 and res:
+            flash("Password updated successfully. Please log in.", "success")
+            return redirect(url_for('login'))
+        
+        flash("Invalid or expired reset token.", "error")
+
+    return render_template("reset-password.html", token=token)
+
+@app.route("/change-password", methods=["GET", "POST"])
+@login_required
+def change_password():
+    if request.method == "POST":
+        old_password = request.form.get("old_password", "")
+        new_password = request.form.get("new_password", "")
+
+        user_id = session.get('user_id')
+
+        # 1. Fetch user record from database to verify old password
+        query = "SELECT password_hash FROM users WHERE id = %s;"
+        res, status = db.select_rows(query, (user_id,), single=True)
+
+        if status != 200:
+            flash("User record not found.", "error")
+            return render_template("change-password.html")
+
+        user_data = res.get_json() if hasattr(res, 'get_json') else res
+
+        # 2. Verify current password hash
+        if not user_data or not check_password_hash(user_data.get('password_hash', ''), old_password):
+            flash("Incorrect current password.", "error")
+            return render_template("change-password.html")
+
+        # 3. Hash the new password
+        hashed_pw = generate_password_hash(new_password, method='scrypt')
+
+        # 4. Update the password in the database
+        update_query = "UPDATE users SET password_hash = %s WHERE id = %s;"
+        res_update, update_status = db.update_row("Change Password", update_query, (hashed_pw, user_id))
+
+        if update_status == 200:
+            flash("Password updated successfully.", "success")
+            return redirect(url_for('patient_records'))
+        else:
+            flash("An error occurred while updating the password.", "error")
+
+    return render_template("change-password.html")
+
+@app.route("/logout")
+@login_required
+def logout():
+    session.clear()
+    return redirect("/login")
+
+# =========================================================
+# AUDIT LOGS VIEW (Superadmin Only)
+# =========================================================
+@app.route("/audit-logs")
+@login_required
+@roles_required('superadmin')
+def audit_logs():
+    """Superadmin-only view to monitor all user actions across accounts."""
+    query = "SELECT * FROM account_activity_logs ORDER BY id DESC LIMIT 200;"
+    response, status = db.select_rows(query)
+    logs = response.get_json() if status == 200 else []
+    return render_template("audit-logs.html", page="audit_logs", logs=logs)
+
+# =========================================================
+# USER MANAGEMENT ROUTES (Superadmin Only)
+# =========================================================
+
+@app.route("/manage-users", methods=["GET"])
+@login_required
+@roles_required('superadmin')
+def manage_users():
+    """Superadmin view to manage user accounts and roles."""
+    log_activity("VIEW", "Viewed User Management Dashboard")
+    
+    query = """
+        SELECT id, username, email, full_name, role, TO_CHAR(created_at, 'MM-DD-YYYY') AS created_at 
+        FROM users 
+        ORDER BY id ASC;
+    """
+    response, status = db.select_rows(query)
+    users_list = response.get_json() if status == 200 else []
+    return render_template("manage-users.html", page="manage_users", users=users_list)
+
+
+@app.route("/api/update-user-role", methods=["POST"])
+@login_required
+@roles_required('superadmin')
+def api_update_user_role():
+    """Updates the role of a user account."""
+    data = request.json or request.form or {}
+    target_user_id = data.get("user_id")
+    new_role = data.get("role")
+
+    if not target_user_id or new_role not in ['superadmin', 'admin', 'user']:
+        return jsonify({"error": "Invalid parameters."}), 400
+
+    # Guard: Prevent superadmin from demoting their own active session
+    if int(target_user_id) == int(session.get("user_id")) and new_role != 'superadmin':
+        return jsonify({"error": "You cannot demote your own active Superadmin account."}), 400
+
+    query = "UPDATE users SET role = %s, updated_at = CURRENT_TIMESTAMP WHERE id = %s;"
+    response, status = db.update_row("Update User Role", query, (new_role, target_user_id))
+
+    if status in [200, 201]:
+        log_activity("EDIT", f"Updated user #{target_user_id} role to '{new_role}'.")
+        return jsonify({"success": True, "message": "User role updated successfully."}), 200
+
+    return jsonify({"error": "Failed to update user role."}), 500
+
+
+@app.route("/api/delete-user/<int:user_id>", methods=["DELETE"])
+@login_required
+@roles_required('superadmin')
+def api_delete_user(user_id):
+    """Deletes a user account."""
+    if user_id == int(session.get("user_id")):
+        return jsonify({"error": "You cannot delete your own active Superadmin account."}), 400
+
+    query = "DELETE FROM users WHERE id = %s;"
+    response, status = db.delete_row("Delete User", query, (user_id,))
+
+    if status == 200:
+        log_activity("DELETE", f"Deleted user account #{user_id}.")
+        return jsonify({"success": True, "message": "User account deleted."}), 200
+
+    return jsonify({"error": "Failed to delete user account."}), 500
+
 
 @app.route("/", methods=["GET"])
 def inference_engine():
@@ -105,6 +407,8 @@ def format_middle_initial(middle_name):
     return f"{clean[0].upper()}."
 
 @app.route('/submit-inference', methods=['POST'])
+@login_required
+@roles_required('admin', 'superadmin')
 def submit_inference():
     if request.method == 'POST':
         # 0. Check the submission type (new patient vs existing patient)
@@ -282,6 +586,7 @@ def submit_inference():
                 raise Exception(error_msg)
 
             new_inference_id = db_data["data"]["inference_id"]
+            log_activity("CREATE", f"User {session['username']} created inference record with ID {new_inference_id}.")
 
             # 6. Redirect to GET route using returned primary key ID
             return redirect(url_for("inference_results", inference_id=new_inference_id))
@@ -294,6 +599,7 @@ def submit_inference():
             return render_template('index.html', error=f'Inference failed: {str(e)}')
         
 @app.route('/api/search-patients', methods=['GET'])
+@login_required
 def api_search_patients():
     """API endpoint for live-searching existing patients."""
     query = request.args.get('q', '').lower()
@@ -338,6 +644,7 @@ def api_search_patients():
     return jsonify([])
 
 @app.route("/inference-results/<string:inference_id>", methods=["GET"])
+@login_required
 def inference_results(inference_id):
     """Inference Results"""
     select_sql = """
@@ -369,6 +676,8 @@ def inference_results(inference_id):
 
     pred_label = record['prediction_label']
     confidence = class_probabilities.get(pred_label, 0.0)
+    
+    log_activity("VIEW", f"User {session['username']} viewed inference results for ID {inference_id}.")
 
     return render_template(
         'inference-results.html',
@@ -394,6 +703,7 @@ def inference_results(inference_id):
 
 
 @app.route("/inference-history", methods=["GET"])
+@login_required
 def inference_history():
     """Inference History View"""
     select_sql = """
@@ -454,6 +764,8 @@ def inference_history():
 
 
 @app.route('/api/delete-inference/<string:inference_id>', methods=['DELETE'])
+@login_required
+@roles_required('admin', 'superadmin')
 def delete_inference(inference_id):
     """API Endpoint to delete an inference record by ID."""
     
@@ -484,11 +796,14 @@ def delete_inference(inference_id):
                 os.remove(img_filepath)
             if os.path.exists(heatmap_filepath):
                 os.remove(heatmap_filepath)
+                
+        log_activity("DELETE", f"User {session['username']} deleted inference record with ID {inference_id}.")
 
     return db_response, db_status
     
 
 @app.route("/patient-records", methods=["GET"])
+@login_required
 def patient_records():
     """Patient Records View with dynamic list formatting and pagination"""
     select_sql = """
@@ -695,6 +1010,7 @@ def fetch_patient_data_by_id(patient_id):
 # NEW API ROUTE: Get JSON data for JS Autofill
 # ==========================================
 @app.route("/api/get-patient/<int:patient_id>", methods=["GET"])
+@login_required
 def api_get_patient(patient_id):
     patient_data = fetch_patient_data_by_id(patient_id)
     if not patient_data:
@@ -705,6 +1021,8 @@ def api_get_patient(patient_id):
 # Add/Edit/Prefill Route
 # ==========================================
 @app.route("/add-patient", methods=["GET", "POST"])
+@login_required
+@roles_required('admin', 'superadmin')
 def add_patient():
     """Add Patient Record, Load Edit View, or Pre-fill Screening Data"""
     encounter_id = ""
@@ -741,6 +1059,7 @@ def add_patient():
 # Detailed Record Route
 # ==========================================
 @app.route("/patient-record-detailed", methods=["GET"])
+@login_required
 def patient_record_detailed():
     """Detailed Patient Record View"""
     patient_id = request.args.get("id") or request.args.get("patient_id")
@@ -750,6 +1069,8 @@ def patient_record_detailed():
     patient_data = fetch_patient_data_by_id(patient_id)
     if not patient_data:
         return redirect("/patient-records")
+    
+    log_activity("VIEW", f"User {session['username']} viewed detailed patient record for ID {patient_id}.")
 
     return render_template(
         "patient-record-detailed.html", 
@@ -774,6 +1095,8 @@ def map_eye_side(val):
     return val
 
 @app.route("/api/add-patient", methods=["POST"])
+@login_required
+@roles_required('admin', 'superadmin')
 def api_add_patient():
     """Handles saving or updating a full patient record across all database tables."""
     data = request.json if request.is_json else (request.form or {})
@@ -852,6 +1175,7 @@ def api_add_patient():
         """
         response, status = db.update_row("Update Patient", patient_query, patient_values + (patient_id,))
         if status not in [200, 201]: return response, status
+        log_activity("UPDATE", f"User {session['username']} updated patient record with ID {patient_id}.")
     else:
         # INSERT New Patient
         print(f"Inserting new patient with code: {patient_code}")
@@ -865,6 +1189,8 @@ def api_add_patient():
         response, status = db.add_row("Add New Patient", patient_query, patient_values)
         if status != 201: return response, status
         
+        log_activity("CREATE", f"User {session['username']} created patient record with ID {patient_id}.")
+
         res_json = response.get_json() or {}
         patient_id = res_json.get('data', {}).get('id') if 'data' in res_json else res_json.get('id')
 
@@ -1019,6 +1345,8 @@ def api_add_patient():
     return jsonify({"success": True, "patient_id": patient_id, "encounter_id": encounter_id}), 201
 
 @app.route('/api/delete-patient/<int:patient_id>', methods=['DELETE'])
+@login_required
+@roles_required('admin', 'superadmin')
 def api_delete_patient(patient_id):
     """API Endpoint to delete a patient record by ID."""
     
@@ -1040,11 +1368,14 @@ def api_delete_patient(patient_id):
     )
     
     if db_status == 200:
+        log_activity("DELETE", f"User {session['username']} deleted patient record with ID {patient_id}.")
         return jsonify({"success": True, "message": "Patient record deleted successfully."}), 200
     else:
         return jsonify({"error": "Failed to delete patient record."}), 500
 
 @app.route('/api/save-follow-up', methods=['POST'])
+@login_required
+@roles_required('admin', 'superadmin')
 def api_save_follow_up():
     """Handles adding a new follow-up or updating an existing one."""
     data = request.json or {}
@@ -1064,6 +1395,8 @@ def api_save_follow_up():
             WHERE id = %s;
         """
         res, status = db.update_row("Update Follow Up", query, (details, follow_up_date, fu_id))
+        if status in [200, 201]:
+            log_activity("UPDATE", f"User {session['username']} updated follow-up ID {fu_id} for encounter ID {encounter_id}.")
     else:
         # Insert new follow-up - calculate next follow_up_number for this encounter
         max_q = "SELECT COALESCE(MAX(follow_up_number), 0) AS max_num FROM patient_follow_ups WHERE encounter_id = %s;"
@@ -1080,17 +1413,22 @@ def api_save_follow_up():
             VALUES (%s, %s, COALESCE(CAST(%s AS DATE), CURRENT_DATE), %s);
         """
         res, status = db.add_row("Add Follow Up", query, (encounter_id, next_num, follow_up_date, details))
+        if status in [200, 201]:
+            log_activity("CREATE", f"User {session['username']} created follow-up for encounter ID {encounter_id}.")
 
     if status in [200, 201]:
         return jsonify({"success": True}), 200
     return jsonify({"error": "Failed to save follow up."}), 500
 
 @app.route('/api/delete-follow-up/<int:fu_id>', methods=['DELETE'])
+@login_required
+@roles_required('admin', 'superadmin')
 def api_delete_follow_up(fu_id):
     """API Endpoint to delete a follow-up record by ID."""
     query = "DELETE FROM patient_follow_ups WHERE id = %s;"
     res, status = db.delete_row("Delete Follow Up", query, (fu_id,))
     if status == 200:
+        log_activity("DELETE", f"User {session['username']} deleted follow-up ID {fu_id}.")
         return jsonify({"success": True, "message": "Follow-up deleted successfully."}), 200
     return jsonify({"error": "Failed to delete follow-up."}), 500
 
@@ -1098,6 +1436,7 @@ def api_delete_follow_up(fu_id):
 # EXPORT EXCEL ROUTE (All Tables)
 # ==========================================
 @app.route("/export-excel", methods=["POST"])
+@login_required
 def export_excel():
     """Generates and downloads an Excel file based on selected fields."""
     selected_fields = request.form.getlist("export_fields[]")
@@ -1158,6 +1497,8 @@ def export_excel():
 # IMPORT EXCEL ROUTES (All Tables)
 # ==========================================
 @app.route("/api/download-template", methods=["GET"])
+@login_required
+@roles_required('admin', 'superadmin')
 def download_import_template():
     """Provides a blank Excel template with all supported columns matching the export format."""
     
@@ -1234,6 +1575,8 @@ def download_import_template():
     )
 
 @app.route("/api/validate-import", methods=["POST"])
+@login_required
+@roles_required('admin', 'superadmin')
 def validate_import():
     """Step 1: Reads Excel, checks for conflicts, and returns them to the frontend."""
     file = request.files.get('excel_file')
@@ -1300,6 +1643,8 @@ def validate_import():
         return jsonify({'error': str(e)}), 500
 
 @app.route("/api/cancel-import", methods=["POST"])
+@login_required
+@roles_required('admin', 'superadmin')
 def cancel_import():
     """Deletes temporary upload file when the user cancels or exits the modal."""
     data = request.json or {}
@@ -1319,6 +1664,8 @@ def cancel_import():
     return jsonify({"message": "No active temp file to clean up."}), 200
 
 @app.route("/api/execute-import", methods=["POST"])
+@login_required
+@roles_required('admin', 'superadmin')
 def execute_import():
     """Step 2: Executes the import using user resolutions and deletes the temp file."""
     data = request.json
@@ -1493,6 +1840,7 @@ def execute_import():
             os.remove(filepath)
             
         print(f"Import Complete: {success_count} succeeded, {skipped_count} skipped.")
+        log_activity("IMPORT", f"User {session['username']} executed import: {success_count} succeeded, {skipped_count} skipped.")
         return redirect("/patient-records")
         
     except Exception as e:
@@ -1507,44 +1855,6 @@ def execute_import():
             except Exception as cleanup_err:
                 print(f"Failed to delete temp file: {cleanup_err}")
                 
-# =========================================================
-# AUTHENTICATION ROUTES
-# =========================================================
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "GET":
-        return render_template("login.html")
-
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    if request.method == "GET":
-        return render_template("register.html")
-
-@app.route("/forgot-password", methods=["GET", "POST"])
-def forgot_password():
-    if request.method == "GET":
-        return render_template("forgot-password.html")
-
-@app.route("/reset-password", methods=["GET", "POST"])
-def reset_password():
-    if request.method == "GET":
-        return render_template("reset-password.html")
-    
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect("/login")
-
-# =========================================================
-# AUDIT LOGS VIEW (Superadmin Only)
-# =========================================================
-@app.route("/audit-logs")
-def audit_logs():
-    """Superadmin-only view to monitor all user actions across accounts."""
-    query = "SELECT * FROM account_activity_logs ORDER BY id DESC LIMIT 200;"
-    response, status = db.select_rows(query)
-    logs = response.get_json() if status == 200 else []
-    return render_template("audit-logs.html", page="audit_logs", logs=logs)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
