@@ -40,6 +40,16 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY") or os.urandom(24)
 
+# --- MAIL CONFIGURATION ---
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT'))
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')  # Use App Password
+app.config['MAIL_DEFAULT_SENDER'] = ('RefraScan Support', os.getenv('MAIL_USERNAME'))
+
+mail = Mail(app)
+
 # --- MONKEY-PATCH FOR KERAS 3 VERSION MISMATCH ---
 _original_dense_init = keras.layers.Dense.__init__
 
@@ -192,6 +202,7 @@ def login():
                 session['username'] = user['username']
                 session['role'] = user['role']
                 session['full_name'] = user['full_name']
+                session['email'] = user['email']
 
                 log_activity("LOGIN", f"User {user['username']} logged in.")
                 if user['role'] == 'user':
@@ -199,6 +210,7 @@ def login():
                 return redirect(url_for('patient_records'))
 
         flash("Invalid username/email or password.", "error")
+        return render_template("login.html", identity=identity)
     
     return render_template("login.html")
 
@@ -228,6 +240,32 @@ def register():
                            username=username,
                            email=email,
                            full_name=full_name)
+            
+        # Check for unique Username (case-insensitive)
+        check_user_q = "SELECT id FROM users WHERE LOWER(username) = LOWER(%s);"
+        res_u, status_u = db.select_rows(check_user_q, (username,), single=True)
+        if status_u == 200 and res_u:
+            flash("Username is already taken. Please choose another.", "error")
+            return render_template(
+                "register.html", 
+                is_setup_mode=is_setup_mode, 
+                username=username, 
+                email=email, 
+                full_name=full_name
+            )
+
+        # Check for unique Email (case-insensitive)
+        check_email_q = "SELECT id FROM users WHERE LOWER(email) = LOWER(%s);"
+        res_e, status_e = db.select_rows(check_email_q, (email,), single=True)
+        if status_e == 200 and res_e:
+            flash("Email address is already registered. Please use a different email or log in.", "error")
+            return render_template(
+                "register.html", 
+                is_setup_mode=is_setup_mode, 
+                username=username, 
+                email=email, 
+                full_name=full_name
+            )
             
         hashed_pw = generate_password_hash(password, method='scrypt')
 
@@ -272,9 +310,35 @@ def forgot_password():
 
         # Only redirect if the update matched an existing user email
         if status == 200 and res_data and res_data.get('data'):
-            # Here you would typically send an email with: url_for('reset_password', token=token, _external=True)
-            flash(f"Password reset link generated. Reset token: {token}", "info")
-            return redirect(url_for('reset_password', token=token))
+            # 1. Generate absolute URL for reset link
+            reset_url = url_for('reset_password', token=token, _external=True)
+            
+            # 2. Build and send the email message
+            try:
+                msg = Message(
+                    subject="RefraScan - Password Reset Request",
+                    recipients=[email],
+                    body=f"""Hello,
+
+You requested a password reset for your RefraScan account.
+
+Click the link below to reset your password (valid for 1 hour):
+{reset_url}
+
+If you did not request this, please ignore this email.
+
+Best regards,
+RefraScan Team
+"""
+                )
+                mail.send(msg)
+                
+                flash("A password reset link has been sent to your email address.", "success")
+                return redirect(url_for('login'))
+
+            except Exception as e:
+                print(f"Failed to send email: {e}")
+                flash("An error occurred while sending the email. Please try again later.", "error")
         else:
             flash("Email address not found.", "error")
             
@@ -371,6 +435,69 @@ def change_password():
 
     return render_template("change-password.html")
 
+@app.route("/change-identity", methods=["GET", "POST"])
+@login_required
+def change_identity():
+    if request.method == "POST":
+        new_username = request.form.get("username", "").strip()
+        new_email = request.form.get("email", "").strip()
+        new_full_name = request.form.get("full_name", "").strip()
+
+        user_id = session.get('user_id')
+        
+        # Fetch current values from DB (or session) to compare
+        current_username = session.get('username', '')
+        current_email = session.get('email', '')
+        current_full_name = session.get('full_name', '')
+        
+        # Track which fields were actually modified
+        changed_fields = []
+        if new_username and new_username != current_username:
+            changed_fields.append(f"username: '{new_username}'")
+        if new_email and new_email != current_email:
+            changed_fields.append(f"email: '{new_email}'")
+        if new_full_name and new_full_name != current_full_name:
+            changed_fields.append(f"full_name: '{new_full_name}'")
+            
+        # If nothing was changed, skip DB update and flash info
+        if not changed_fields:
+            flash("No changes were made.", "info")
+            return render_template("change-identity.html", username=new_username, email=new_email, full_name=new_full_name)
+
+        # Check for uniqueness of username and email
+        check_query = "SELECT id FROM users WHERE (username = %s OR email = %s) AND id != %s;"
+        res, status = db.select_rows(check_query, (new_username, new_email, user_id), single=True)
+
+        if status == 200 and res:
+            flash("Username or Email already exists. Please choose a different one.", "error")
+            return render_template("change-identity.html", username=new_username, email=new_email, full_name=new_full_name)
+
+        # Update the user's identity in the database
+        update_query = "UPDATE users SET username = %s, email = %s, full_name = %s WHERE id = %s;"
+        res_update, update_status = db.update_row("Change Identity", update_query, (new_username, new_email, new_full_name, user_id))
+
+        if update_status == 200:
+            # Log the identity change
+            changes_summary = ", ".join(changed_fields)
+            log_description = f"User {session.get('username')} updated identity ({changes_summary})."
+            
+            log_activity("EDIT", log_description)
+            # Update session variables
+            session['username'] = new_username
+            session['full_name'] = new_full_name
+            session['email'] = new_email
+            
+            flash("Identity updated successfully.", "success")
+            return render_template("change-identity.html", username=new_username, email=new_email, full_name=new_full_name)
+        else:
+            flash("An error occurred while updating your identity.", "error")
+
+    # Pre-fill form with current session values
+    return render_template("change-identity.html", 
+                           username=session.get('username', ''), 
+                           email=session.get('email', ''), 
+                           full_name=session.get('full_name', ''))
+
 @app.route("/logout")
 @login_required
 def logout():
@@ -399,12 +526,11 @@ def audit_logs():
 @roles_required('superadmin')
 def manage_users():
     """Superadmin view to manage user accounts and roles."""
-    log_activity("VIEW", "Viewed User Management Dashboard")
     
     query = """
         SELECT id, username, email, full_name, role, TO_CHAR(created_at, 'MM-DD-YYYY') AS created_at 
         FROM users 
-        ORDER BY id ASC;
+        ORDER BY id DESC;
     """
     response, status = db.select_rows(query)
     users_list = response.get_json() if status == 200 else []

@@ -41,6 +41,7 @@
 							{{ session.get('username', 'Account') }} &#9662;
 						</button>
 						<div class="dropdown-menu" id="dropdownMenu">
+							<a class="dropdown-item" href="/change-identity">Change Name/Email</a>
 							<a class="dropdown-item" href="/change-password">Change Password</a>
 							{% if session.get('role') == 'superadmin' %}
 								<a class="dropdown-item" href="/audit-logs">Audit Logs</a>
