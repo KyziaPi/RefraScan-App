@@ -5,8 +5,9 @@
 ### Step 1: Initial Setup (One-Time Only)
 1. Double-click **SETUP.bat**
 2. Follow the prompts to create the virtual environment
-3. This will install all required dependencies from `requirements.txt`
-4. The process may take 3-5 minutes
+3. This will install all required dependencies from `requirements.txt` and create a `.env` file
+4. The process may take 5-10 minutes
+5. Edit the value of DB_PASSWORD (and the DB_HOST and UPLOAD_BASE_PATH if data is shared within the network) in `.env` file
 
 ### Step 2: Start the App
 After setup is complete, simply double-click **START-APP.bat**

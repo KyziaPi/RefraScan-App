@@ -62,12 +62,16 @@ RefraScan-App/
 
 ## 🚀 Quick Start
 
-### 1. Configuration
+### 1. Initial Setup
 
-Copy `.env.example` to `.env` in the RefraScan folder and configure your database and file paths:
+Run `tools\SETUP.bat` once to create the local Python virtual environment (`.venv`), install required packages from `requirements.txt` and create a `.env` file.
+
+### 2. Configuration
+
+Open `.env` in the RefraScan folder and configure your database and file paths:
 
 ```ini
-DB_NAME=refrascan_db
+DB_NAME=refrascandb
 DB_USER=postgres
 DB_PASSWORD=your_password
 DB_HOST=127.0.0.1
@@ -76,13 +80,12 @@ UPLOAD_BASE_PATH=
 
 ```
 
-### 2. Initial Setup
-
-Run `tools\SETUP.bat` once to create the local Python virtual environment (`.venv`) and install required packages from `requirements.txt`.
-
 ### 3. Start the Application
 
-Run `tools\START-APP.bat`. The launcher will start the Flask server and open `http://localhost:5000` automatically in your web browser.
+Run `tools\START-APP.bat`. The launcher will start the Flask server and open `http://localhost:5000` automatically in your web browser. 
+
+> [!NOTE]
+> First time opening of the app (by the server machine if in Multi-Computer Setup) will redirect you to superadmin registration.
 
 ---
 
@@ -128,6 +131,6 @@ UPLOAD_BASE_PATH=Z:\
 
 ---
 
-**Version:** 1.0
+**Version:** 1.1
 
 **Contact:** guecoyerikaelaine@gmail.com

@@ -16,14 +16,14 @@ Welcome! Your RefraScan app is ready to deploy. Choose the setup that matches yo
 
 | File | Purpose |
 |------|---------|
-| `SETUP.bat` | ⭐ Run this ONCE to install dependencies |
-| `START-APP.bat` | ⭐ Run this to start the app (every time) |
-| `README-STARTUP.md` | Instructions for non-technical users |
-| `run-app.py` | Python launcher script |
+| `/tools/SETUP.bat` | ⭐ Run this ONCE to install dependencies |
+| `/tools/START-APP.bat` | ⭐ Run this to start the app (every time) |
+| `/guides/README-STARTUP.md` | Instructions for non-technical users |
+| `/RefraScan/run-app.py` | Python launcher script |
 | `.env.example` | Template for configuration |
-| `TEST-NETWORK.bat` | Verify network setup (optional) |
-| `NETWORK-QUICK-START.md` | Network setup guide (optional) |
-| `NETWORK-SETUP.md` | Detailed network guide (optional) |
+| `/tools/TEST-NETWORK.bat` | Verify network setup (optional) |
+| `/guides/NETWORK-QUICK-START.md` | Network setup guide (optional) |
+| `/guides/NETWORK-SETUP.md` | Detailed network guide (optional) |
 
 ---
 
@@ -33,6 +33,7 @@ Welcome! Your RefraScan app is ready to deploy. Choose the setup that matches yo
 1. Double-click **SETUP.bat**
 2. Wait for dependencies to install (5-10 minutes)
 3. Press any key when done
+4. Configure the DB_PASSWORD in the `.env` file
 
 ### Every Time You Use It
 1. Double-click **START-APP.bat**
@@ -290,6 +291,6 @@ Key points:
 
 ---
 
-**Version:** 1.0  
-**Updated:** August 2026  
+**Version:** 1.1  
+**Updated:** September 2026  
 **Contact:** guecoyerikaelaine@gmail.com
