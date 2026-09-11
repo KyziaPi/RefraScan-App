@@ -42,7 +42,7 @@ This guide enables multiple computers on the same network to:
 ## Part 2: Network Shared Folder Setup (Server Machine)
 
 ### Step 1: Share the Uploads Folder
-1. Navigate to your RefraScan app folder
+1. Navigate to your RefraScan app folder and open Refrascan folder
 2. Right-click `static\uploads` folder
 3. Select "Properties"
 4. Go to "Sharing" tab
@@ -66,12 +66,12 @@ This guide enables multiple computers on the same network to:
 
 ## Part 3: Configure Server Machine
 
-### Step 1: Create/Update .env File
-In your RefraScan app folder, create or update `.env`:
+### Step 1: Update .env File
+In your RefraScan folder, create or update `.env`:
 
 ```
 # Database Configuration
-DB_NAME=refrascan_db
+DB_NAME=refrascandb
 DB_USER=postgres
 DB_PASSWORD=your_postgres_password
 DB_HOST=127.0.0.1
@@ -104,13 +104,13 @@ Leave `UPLOAD_BASE_PATH` empty for now (uses local folder by default)
 6. Click "Finish"
 7. Folder should open automatically
 
-### Step 2: Create .env File
+### Step 2: Configure .env File
 1. On client machine, go to RefraScan app folder
-2. Create file called `.env` with this content:
+2. Edit the file called `.env` with this content:
 
 ```
 # Database Configuration (point to server)
-DB_NAME=refrascan_db
+DB_NAME=refrascandb
 DB_USER=postgres
 DB_PASSWORD=your_postgres_password
 DB_HOST=192.168.1.100
