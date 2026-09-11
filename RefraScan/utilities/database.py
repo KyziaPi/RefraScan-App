@@ -60,6 +60,9 @@ def create_database():
         
         # 3. Removed the trailing comma after PRIMARY KEY
         create_table_query = """
+        -- Enable the extension in PostgreSQL
+        CREATE EXTENSION IF NOT EXISTS citext;
+        
         -- =========================================================
         -- 1) PATIENTS (Master Demographics - 1 per person)
         -- =========================================================
@@ -241,8 +244,8 @@ def create_database():
         -- =========================================================
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
-            username VARCHAR(100) UNIQUE NOT NULL,
-            email VARCHAR(255) UNIQUE NOT NULL,
+            username CITEXT UNIQUE NOT NULL,
+            email CITEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
             full_name VARCHAR(150),
             role VARCHAR(20) NOT NULL CHECK (role IN ('superadmin', 'admin', 'user')) DEFAULT 'user',
@@ -413,7 +416,9 @@ def delete_table():
         "inference_history",
         "clinical_encounters",
         "patients",
-        "patient_diagnoses"
+        "patient_diagnoses",
+        "users",
+        "account_activity_logs"
     ]
     
     try:

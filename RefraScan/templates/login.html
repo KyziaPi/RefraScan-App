@@ -29,7 +29,8 @@
         <form class="auth-form" method="POST" action="/login">
             <div class="form-field">
                 <label for="identity">Username or Email</label>
-                <input type="text" id="identity" name="identity" placeholder="Enter username or email" required>
+                <input type="text" id="identity" name="identity" placeholder="Enter username or email" 
+                    value="{{ request.form.get('identity', '') }}" required>
             </div>
             
             <div class="form-field">

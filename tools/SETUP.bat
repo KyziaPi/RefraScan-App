@@ -80,26 +80,21 @@ if errorlevel 1 (
 )
 
 REM ============================================================
-REM Check .env file and generate SECRET_KEY
+REM Check and Create .env File with Uploaded Template Structure
 REM ============================================================
 echo.
 echo Checking .env configuration...
 if not exist ".env" (
-    if exist ".env.example" (
-        echo Creating .env from .env.example...
-        copy .env.example .env >nul
-    ) else (
-        echo Creating new .env file...
-        type nul > .env
-    )
+    echo Creating .env file from template...
+    python -c "import secrets; key = secrets.token_hex(32); template = '''# RefraScan App .env\n# Configure this file with your database and network settings (optional).\n\n# ========================================\n# DATABASE CONFIGURATION\n# ========================================\n\n# Database name (default: refrascandb)\nDB_NAME=refrascandb\n\n# PostgreSQL username (default: postgres)\nDB_USER=postgres\n\n# PostgreSQL password (change to your password^!)\nDB_PASSWORD=your_password_here\n\n# Database host\n# For LOCAL only:   127.0.0.1 or localhost\n# For NETWORK:      Server IP address (e.g., 192.168.1.100)\nDB_HOST=127.0.0.1\n\n# PostgreSQL port (default: 5432)\nDB_PORT=5432\n\n# ========================================\n# NETWORK SHARED FOLDER (Optional)\n# ========================================\n\n# Leave empty to use local uploads folder\n# For network shared folder, use mapped drive or UNC path\n# Examples:\n#   Z:\\                          (mapped network drive)\n#   \\\\192.168.1.100\\uploads\\     (UNC path with IP)\n#   \\\\SERVER-PC\\uploads\\         (UNC path with computer name)\nUPLOAD_BASE_PATH=\n\n\n# ========================================\n# NOTES\n# ========================================\n# - For network setup: update DB_HOST and UPLOAD_BASE_PATH\n# - Make sure network paths end with backslash\n# - Database must be created first before app starts\n\n# ========================================\n# OTHER CONFIGURATION (LEAVE AS IS)\n# ========================================\nSECRET_KEY={}\nMAIL_SERVER=smtp.gmail.com\nMAIL_PORT=587\nMAIL_USE_TLS=True\nMAIL_USERNAME=refrascan@gmail.com\nMAIL_PASSWORD=bmev hrwr rzho lyjw\n'''.format(key); open('.env', 'w', encoding='utf-8').write(template); print('✓ .env file created')"
+) else (
+    echo ✓ .env file already exists
 )
-
-python -c "import os, secrets; env='.env'; text=open(env,'r',encoding='utf-8').read() if os.path.exists(env) else ''; (open(env,'a',encoding='utf-8').write(f'\nSECRET_KEY={secrets.token_hex(32)}\n'), print('✓ Generated new SECRET_KEY in .env')) if 'SECRET_KEY=' not in text else print('✓ SECRET_KEY already configured in .env')"
 
 echo.
 echo ✓ Setup complete!
 echo.
-echo You can now run START-APP.bat to start the RefraScan App
+echo You must first configure the .env file inside RefraScan folder before running START-APP.bat to start the RefraScan App
 echo.
 pause
 

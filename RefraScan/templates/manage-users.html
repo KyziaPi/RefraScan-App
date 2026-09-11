@@ -44,6 +44,7 @@
                                 <p class="table-row-text">{{ u.created_at or 'N/A' }}</p>
                                 
                                 <div class="table-row-buttons">
+                                    {% if u.role != 'superadmin' %}
                                     <button type="button" 
                                             class="edit-role-btn" 
                                             data-popup="edit-role-popup"
@@ -53,8 +54,9 @@
                                             style="border:none; background:transparent; cursor:pointer; padding:0;">
                                         <img src="{{ url_for('static', filename='assets/row-edit.png') }}" alt="Edit Role" />
                                     </button>
-
-                                    {% if u.id != session.get('user_id') %}
+                                    {% endif %}
+                                    
+                                    {% if u.role != 'superadmin' and u.id != session.get('user_id') %}
                                     <button type="button" 
                                             class="btn-delete" 
                                             data-popup="delete-confirmation-popup"

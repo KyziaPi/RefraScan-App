@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+
+{% block title %}Set New Password - RefraScan{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="/static/css/auth.css" />
+<link rel="stylesheet" href="/static/css/add-patient.css" />
+{% endblock %}
+
+{% block main %}
+<div class="auth-main-content">
+    <div class="auth-card">
+        
+        <div class="auth-header">
+            <h1 class="auth-title">New Identity</h1>
+            <p class="auth-subtitle">You can change your full name, username, or email address.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                <div class="alert {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+
+        <form class="auth-form" method="POST" action="/change-identity">
+            
+            <div class="form-field">
+                <label for="full_name">Full Name</label>
+                <input type="text" id="full_name" name="full_name" 
+                    value="{{ full_name }}" required>
+            </div>
+
+            <div class="form-field">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" 
+                    value="{{ username }}" required>
+            </div>
+
+            <div class="form-field">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" 
+                    value="{{ email }}" required>
+            </div>
+
+            <button type="submit" class="btn-main hover-bright" style="margin-top: 1rem;">Update Identity</button>
+        </form>
+        
+    </div>
+</div>
+{% endblock %}
