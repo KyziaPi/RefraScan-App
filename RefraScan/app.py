@@ -7,6 +7,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 from flask import Flask, Response, request, jsonify, render_template, redirect, url_for, send_file, flash, session
+from flask_mail import Mail, Message
 import cv2
 import numpy as np
 from tensorflow import keras
@@ -153,6 +154,24 @@ def roles_required(*allowed_roles):
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+
+
+def is_password_strong(password):
+    """
+    Validates password strength:
+    - Minimum 8 characters long
+    - Contains at least one letter (a-z or A-Z)
+    - Contains at least one digit (0-9)
+    (Uppercase letters and special characters are optional)
+    """
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long."
+    if not re.search(r"[a-zA-Z]", password):
+        return False, "Password must contain at least one letter."
+    if not re.search(r"\d", password):
+        return False, "Password must contain at least one number."
+    
+    return True, ""
                 
 # =========================================================
 # AUTHENTICATION ROUTES
@@ -192,7 +211,24 @@ def register():
         email = request.form.get("email", "").strip()
         full_name = request.form.get("full_name", "").strip()
         password = request.form.get("password", "")
-
+        confirm_password = request.form.get("confirm_password", "")
+        
+        # Validate password strength
+        is_strong, error_msg = is_password_strong(password)
+        if not is_strong:
+            flash(error_msg, "error")
+            return render_template("register.html", is_setup_mode=is_setup_mode, username=username, email=email, full_name=full_name)
+        
+        # Validate password confirmation
+        if password != confirm_password:
+            flash("Passwords do not match. Please try again.", "error")
+            # Pass entered values back
+            return render_template("register.html", 
+                           is_setup_mode=is_setup_mode,
+                           username=username,
+                           email=email,
+                           full_name=full_name)
+            
         hashed_pw = generate_password_hash(password, method='scrypt')
 
         # Automatically assign 'superadmin' if this is the first registration
@@ -212,6 +248,12 @@ def register():
             return redirect(url_for('login'))
         else:
             flash("Username or Email already exists.", "error")
+            # Pass entered values back
+            return render_template("register.html", 
+                           is_setup_mode=is_setup_mode,
+                           username=username,
+                           email=email,
+                           full_name=full_name)
 
     return render_template("register.html", is_setup_mode=is_setup_mode)
 
@@ -222,10 +264,14 @@ def forgot_password():
         token = secrets.token_urlsafe(32)
         expiry = datetime.now() + timedelta(hours=1)
 
-        query = "UPDATE users SET reset_token = %s, reset_token_expiry = %s WHERE email = %s;"
+        query = "UPDATE users SET reset_token = %s, reset_token_expiry = %s WHERE email = %s RETURNING email;"
         res, status = db.update_row("Request Password Reset", query, (token, expiry, email))
+        
+        # Extract returned data from response
+        res_data = res.get_json() if hasattr(res, 'get_json') else res
 
-        if status == 200:
+        # Only redirect if the update matched an existing user email
+        if status == 200 and res_data and res_data.get('data'):
             # Here you would typically send an email with: url_for('reset_password', token=token, _external=True)
             flash(f"Password reset link generated. Reset token: {token}", "info")
             return redirect(url_for('reset_password', token=token))
@@ -241,9 +287,19 @@ def reset_password():
 
     if request.method == "POST":
         new_password = request.form.get("password")
-        
+        confirm_password = request.form.get("confirm_password")
         if not token:
             flash("Missing or invalid reset token.", "error")
+            return render_template("reset-password.html", token=token)
+
+        # Validate password strength
+        is_strong, error_msg = is_password_strong(new_password)
+        if not is_strong:
+            flash(error_msg, "error")
+            return render_template("reset-password.html", token=token)
+        
+        if new_password != confirm_password:
+            flash("Passwords do not match. Please try again.", "error")
             return render_template("reset-password.html", token=token)
 
         hashed_pw = generate_password_hash(new_password, method='scrypt')
@@ -270,6 +326,18 @@ def change_password():
     if request.method == "POST":
         old_password = request.form.get("old_password", "")
         new_password = request.form.get("new_password", "")
+        confirm_password = request.form.get("confirm_password", "")
+        
+        # Validate new password strength
+        is_strong, error_msg = is_password_strong(new_password)
+        if not is_strong:
+            flash(error_msg, "error")
+            return render_template("change-password.html")
+        
+        # Validate password confirmation
+        if new_password != confirm_password:
+            flash("Passwords do not match. Please try again.", "error")
+            return render_template("change-password.html")
 
         user_id = session.get('user_id')
 
@@ -297,7 +365,7 @@ def change_password():
 
         if update_status == 200:
             flash("Password updated successfully.", "success")
-            return redirect(url_for('patient_records'))
+            return render_template("change-password.html")
         else:
             flash("An error occurred while updating the password.", "error")
 
