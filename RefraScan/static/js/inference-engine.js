@@ -10,7 +10,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileNameWrapper = document.getElementById('fileNameWrapper');
     const user_id = document.getElementById('user_id').value;
 
-    if (!user_id) {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const submissionTypeInput = document.getElementById('submission-type');
+    const patientIdInput = document.getElementById('patient-id');
+    const encounterIdInput = document.getElementById('encounter-id');
+    const searchInput = document.getElementById('patient-search');
+    const searchResults = document.getElementById('search-results');
+    const summaryCard = document.getElementById('patient-summary-card');
+    const clearBtn = document.getElementById('clear-selected-patient');
+    const ageInput = document.getElementById('age');
+
+    if (user_id) {
         // Trigger file input when the main button is clicked
         dropZone.addEventListener('click', (e) => {
             if (e.target !== fileInput) {
@@ -62,16 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
         /* ==========================================
         Input Group & Tab Functionality
         ========================================== */
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
-        const submissionTypeInput = document.getElementById('submission-type');
-        const patientIdInput = document.getElementById('patient-id');
-        const encounterIdInput = document.getElementById('encounter-id');
-        const searchInput = document.getElementById('patient-search');
-        const searchResults = document.getElementById('search-results');
-        const summaryCard = document.getElementById('patient-summary-card');
-        const clearBtn = document.getElementById('clear-selected-patient');
-        const ageInput = document.getElementById('age');
 
         // Tab Switching Logic
         tabBtns.forEach(btn => {

@@ -205,9 +205,7 @@ def login():
                 session['email'] = user['email']
 
                 log_activity("LOGIN", f"User {user['username']} logged in.")
-                if user['role'] == 'user':
-                    return redirect(url_for('inference_engine'))
-                return redirect(url_for('patient_records'))
+                return redirect(url_for('inference_engine'))
 
         flash("Invalid username/email or password.", "error")
         return render_template("login.html", identity=identity)
@@ -334,7 +332,7 @@ RefraScan Team
                 mail.send(msg)
                 
                 flash("A password reset link has been sent to your email address.", "success")
-                return redirect(url_for('login'))
+                return redirect(url_for('forgot_password'))
 
             except Exception as e:
                 print(f"Failed to send email: {e}")
