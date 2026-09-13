@@ -240,19 +240,19 @@
     {% endif %}
 
     {% if session.user_id %}
-    <!-- 8. Export to CSV Field Selection -->
+    <!-- 8. Export to Excel Field Selection -->
     <div class="popup-overlay popup-export-csv" id="export-csv-popup">
         <div class="popup-container popup-container-large">
 
             <div class="popup-header">
-                <h2>Export Patient Records to CSV</h2>
+                <h2>Export Patient Records to Excel</h2>
                 <button type="button" class="popup-close">&times;</button>
             </div>
 
             <form action="/export-excel" method="post" class="popup-form">
                 
                 <div class="popup-content popup-scrollable">
-                    <p class="export-subtitle">Select fields to include in the exported CSV file:</p>
+                    <p class="export-subtitle">Select fields to include in the exported Excel file:</p>
 
                     <div class="export-global-actions">
                         <button type="button" class="btn-link" id="select-all-fields">Select All</button> | 
@@ -499,7 +499,7 @@
                         Cancel
                     </button>
                     <button type="submit" class="btn-primary">
-                        Export CSV
+                        Export Excel
                     </button>
                 </div>
 
