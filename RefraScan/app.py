@@ -268,7 +268,7 @@ def register():
         hashed_pw = generate_password_hash(password, method='scrypt')
 
         # Automatically assign 'superadmin' if this is the first registration
-        target_role = 'superadmin' if is_setup_mode else 'user'
+        target_role = 'superadmin' if is_setup_mode else 'admin'
 
         query = """
             INSERT INTO users (username, email, password_hash, full_name, role)
