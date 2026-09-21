@@ -215,7 +215,7 @@ Key points:
 
 ### Minimum (Single Computer)
 - Windows 10+
-- Python 3.8+
+- Python 3.10
 - 4GB RAM
 - 3GB disk space (mostly for TensorFlow)
 - PostgreSQL installed and running

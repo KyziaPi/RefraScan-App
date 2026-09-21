@@ -48,7 +48,7 @@ RefraScan-App/
 * **OS:** Windows 10 or later
 
 
-* **Language:** Python 3.8+
+* **Language:** Python 3.10
 
 
 * **Database:** PostgreSQL

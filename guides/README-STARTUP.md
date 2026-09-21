@@ -30,7 +30,7 @@ To stop the app, return to the command window and press **Ctrl+C**, then press a
 ## Troubleshooting
 
 ### "Python is not installed"
-- Install Python 3.8+ from https://www.python.org/
+- Install Python 3.10 from https://www.python.org/
 - **Important**: Check the box "Add Python to PATH" during installation
 - Restart your computer after installation
 
