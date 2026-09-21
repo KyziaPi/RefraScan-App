@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 selectedAction === "" || action.includes(selectedAction);
 
             const matchesUserType =
-                selectedUserType === "" || role.includes(selectedUserType.replace(/\s+/g, ""));
+                selectedUserType === "" || role.toLowerCase() === selectedUserType.replace(/\s+/g, "").toLowerCase()
 
             return matchesSearch && matchesAction && matchesUserType;
         });

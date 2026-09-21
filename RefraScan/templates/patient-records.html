@@ -64,22 +64,26 @@ RefraScan - LASIK Patient Records
 								<p class="table-row-text">{{ record.age }}</p>
 								<p class="table-row-text">{{ record.referred_from }}</p>
 								
-								<form class="table-row-buttons">
-									<input type="hidden" name="patient_id" id="patient-id" value="{{ record.id if record.id else '' }}">
-									<input type="hidden" name="encounter_id" id="encounter-id" value="{{ record.encounter_id if record.encounter_id else '' }}">
+								<div class="table-row-buttons">
+									<!-- View Record (GET Request) -->
+									<form action="/patient-record-detailed" method="GET" style="display:inline;">
+										<input type="hidden" name="id" value="{{ record.id if record.id else '' }}">
+										<button class="btn-view" type="submit">
+											<img src="{{ url_for('static', filename='assets/row-view.png') }}" alt="View" />
+										</button>
+									</form>
 
-									<button href="/patient-record-detailed" class="btn-view" 
-										formaction="/patient-record-detailed?id={{ record.id }}"
-										formethod="GET"
-										type="submit">
-										<img src="{{ url_for('static', filename='assets/row-view.png') }}" alt="View" />
-									</button>
 									{% if session.get('role') != 'user' %}
-									<button type="submit" class="btn-edit" style="border:none; background:transparent; cursor:pointer; padding:0;"
-										formaction="/add-patient"
-										formethod="POST">
-										<img src="{{ url_for('static', filename='assets/row-edit.png') }}" alt="Edit" />
-									</button>
+									<!-- Edit Record (POST Request) -->
+									<form action="/add-patient" method="POST" style="display:inline;">
+										<input type="hidden" name="patient_id" value="{{ record.id if record.id else '' }}">
+										<input type="hidden" name="encounter_id" value="{{ record.encounter_id if record.encounter_id else '' }}">
+										<button type="submit" class="btn-edit" style="border:none; background:transparent; cursor:pointer; padding:0;">
+											<img src="{{ url_for('static', filename='assets/row-edit.png') }}" alt="Edit" />
+										</button>
+									</form>
+
+									<!-- Delete Record -->
 									<button type="button" 
 											class="btn-delete"
 											data-popup="delete-confirmation-popup"
@@ -90,7 +94,7 @@ RefraScan - LASIK Patient Records
 										<img src="{{ url_for('static', filename='assets/row-delete.png') }}" alt="Delete" />
 									</button>
 									{% endif %}
-								</form>
+								</div>
 							</div>
 						{% endfor %}
 					{% endif %}
