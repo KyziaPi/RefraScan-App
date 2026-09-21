@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const patientId = hiddenIdInput ? hiddenIdInput.value : null;
 
     let newlyCreatedPatientId = null;
+    let newlyCreatedEncounterId = null;
 
     // Helper function to format date strings strictly to YYYY-MM-DD for <input type="date">
     function formatDateForInput(dateStr) {
@@ -191,6 +192,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (response.ok) {
                     const result = await response.json();
                     newlyCreatedPatientId = result.patient_id;
+                    newlyCreatedEncounterId = result.encounter_id;
                     
                     const msgEl = successPopup?.querySelector('#record-success-message');
                     if (msgEl) msgEl.textContent = 'Patient record has been saved successfully.';
@@ -211,21 +213,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const handleRedirect = () => {
         if (newlyCreatedPatientId) {
-            // Create a dynamic form element
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/patient-record-detailed';
-
-            // Add hidden input for the patient ID
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'id';
-            input.value = newlyCreatedPatientId;
-
-            // Append to DOM and submit
-            form.appendChild(input);
-            document.body.appendChild(form);
-            form.submit();
+            let redirectUrl = `/patient-record-detailed?patient_id=${newlyCreatedPatientId}`;
+            if (newlyCreatedEncounterId) {
+                redirectUrl += `&encounter_id=${newlyCreatedEncounterId}`;
+            }
+            window.location.href = redirectUrl;
         }
     };
 

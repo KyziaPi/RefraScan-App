@@ -1312,9 +1312,9 @@ def api_add_patient():
 
     # Track if this is an Edit or a New Record
     patient_id = data.get('patient_id')
-    encounter_id = data.get('id')
+    encounter_id = data.get('encounter_id')
     patient_code = data.get('patient_code')
-
+    
     # =========================================================
     # 1. PATIENTS (Master Demographics)
     # =========================================================
