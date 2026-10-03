@@ -75,7 +75,7 @@
     </div>
 
 
-    <!-- 3. Dynamic Delete Confirmation Popup -->
+    <!-- 3. Dynamic Deactivate Confirmation Popup -->
     <div class="popup-overlay popup-delete-confirmation" id="delete-confirmation-popup">
         <div class="popup-container">
 
@@ -86,7 +86,7 @@
 
             <div class="popup-content">
                 <p id="delete-confirmation-message">
-                    Do you really want to delete this <span id="delete-item-type">record</span>?
+                    Do you really want to make this <span id="delete-item-type">record</span> inactive?
                 </p>
             </div>
 
@@ -98,7 +98,7 @@
                 </button>
 
                 <button type="submit" class="btn-danger">
-                    Delete
+                    Make Inactive
                 </button>
             </form>
 
@@ -106,18 +106,73 @@
     </div>
 
 
-    <!-- 4. Dynamic Record Deleted Success Popup -->
+    <!-- Dynamic Record Deactivate Success Popup -->
     <div class="popup-overlay popup-record-deleted" id="record-deleted-popup">
         <div class="popup-container">
 
             <div class="popup-header">
-                <h2>Deleted</h2>
+                <h2>Deactivated Record</h2>
                 <button type="submit" class="popup-close">&times;</button>
             </div>
 
             <div class="popup-content">
                 <p id="record-deleted-message">
-                    Record has been deleted.
+                    Record has been made inactive.
+                </p>
+            </div>
+
+            <div class="popup-actions">
+                <button class="btn-primary popup-close-action">
+                    OK
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+        <!-- 4. Dynamic Reactivate Confirmation Popup -->
+    <div class="popup-overlay popup-reactivate-confirmation" id="reactivate-confirmation-popup">
+        <div class="popup-container">
+
+            <div class="popup-header">
+                <h2>Reactivate Record</h2>
+                <button type="button" class="popup-close">&times;</button>
+            </div>
+
+            <div class="popup-content">
+                <p id="delete-confirmation-message">
+                    Do you really want to make this <span id="delete-item-type">record</span> active?
+                </p>
+            </div>
+
+            <form class="popup-actions" id="reactivate-popup-form" action="/reactivate-patient" method="post">
+                <input type="hidden" name="item_id" id="delete-item-id" value="">
+                
+                <button type="button" class="btn-secondary popup-cancel">
+                    Cancel
+                </button>
+
+                <button type="submit" class="btn-success">
+                    Make Active
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+
+    <!-- Dynamic Record Deactivate Success Popup -->
+    <div class="popup-overlay popup-record-active" id="record-activated-popup">
+        <div class="popup-container">
+
+            <div class="popup-header">
+                <h2>Activated Record</h2>
+                <button type="submit" class="popup-close">&times;</button>
+            </div>
+
+            <div class="popup-content">
+                <p id="record-deleted-message">
+                    Record has been made active.
                 </p>
             </div>
 
@@ -528,8 +583,8 @@
                     <div class="form-field" style="margin-top: 1.5rem;">
                         <label for="edit-role-select" style="display: block; font-weight: 500; margin-bottom: 0.5rem;">Assigned Role</label>
                         <select id="edit-role-select" name="role" class="input-select" required>
-                            <option value="admin">Admin (View, Add, Edit, Delete Patients)</option>
-                            <option value="superadmin">Superadmin (View, Add, Edit, Delete Patients, and Moderation Capabilities)</option>
+                            <option value="admin">Admin (View, Add & Edit Patients)</option>
+                            <option value="superadmin">Superadmin (View, Add, Edit Patients, and Moderation Capabilities)</option>
                         </select>
                     </div>
                 </div>

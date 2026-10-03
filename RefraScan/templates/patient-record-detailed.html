@@ -35,14 +35,18 @@ RefraScan - Patient Record Details
             <input type="hidden" name="patient_id" value="{{ patient.patient_id }}">
             <input type="hidden" name="encounter_id" value="{{ patient.id }}">
             <button class="btn-primary" formaction="/add-patient" formmethod="POST" type="submit">Edit Record</button>
-            <button class="btn-danger" 
-                data-popup="delete-confirmation-popup"
-                data-item-type="Patient Record"
-                data-item-name="{{ patient.name }} ({{ patient.patient_code }})"
-                data-item-id="{{ patient.patient_id }}"
-                data-delete-url="/api/delete-patient/{{ patient.patient_id }}"
+            <button class="{{ 'btn-danger' if patient.status|lower == 'active' else 'btn-success' }}" 
+				data-popup="{{ 'delete-confirmation-popup' if patient.status|lower == 'active' else 'reactivate-confirmation-popup' }}"
+				data-item-type="Patient Record"
+				data-item-name="{{ patient.name }} ({{ patient.patient_code }})"
+				data-item-id="{{ patient.id }}"
+				data-delete-url="{{ '/api/delete-patient/' ~ patient.id if patient.status|lower == 'active' else '/api/reactivate-patient/' ~ patient.id }}"
                 type="button">
-                Delete Record
+                {% if patient.status|lower == 'active' %}
+                    Deactivate Record
+                {% else %}
+                    Activate Record
+                {% endif %}
             </button>
             {% endif %}
         </form>

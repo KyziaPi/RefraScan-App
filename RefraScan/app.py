@@ -1173,7 +1173,8 @@ def patient_records():
                 WHERE patient_id = p.id 
                 ORDER BY id DESC 
                 LIMIT 1
-            ) AS encounter_id
+            ) AS encounter_id,
+            p.status
         FROM patients p
         ORDER BY p.id DESC;
     """
@@ -1192,7 +1193,8 @@ def patient_records():
                 'name': record.get('full_name') or 'N/A',
                 'age': record.get('age') if record.get('age') is not None else 'N/A',
                 'referred_from': record.get('referred_from') or '—',
-                'encounter_id': record.get('encounter_id')
+                'encounter_id': record.get('encounter_id'),
+                'status': record.get('status') or 'Unknown'
             })
 
     return render_template(
@@ -1701,30 +1703,64 @@ def api_add_patient():
 @login_required
 @roles_required('admin', 'superadmin')
 def api_delete_patient(patient_id):
-    """API Endpoint to delete a patient record by ID."""
+    """API Endpoint to deactivate a patient record (soft delete)."""
     
-    # 1. Verify the patient exists before attempting deletion
-    check_sql = "SELECT id FROM patients WHERE id = %s;"
+    # 1. Verify the patient exists and check current status
+    check_sql = "SELECT id, status FROM patients WHERE id = %s;"
     res, status = db.select_rows(check_sql, (patient_id,), single=True)
     
     if status != 200 or not res.get_json():
         return jsonify({"error": "Patient record not found."}), 404
 
-    # 2. Delete the record from the database
-    # ON DELETE CASCADE in your schema automatically removes all 
-    # linked medical history, clinical encounters, refractions, and eye exams.
-    delete_sql = "DELETE FROM patients WHERE id = %s;"
-    db_response, db_status = db.delete_row(
-        purpose="Delete Patient Record",
-        query=delete_sql,
-        params=(patient_id,)
+    # 2. Update status to 'Inactive' instead of deleting the row
+    update_sql = """
+        UPDATE patients 
+        SET status = 'Inactive', updated_at = CURRENT_TIMESTAMP 
+        WHERE id = %s;
+    """
+    db_response, db_status = db.update_row(
+        purpose="Deactivate Patient Record",
+        query=update_sql,
+        values=(patient_id,)
     )
     
     if db_status == 200:
-        log_activity("DELETE", f"User {session['username']} deleted patient record with ID {patient_id}.")
-        return jsonify({"success": True, "message": "Patient record deleted successfully."}), 200
+        log_activity("DEACTIVATE", f"User {session['username']} set status of patient record ID {patient_id} to Inactive.")
+        return jsonify({"success": True, "message": "Patient record set to inactive successfully."}), 200
     else:
-        return jsonify({"error": "Failed to delete patient record."}), 500
+        return jsonify({"error": "Failed to deactivate patient record."}), 500
+    
+@app.route('/api/reactivate-patient/<int:patient_id>', methods=['PATCH'])
+@login_required
+@roles_required('admin', 'superadmin')
+def api_reactivate_patient(patient_id):
+    """API Endpoint to reactivate an inactive patient record."""
+    
+    # 1. Verify the patient exists
+    check_sql = "SELECT id, status FROM patients WHERE id = %s;"
+    res, status = db.select_rows(check_sql, (patient_id,), single=True)
+    
+    if status != 200 or not res.get_json():
+        return jsonify({"error": "Patient record not found."}), 404
+
+    # 2. Update status to 'Active'
+    update_sql = """
+        UPDATE patients 
+        SET status = 'Active', updated_at = CURRENT_TIMESTAMP 
+        WHERE id = %s;
+    """
+    db_response, db_status = db.update_row(
+        purpose="Reactivate Patient Record",
+        query=update_sql,
+        values=(patient_id,)
+    )
+    
+    if db_status == 200:
+        log_activity("ACTIVATE", f"User {session['username']} set status of patient record ID {patient_id} to Active.")
+        return jsonify({"success": True, "message": "Patient record reactivated successfully."}), 200
+    else:
+        return jsonify({"error": "Failed to reactivate patient record."}), 500
+
 
 @app.route('/api/save-follow-up', methods=['POST'])
 @login_required

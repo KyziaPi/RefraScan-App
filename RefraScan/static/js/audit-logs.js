@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 ipAddress.includes(query);
 
             const matchesAction =
-                selectedAction === "" || action.includes(selectedAction);
+                selectedAction === "" || action === selectedAction;
 
             const matchesUserType =
                 selectedUserType === "" || role.toLowerCase() === selectedUserType.replace(/\s+/g, "").toLowerCase()

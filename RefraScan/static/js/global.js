@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const deleteForm = document.getElementById("delete-popup-form");
     const hiddenIdInput = document.getElementById("delete-item-id");
+    const reactivateForm = document.getElementById("reactivate-popup-form");
 
     const importForm = document.querySelector("#import-csv-popup form");
     const conflictPopup = document.getElementById("import-conflict-popup");
@@ -86,13 +87,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     const itemId = button.dataset.itemId || "";
                     const deleteUrl = button.dataset.deleteUrl || "/delete-patient";
                     const redirectUrl = button.dataset.redirectUrl || "/patient-records";
+                    const isPatientRecordsPage = window.location.pathname.replace(/\/$/, "") === "/patient-records" || window.location.pathname.replace(/\/$/, "").includes("/patient-record-detailed");
 
                     // 1. Update confirmation message text
                     const confirmMsgEl = popup.querySelector("#delete-confirmation-message");
                     if (confirmMsgEl) {
-                        confirmMsgEl.innerHTML = itemName
-                            ? `Do you really want to delete <strong>${itemName}</strong>?`
-                            : `Do you really want to delete this <strong>${itemType}</strong>?`;
+                        confirmMsgEl.innerHTML = isPatientRecordsPage
+                            ? (itemName
+                                ? `Do you really want to make <strong>${itemName}</strong> inactive?`
+                                : `Do you really want to make this <strong>${itemType}</strong> inactive?`)
+                            : `Do you really want to delete <strong>${itemName}</strong>?`;
+                    }
+
+                    const deleteSubmitButton = popup.querySelector('#delete-popup-form button[type="submit"]');
+                    if (deleteSubmitButton) {
+                        deleteSubmitButton.textContent = isPatientRecordsPage ? "Make inactive" : "Delete";
                     }
 
                     // 2. Update form action URL and hidden input value
@@ -106,10 +115,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (successPopup) {
                         const deletedMsgEl = successPopup.querySelector("#record-deleted-message");
                         if (deletedMsgEl) {
-                            deletedMsgEl.textContent = `${itemType} has been deleted.`;
+                            deletedMsgEl.textContent = isPatientRecordsPage
+                                ? `${itemType} has been made inactive.`
+                                : `${itemType} has been deleted.`;
                         }
                         successPopup.action = redirectUrl;
                     }
+                }
+
+                if (popupId === "reactivate-confirmation-popup") {
+                    const itemId = button.dataset.itemId || "";
+                    const reactivateUrl = button.dataset.deleteUrl || "/api/reactivate-patient";
+
+                    if (reactivateForm) reactivateForm.action = reactivateUrl;
+
+                    const itemIdInput = popup.querySelector("#delete-item-id");
+                    if (itemIdInput) itemIdInput.value = itemId;
                 }
                 
                 // Check if opening the dynamic Edit Role modal
@@ -155,16 +176,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 // 1. IF ON DETAILED PAGE: Redirect back to records list or reload page
                 if (window.location.pathname.includes('patient-record-detailed')) {
-                    // If deleting a specific follow-up sheet item, reload page. Otherwise redirect.
-                    if (deleteUrl.includes('delete-follow-up')) {
-                        window.location.reload();
-                    } else {
-                        window.location.href = '/patient-records';
-                    }
+                    window.location.reload();
                     return;
                 }
 
-                // 2. IF ON MAIN TABLE PAGE: Remove row directly from DOM
+                // 2. IF ON PATIENT RECORDS PAGE: Reload to show the updated status
+                const isPatientRecordsPage = window.location.pathname.replace(/\/$/, "") === "/patient-records";
+                if (isPatientRecordsPage) {
+                    window.location.reload();
+                    return;
+                }
+
+                // 3. IF ON MAIN TABLE PAGE: Remove deleted rows directly from DOM
                 const deleteBtn = document.querySelector(`button[data-item-id="${itemId}"]`);
                 if (deleteBtn) {
                     const targetRow = deleteBtn.closest('.table-row');
@@ -186,6 +209,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error("Error deleting record:", error);
+            alert("An error occurred while communicating with the server.");
+        }
+    });
+
+    reactivateForm?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        try {
+            const response = await fetch(reactivateForm.action, { method: "PATCH" });
+            const result = await response.json();
+
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert(result.error || result.message || "Failed to reactivate record.");
+            }
+        } catch (error) {
+            console.error("Error reactivating record:", error);
             alert("An error occurred while communicating with the server.");
         }
     });

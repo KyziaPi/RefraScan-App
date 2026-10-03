@@ -5,6 +5,7 @@
 	--color-brand: #536c78;
 	--color-brand-strong: #1e293b;
 	--color-danger: #dc3545;
+	--color-danger-strong: #b02a37;
 	--color-success: #00a63e;
 	--color-success-strong: #00bc7d;
 	--color-warning: #f0b100;
@@ -290,7 +291,7 @@ textarea {
 	border-radius: 10px;
 }
 
-.btn-primary, .btn-secondary, .btn-danger {
+.btn-primary, .btn-secondary, .btn-danger, .btn-success {
     padding: 0.6em 1.2em;
     border-radius: var(--border-radius, 6px);
     font-size: 0.95em;
@@ -305,12 +306,17 @@ textarea {
 	color: var(--color-surface);
 }
 
-.btn-primary:hover, .btn-danger:hover {
+.btn-primary:hover, .btn-danger:hover, .btn-success:hover {
     filter: brightness(0.9);
 }
 
 .btn-danger {
 	background-color: var(--color-danger);
+	color: var(--color-surface);
+}
+
+.btn-success {
+	background-color: var(--color-success);
 	color: var(--color-surface);
 }
 

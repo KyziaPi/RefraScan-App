@@ -21,6 +21,7 @@ body {
 		minmax(12rem, 2fr)
         minmax(2rem, 0.4fr)
         minmax(12rem, 2fr)
+		minmax(4rem, 0.8fr)
         minmax(8rem, 0.6fr);
 	column-gap: 1rem;
 }

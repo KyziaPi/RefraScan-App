@@ -82,6 +82,7 @@ def create_database():
             "date" DATE NOT NULL DEFAULT CURRENT_DATE,
             occupation VARCHAR(255),
             language_spoken VARCHAR(100),
+            status VARCHAR(20) CHECK (status IN ('Active', 'Inactive')) DEFAULT 'Active',
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
@@ -263,7 +264,7 @@ def create_database():
             user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
             username VARCHAR(100),
             user_role VARCHAR(20),
-            action_type VARCHAR(20) NOT NULL CHECK (action_type IN ('VIEW', 'CREATE', 'EDIT', 'DELETE', 'LOGIN')),
+            action_type VARCHAR(20) NOT NULL CHECK (action_type IN ('VIEW', 'CREATE', 'EDIT', 'DELETE', 'DEACTIVATE', 'ACTIVATE' , 'LOGIN')),
             description TEXT NOT NULL,
             ip_address VARCHAR(45),
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP

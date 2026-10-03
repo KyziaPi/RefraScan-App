@@ -51,6 +51,7 @@ RefraScan - LASIK Patient Records
 					<p class="root-text">Full Name</p>
 					<p class="root-text">Age</p>
 					<p class="root-text">Referred From</p>
+					<p class="root-text">Status</p>
 					<p class="root-text">Action</p>
 				</div>
 
@@ -63,6 +64,7 @@ RefraScan - LASIK Patient Records
 								<p class="table-row-text">{{ record.name }}</p>								
 								<p class="table-row-text">{{ record.age }}</p>
 								<p class="table-row-text">{{ record.referred_from }}</p>
+								<p class="table-row-text">{{ record.status }}</p>
 								
 								<div class="table-row-buttons">
 									<!-- View Record (GET Request) -->
@@ -83,15 +85,15 @@ RefraScan - LASIK Patient Records
 										</button>
 									</form>
 
-									<!-- Delete Record -->
+									<!-- Deactivate Record -->
 									<button type="button" 
 											class="btn-delete"
-											data-popup="delete-confirmation-popup"
+											data-popup="{{ 'delete-confirmation-popup' if record.status|lower == 'active' else 'reactivate-confirmation-popup' }}"
 											data-item-type="Patient Record"
 											data-item-name="{{ record.name }} ({{ record.patient_code }})"
 											data-item-id="{{ record.id }}"
-											data-delete-url="/api/delete-patient/{{ record.id }}">
-										<img src="{{ url_for('static', filename='assets/row-delete.png') }}" alt="Delete" />
+											data-delete-url="{{ '/api/delete-patient/' ~ record.id if record.status|lower == 'active' else '/api/reactivate-patient/' ~ record.id }}">
+										<img src="{{ url_for('static', filename='assets/' ~ ('row-deactivate.png' if record.status|lower == 'active' else 'row-activate.png')) }}" alt="{{ 'Deactivate' if record.status|lower == 'active' else 'Activate' }}" />
 									</button>
 									{% endif %}
 								</div>

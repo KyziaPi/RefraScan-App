@@ -154,7 +154,8 @@
 
 .popup-actions .btn-primary,
 .popup-actions .btn-secondary,
-.popup-actions .btn-danger {
+.popup-actions .btn-danger,
+.popup-actions .btn-success {
     min-width: 8rem;
 }
 
@@ -163,6 +164,12 @@
 
 .popup-delete-confirmation .popup-header {
     background-color: var(--color-danger);
+}
+
+/* Reactivate Confirmation */
+
+.popup-reactivate-confirmation .popup-header {
+    background-color: var(--color-success);
 }
 
 /* =========================================================
