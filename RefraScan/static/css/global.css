@@ -226,7 +226,7 @@ textarea {
 .site-header__brand {
 	display: flex;
 	align-items: center;
-	gap: 3.2rem;
+	gap: 2rem;
 	flex-shrink: 0;
 }
 
@@ -588,7 +588,7 @@ textarea {
 }
 
 /* Container Query for width < 700px */
-@container site-header (width < 700px) {
+@container site-header (width < 850px) {
     .site-header__inner {
         display: flex;
         align-items: center;

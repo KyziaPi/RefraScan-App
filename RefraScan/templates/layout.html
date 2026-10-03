@@ -24,16 +24,17 @@
 					
 					<a class="site-header__brand-name" href="/">RefraScan</a>
 				</div>
-				
+				{% if session.get('user_id') %}
+				<a class="site-header__about-link link" href="/inference-engine">Inference Engine</a>
+				{% endif %}
 				<a class="site-header__about-link link" href="/about-the-study">About the Study</a>
 			</div>
 			
 			<div class="site-header__nav">
 				<!-- Link for Mobile Menu Only -->
-				<a class="site-header__nav-link mobile-only-link" href="/about-the-study">About the Study</a>
-
 				{% if session.get('user_id') %}
 					<!-- Logged In Links -->
+					<a class="site-header__nav-link mobile-only-link" href="/inference-engine">Inference Engine</a>
 					<a class="site-header__nav-link" href="/patient-records">Patient Records</a>
 					<a class="site-header__nav-link" href="/inference-history">Inference History</a>
 					<div class="dropdown">
@@ -56,6 +57,7 @@
 					<a class="site-header__nav-link" href="/register">Register</a>
 					<a class="site-header__nav-link" href="/forgot-password">Forgot Password</a>
 				{% endif %}
+				<a class="site-header__nav-link mobile-only-link" href="/about-the-study">About the Study</a>
 			</div>
 
 			<!-- Mobile Toggle Button (Visible < 610px) -->

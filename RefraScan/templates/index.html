@@ -1,0 +1,139 @@
+{% extends "layout.html" %}
+
+{% block title %}
+RefraScan - Inference Engine
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="/static/css/inference-engine.css" />
+<script src="{{ url_for('static', filename='js/dashboard-report.js') }}"></script>
+{% endblock %}
+
+{% block main %}
+
+		<div class="inference-engine-main-content section1">
+			<input type="hidden" id="user_id" name="user_id" value="{{ session.get('user_id') }}">
+			{% if session.get('user_id') and session.get('role') != 'user' %}
+			<section class="dashboard" aria-labelledby="dashboard-title">
+				<div class="dashboard__header">
+					<div>
+						<p class="dashboard__eyebrow">Operations overview</p>
+						<h1 id="dashboard-title" class="dashboard__title">Good day, {{ session.get('full_name') or session.get('username') }}.</h1>
+						<p class="dashboard__description">A current view of patient care activity and AI-assisted refractive status screening.</p>
+					</div>
+					<div class="dashboard__actions">
+						<button type="button" class="dashboard__report-trigger" id="dashboard-report-trigger">View detailed reports</button>
+						<a class="dashboard__action" href="/inference-engine">Start an inference <span aria-hidden="true">&rarr;</span></a>
+					</div>
+				</div>
+
+				<section class="dashboard-section" aria-labelledby="patient-records-summary-title">
+					<div class="dashboard-section__heading">
+						<div>
+							<p class="dashboard-section__label">Patient records</p>
+							<h2 id="patient-records-summary-title">Care volume</h2>
+						</div>
+						<a href="/patient-records">View records <span aria-hidden="true">&rarr;</span></a>
+					</div>
+					<div class="dashboard-metrics">
+						<div class="dashboard-metric dashboard-metric--featured"><span>Total patients</span><strong>{{ dashboard.patients.total|default(0) }}</strong><small>All registered records</small></div>
+						<div class="dashboard-metric"><span>Today</span><strong>{{ dashboard.patients.today|default(0) }}</strong><small>New patient records</small></div>
+						<div class="dashboard-metric"><span>This week</span><strong>{{ dashboard.patients.week|default(0) }}</strong><small>Patients catered</small></div>
+						<div class="dashboard-metric"><span>This month</span><strong>{{ dashboard.patients.month|default(0) }}</strong><small>Patients catered</small></div>
+					</div>
+					<p class="dashboard-section__footnote">{{ dashboard.patients.referral_sources|default(0) }} referral sources represented in the records.</p>
+				</section>
+
+				<section class="dashboard-section" aria-labelledby="inference-results-summary-title">
+					<div class="dashboard-section__heading">
+						<div>
+							<p class="dashboard-section__label">Inference results</p>
+							<h2 id="inference-results-summary-title">Screening activity</h2>
+						</div>
+						<a href="/inference-history">View history <span aria-hidden="true">&rarr;</span></a>
+					</div>
+					<div class="dashboard-metrics">
+						<div class="dashboard-metric dashboard-metric--featured"><span>Total inferences</span><strong>{{ dashboard.inferences.total|default(0) }}</strong><small>Recorded screening results</small></div>
+						<div class="dashboard-metric"><span>Today</span><strong>{{ dashboard.inferences.today|default(0) }}</strong><small>Results generated</small></div>
+						<div class="dashboard-metric"><span>This week</span><strong>{{ dashboard.inferences.week|default(0) }}</strong><small>Results generated</small></div>
+						<div class="dashboard-metric"><span>This month</span><strong>{{ dashboard.inferences.month|default(0) }}</strong><small>Results generated</small></div>
+					</div>
+					<div class="dashboard-results-breakdown" aria-label="Inference result breakdown">
+						<span><i class="dashboard-results-breakdown__dot dashboard-results-breakdown__dot--myopia"></i>Myopia <strong>{{ dashboard.inferences.myopia|default(0) }}</strong></span>
+						<span><i class="dashboard-results-breakdown__dot dashboard-results-breakdown__dot--hyperopia"></i>Hyperopia <strong>{{ dashboard.inferences.hyperopia|default(0) }}</strong></span>
+						<span><i class="dashboard-results-breakdown__dot dashboard-results-breakdown__dot--emmetropia"></i>Emmetropia <strong>{{ dashboard.inferences.emmetropia|default(0) }}</strong></span>
+					</div>
+				</section>
+
+                {% if session.get('role') == 'superadmin' %}
+				<div class="dashboard__footer-summary">
+                    <span>RefraScan accounts</span><strong>{{ dashboard.users.total_users|default(0) }}</strong><small>{{ dashboard.users.superadmins|default(0) }} super admins &middot; {{ dashboard.users.staff_admins|default(0) }} staff admins</small>
+                </div>
+                {% endif %}
+			</section>
+
+			<div class="dashboard-report-overlay" id="dashboard-report-popup" role="dialog" aria-modal="true" aria-labelledby="dashboard-report-title" aria-hidden="true">
+				<div class="dashboard-report" role="document">
+					<header class="dashboard-report__header">
+						<div>
+							<p class="dashboard__eyebrow">RefraScan report</p>
+							<h2 id="dashboard-report-title">Detailed dashboard insights</h2>
+							<p id="dashboard-report-generated" class="dashboard-report__generated"></p>
+						</div>
+						<button type="button" class="dashboard-report__close" id="dashboard-report-close" aria-label="Close report">&times;</button>
+					</header>
+					<div class="dashboard-report__body" id="dashboard-report-content">
+						<p class="dashboard-report__loading">Loading report details...</p>
+					</div>
+					<footer class="dashboard-report__actions">
+						<button type="button" class="dashboard-report__secondary" id="dashboard-report-close-action">Close</button>
+						<button type="button" class="dashboard-report__primary" id="dashboard-report-print">Print report</button>
+					</footer>
+				</div>
+			</div>
+			{% else %}
+			<section class="refrascan-landing" aria-labelledby="landing-title">
+				<div class="refrascan-landing__copy">
+					<p class="refrascan-landing__eyebrow">Clinical decision support for eye care</p>
+					<h1 id="landing-title" class="refrascan-landing__title">
+						See refractive status patterns with greater clarity.
+					</h1>
+					<p class="refrascan-landing__description">
+						RefraScan is a deep learning clinical decision support application for fundus image-based refractive status classification.
+					</p>
+					<div class="refrascan-landing__actions">
+						{% if not session.get('user_id') %}
+						<a class="btn-main refrascan-landing__primary hover-bright" href="/login">Login to RefraScan</a>
+						{% endif %}
+						<a class="refrascan-landing__secondary" href="/about-the-study">Learn about the study <span aria-hidden="true">&rarr;</span></a>
+					</div>
+				</div>
+
+				<div class="refrascan-landing__visual" aria-label="Fundus image analysis preview">
+					<div class="refrascan-landing__image-frame">
+						<img src="/static/assets/sample-fundus.png" alt="Sample fundus image" />
+					</div>
+					<div class="refrascan-landing__signal">
+						<span class="refrascan-landing__signal-dot"></span>
+						<span>AI-assisted screening</span>
+					</div>
+				</div>
+			</section>
+
+			<div class="refrascan-landing__features" aria-label="RefraScan capabilities">
+				<div class="refrascan-landing__feature">
+					<strong>01</strong>
+					<span>Fundus image-based classification</span>
+				</div>
+				<div class="refrascan-landing__feature">
+					<strong>02</strong>
+					<span>Explainable results for clinical review</span>
+				</div>
+				<div class="refrascan-landing__feature">
+					<strong>03</strong>
+					<span>Organized patient and inference records</span>
+				</div>
+			</div>
+            {% endif %}
+		</div>
+{% endblock %}

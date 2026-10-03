@@ -205,7 +205,7 @@ def login():
                 session['email'] = user['email']
 
                 log_activity("LOGIN", f"User {user['username']} logged in.")
-                return redirect(url_for('inference_engine'))
+                return redirect(url_for('index'))
 
         flash("Invalid username/email or password.", "error")
         return render_template("login.html", identity=identity)
@@ -500,7 +500,7 @@ def change_identity():
 @login_required
 def logout():
     session.clear()
-    return redirect("/login")
+    return redirect("/")
 
 # =========================================================
 # AUDIT LOGS VIEW (Superadmin Only)
@@ -580,6 +580,167 @@ def api_delete_user(user_id):
 
 
 @app.route("/", methods=["GET"])
+def index():
+    """Dashboard / Landing Page"""
+    dashboard = None
+
+    if session.get('user_id') and session.get('role') != 'user':
+        patient_query = """
+            SELECT COUNT(*) AS total,
+                   COUNT(*) FILTER (WHERE date = CURRENT_DATE) AS today,
+                   COUNT(*) FILTER (WHERE date >= DATE_TRUNC('week', CURRENT_DATE)::date) AS week,
+                   COUNT(*) FILTER (WHERE date >= DATE_TRUNC('month', CURRENT_DATE)::date) AS month,
+                   COUNT(DISTINCT referred_from) AS referral_sources
+            FROM patients;
+        """
+        inference_query = """
+            SELECT COUNT(*) AS total,
+                   COUNT(*) FILTER (WHERE screening_date = CURRENT_DATE) AS today,
+                   COUNT(*) FILTER (WHERE screening_date >= DATE_TRUNC('week', CURRENT_DATE)::date) AS week,
+                   COUNT(*) FILTER (WHERE screening_date >= DATE_TRUNC('month', CURRENT_DATE)::date) AS month,
+                   COUNT(*) FILTER (WHERE prediction_label = 'Myopia') AS myopia,
+                   COUNT(*) FILTER (WHERE prediction_label = 'Hyperopia') AS hyperopia,
+                   COUNT(*) FILTER (WHERE prediction_label = 'Emmetropia') AS emmetropia
+            FROM inference_history;
+        """
+        activity_query = """
+            SELECT COUNT(*) AS total_users,
+                   COUNT(*) FILTER (WHERE role = 'superadmin') AS superadmins,
+                   COUNT(*) FILTER (WHERE role = 'admin') AS staff_admins
+            FROM users;
+        """
+
+        def query_row(query):
+            response, status = db.select_rows(query, single=True)
+            if status != 200:
+                return {}
+            return response.get_json() if hasattr(response, 'get_json') else response
+
+        dashboard = {
+            'patients': query_row(patient_query),
+            'inferences': query_row(inference_query),
+            'users': query_row(activity_query)
+        }
+
+    return render_template("index.html", page="index", dashboard=dashboard)
+
+@app.route('/api/dashboard-report', methods=['GET'])
+@login_required
+@roles_required('admin', 'superadmin')
+def dashboard_report():
+    """Returns detailed dashboard insights for the printable report popup."""
+    summary_query = """
+        SELECT
+            (SELECT COUNT(*) FROM patients) AS total_patients,
+            (SELECT COUNT(*) FROM patients WHERE date = CURRENT_DATE) AS patients_today,
+            (SELECT COUNT(*) FROM patients WHERE date >= DATE_TRUNC('week', CURRENT_DATE)::date) AS patients_week,
+            (SELECT COUNT(*) FROM patients WHERE date >= DATE_TRUNC('month', CURRENT_DATE)::date) AS patients_month,
+            (SELECT ROUND(AVG(age)::numeric, 1)::float FROM patients WHERE age IS NOT NULL) AS average_age,
+            (SELECT COUNT(*) FROM patients WHERE gender = 'Male') AS male_patients,
+            (SELECT COUNT(*) FROM patients WHERE gender = 'Female') AS female_patients,
+            (SELECT COUNT(*) FROM patients WHERE gender = 'Other') AS other_patients,
+            (SELECT COUNT(*) FROM patients WHERE age < 18) AS pediatric_patients,
+            (SELECT COUNT(*) FROM patients WHERE age BETWEEN 18 AND 64) AS adult_patients,
+            (SELECT COUNT(*) FROM patients WHERE age >= 65) AS senior_patients,
+            (SELECT COUNT(*) FROM inference_history) AS total_inferences,
+            (SELECT COUNT(*) FROM inference_history WHERE screening_date = CURRENT_DATE) AS inferences_today,
+            (SELECT COUNT(*) FROM inference_history WHERE screening_date >= DATE_TRUNC('week', CURRENT_DATE)::date) AS inferences_week,
+            (SELECT COUNT(*) FROM inference_history WHERE screening_date >= DATE_TRUNC('month', CURRENT_DATE)::date) AS inferences_month,
+            (SELECT COUNT(*) FROM inference_history WHERE prediction_label = 'Myopia') AS myopia,
+            (SELECT COUNT(*) FROM inference_history WHERE prediction_label = 'Hyperopia') AS hyperopia,
+            (SELECT COUNT(*) FROM inference_history WHERE prediction_label IN ('Emmetropia', 'Normal')) AS emmetropia,
+            (SELECT COUNT(*) FROM inference_history WHERE patient_id IS NOT NULL) AS linked_inferences,
+            (SELECT COUNT(*) FROM inference_history WHERE patient_id IS NULL) AS unlinked_inferences,
+            (SELECT ROUND(100.0 * COUNT(*) FILTER (WHERE prediction_label = 'Myopia') / NULLIF(COUNT(*), 0), 1)::float FROM inference_history) AS myopia_percentage,
+            (SELECT ROUND(100.0 * COUNT(*) FILTER (WHERE prediction_label = 'Hyperopia') / NULLIF(COUNT(*), 0), 1)::float FROM inference_history) AS hyperopia_percentage,
+            (SELECT ROUND(100.0 * COUNT(*) FILTER (WHERE prediction_label IN ('Emmetropia', 'Normal')) / NULLIF(COUNT(*), 0), 1)::float FROM inference_history) AS emmetropia_percentage,
+            (SELECT ROUND(AVG(myopia_probability), 1)::float FROM inference_history) AS average_myopia_probability,
+            (SELECT ROUND(AVG(hyperopia_probability), 1)::float FROM inference_history) AS average_hyperopia_probability,
+            (SELECT ROUND(AVG(normal_probability), 1)::float FROM inference_history) AS average_emmetropia_probability,
+            (SELECT COUNT(*) FROM inference_history i WHERE i.encounter_id IS NOT NULL AND EXISTS (SELECT 1 FROM patient_diagnoses d WHERE d.encounter_id = i.encounter_id)) AS diagnosed_inferences,
+            (SELECT COUNT(*) FROM inference_history i WHERE i.encounter_id IS NOT NULL AND EXISTS (SELECT 1 FROM patient_diagnoses d WHERE d.encounter_id = i.encounter_id AND ((i.prediction_label = 'Myopia' AND d.diagnosis ILIKE '%%myopic%%') OR (i.prediction_label = 'Hyperopia' AND d.diagnosis ILIKE '%%hyperopic%%') OR (i.prediction_label IN ('Emmetropia', 'Normal') AND (d.diagnosis ILIKE '%%emmetropic%%' OR d.diagnosis ILIKE '%%normal%%'))))) AS concordant_inferences
+    """
+    occupation_query = """
+        SELECT INITCAP(LOWER(COALESCE(NULLIF(TRIM(p.occupation), ''), 'Not specified'))) AS occupation,
+               COUNT(DISTINCT p.id) AS patients,
+               COUNT(DISTINCT p.id) FILTER (WHERE d.diagnosis ILIKE '%%myop%%') AS myopic_patients,
+               COUNT(DISTINCT p.id) FILTER (WHERE d.diagnosis ILIKE '%%hyperop%%') AS hyperopic_patients,
+               COUNT(DISTINCT p.id) FILTER (WHERE d.diagnosis ILIKE '%%emmetrop%%') AS emmetropic_patients,
+               COUNT(DISTINCT p.id) FILTER (WHERE d.diagnosis ILIKE '%%astigmat%%') AS astigmatism_patients
+        FROM patients p
+        LEFT JOIN clinical_encounters ce ON ce.patient_id = p.id
+        LEFT JOIN patient_diagnoses d ON d.encounter_id = ce.id
+        GROUP BY INITCAP(LOWER(COALESCE(NULLIF(TRIM(p.occupation), ''), 'Not specified')))
+        ORDER BY patients DESC, occupation
+        LIMIT 10;
+    """
+    diagnosis_query = """
+        SELECT INITCAP(TRIM(diagnosis)) AS diagnosis, COUNT(*) AS diagnosis_count
+        FROM patient_diagnoses
+        GROUP BY INITCAP(TRIM(diagnosis))
+        ORDER BY diagnosis_count DESC, diagnosis
+        LIMIT 8;
+    """
+    corneal_query = """
+        SELECT CASE WHEN p.age < 18 THEN 'Pediatric' WHEN p.age BETWEEN 18 AND 64 THEN 'Adult' ELSE 'Senior' END AS age_group,
+               ROUND(AVG(ee.pachymetry), 2)::float AS average_pachymetry,
+               ROUND(AVG(ee.k1), 2)::float AS average_k1,
+               ROUND(AVG(ee.k2), 2)::float AS average_k2,
+               ROUND(AVG(ee.axis), 1)::float AS average_axis
+        FROM patients p
+        JOIN clinical_encounters ce ON ce.patient_id = p.id
+        JOIN eye_examinations ee ON ee.encounter_id = ce.id
+        WHERE p.age IS NOT NULL
+        GROUP BY age_group
+        ORDER BY age_group;
+    """
+    dominance_query = """
+        SELECT COUNT(*) FILTER (WHERE master_eye = 'OD') AS master_od,
+               COUNT(*) FILTER (WHERE master_eye = 'OS') AS master_os,
+               COUNT(*) FILTER (WHERE rifle_eye = 'OD') AS rifle_od,
+               COUNT(*) FILTER (WHERE rifle_eye = 'OS') AS rifle_os
+        FROM clinical_encounters;
+    """
+    systemic_query = """
+        SELECT INITCAP(TRIM(history.factor)) AS factor, COUNT(DISTINCT p.id) AS patient_count
+        FROM patients p
+        JOIN patient_medical_history pmh ON pmh.patient_id = p.id
+        CROSS JOIN LATERAL UNNEST(
+            COALESCE(pmh.family_history, ARRAY[]::text[]) || COALESCE(pmh.past_history, ARRAY[]::text[])
+        ) AS history(factor)
+        WHERE TRIM(history.factor) <> ''
+        GROUP BY INITCAP(TRIM(history.factor))
+        ORDER BY patient_count DESC, factor
+        LIMIT 8;
+    """
+
+    def report_rows(query, single=False):
+        response, status = db.select_rows(query, single=single)
+        if status != 200:
+            return None
+        return response.get_json() if hasattr(response, 'get_json') else response
+
+    summary = report_rows(summary_query, single=True)
+    occupations = report_rows(occupation_query)
+    diagnoses = report_rows(diagnosis_query)
+    corneal = report_rows(corneal_query)
+    dominance = report_rows(dominance_query, single=True)
+    systemic = report_rows(systemic_query)
+
+    if any(value is None for value in (summary, occupations, diagnoses, corneal, dominance, systemic)):
+        return jsonify({'error': 'Unable to load dashboard report data.'}), 500
+
+    return jsonify({
+        'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M'),
+        'summary': summary,
+        'occupations': occupations,
+        'diagnoses': diagnoses,
+        'corneal': corneal,
+        'dominance': dominance,
+        'systemic': systemic
+    })
+
+@app.route("/inference-engine", methods=["GET"])
 def inference_engine():
     """Inference Engine"""
     return render_template("inference-engine.html", page="inference_engine")

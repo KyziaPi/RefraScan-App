@@ -72,7 +72,7 @@ def create_database():
             last_name VARCHAR(100) NOT NULL,
             first_name VARCHAR(100) NOT NULL,
             middle_name VARCHAR(100),
-            gender VARCHAR(20) CHECK (gender IN ('Male', 'Female', 'Other')),
+            gender VARCHAR(20) CHECK (gender IN ('Male', 'Female')),
             birthdate DATE,
             age INTEGER,
             referred_from VARCHAR(255),
