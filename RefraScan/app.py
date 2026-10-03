@@ -20,6 +20,10 @@ import re
 import io
 import pandas as pd
 import uuid
+import subprocess
+import tempfile
+import shutil
+import glob
 from dotenv import load_dotenv
 import secrets
 from functools import wraps
@@ -39,6 +43,7 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY") or os.urandom(24)
+app.config['MAX_CONTENT_LENGTH'] = 512 * 1024 * 1024
 
 # --- MAIL CONFIGURATION ---
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
@@ -501,6 +506,133 @@ def change_identity():
 def logout():
     session.clear()
     return redirect("/")
+
+# =========================================================
+# DATABASE BACKUP & RESTORATION (Superadmin Only)
+# =========================================================
+def postgres_utility(name):
+    """Resolve a PostgreSQL client utility from PATH or PG_BIN_DIR."""
+    executable = f"{name}.exe" if os.name == "nt" else name
+    configured_dir = os.getenv("PG_BIN_DIR", "").strip()
+    if configured_dir:
+        return os.path.join(configured_dir, executable)
+
+    path_executable = shutil.which(executable)
+    if path_executable:
+        return path_executable
+
+    if os.name == "nt":
+        standard_paths = glob.glob(os.path.join(
+            os.environ.get("PROGRAMFILES", r"C:\Program Files"),
+            "PostgreSQL", "*", "bin", executable
+        ))
+        if standard_paths:
+            return sorted(standard_paths)[-1]
+
+    return executable
+
+
+def postgres_environment():
+    environment = os.environ.copy()
+    environment['PGPASSWORD'] = os.getenv('DB_PASSWORD', '')
+    return environment
+
+
+def postgres_arguments():
+    return [
+        '-h', os.getenv('DB_HOST', '127.0.0.1'),
+        '-p', os.getenv('DB_PORT', '5432'),
+        '-U', os.getenv('DB_USER', 'postgres'),
+        '-d', os.getenv('DB_NAME', 'refrascan_db')
+    ]
+
+
+@app.route("/database-backup", methods=["GET", "POST"])
+@login_required
+@roles_required('superadmin')
+def database_backup():
+    """Allow a superadmin to download or restore a PostgreSQL database backup."""
+    if request.method == "POST":
+        backup_file = request.files.get('backup_file')
+        if not backup_file or not backup_file.filename:
+            flash("Choose a PostgreSQL backup file to restore.", "error")
+            return redirect(url_for('database_backup'))
+
+        filename = secure_filename(backup_file.filename)
+        if not filename.lower().endswith(('.backup', '.dump')):
+            flash("Only .backup or .dump PostgreSQL files can be restored.", "error")
+            return redirect(url_for('database_backup'))
+
+        temporary_path = None
+        try:
+            with tempfile.NamedTemporaryFile(suffix='.dump', delete=False) as temporary_file:
+                temporary_path = temporary_file.name
+                backup_file.save(temporary_path)
+
+            restore_command = [
+                postgres_utility('pg_restore'), '--exit-on-error', '--clean', '--if-exists',
+                '--no-owner', '--no-acl', *postgres_arguments(), temporary_path
+            ]
+            result = subprocess.run(
+                restore_command, env=postgres_environment(), capture_output=True,
+                text=True, timeout=300, check=False
+            )
+            if result.returncode != 0:
+                error = (result.stderr or result.stdout or "Unknown restore error.").strip()
+                flash(f"Database restoration failed: {error[-500:]}", "error")
+            else:
+                log_activity("RESTORE", "Restored the database from a backup.")
+                flash("Database restored successfully. Please refresh the page.", "success")
+        except (OSError, subprocess.TimeoutExpired) as error:
+            flash(f"Database restoration could not be completed: {error}", "error")
+        finally:
+            if temporary_path and os.path.exists(temporary_path):
+                os.remove(temporary_path)
+
+        return redirect(url_for('database_backup'))
+
+    return render_template("database-backup.html", page="database_backup")
+
+
+@app.route("/database-backup/download", methods=["GET"])
+@login_required
+@roles_required('superadmin')
+def download_database_backup():
+    """Create and download a custom-format PostgreSQL backup."""
+    temporary_file = tempfile.NamedTemporaryFile(suffix='.dump', delete=False)
+    temporary_path = temporary_file.name
+    temporary_file.close()
+
+    def remove_temporary_backup(response):
+        if os.path.exists(temporary_path):
+            os.remove(temporary_path)
+        return response
+
+    try:
+        dump_command = [
+            postgres_utility('pg_dump'), '--format=custom', '--no-owner', '--no-acl',
+            *postgres_arguments(), '--file', temporary_path
+        ]
+        result = subprocess.run(
+            dump_command, env=postgres_environment(), capture_output=True,
+            text=True, timeout=300, check=False
+        )
+        if result.returncode != 0:
+            error = (result.stderr or result.stdout or "Unknown backup error.").strip()
+            flash(f"Database backup failed: {error[-500:]}", "error")
+            return redirect(url_for('database_backup'))
+
+        log_activity("BACKUP", "Downloaded a database backup.")
+        response = send_file(
+            temporary_path, as_attachment=True,
+            download_name=f"refrascan-backup-{datetime.now().strftime('%Y%m%d-%H%M%S')}.dump",
+            mimetype='application/octet-stream'
+        )
+        response.call_on_close(lambda: remove_temporary_backup(response))
+        return response
+    except (OSError, subprocess.TimeoutExpired) as error:
+        flash(f"Database backup could not be completed: {error}", "error")
+        return redirect(url_for('database_backup'))
 
 # =========================================================
 # AUDIT LOGS VIEW (Superadmin Only)

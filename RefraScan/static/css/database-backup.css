@@ -1,0 +1,125 @@
+.database-backup-page {
+    width: min(112rem, calc(100% - 4.8rem));
+    margin: 0 auto;
+    padding: 10rem 0 5rem;
+    text-align: left;
+}
+
+.database-backup-header {
+    max-width: 70rem;
+    margin-bottom: 3.2rem;
+}
+
+.database-backup-eyebrow {
+    margin: 0 0 0.8rem;
+    color: var(--color-brand);
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.12rem;
+    text-transform: uppercase;
+}
+
+.database-backup-header h1 {
+    margin: 0 0 1.2rem;
+    color: var(--color-text-strong);
+    font-size: clamp(2.8rem, 4vw, 4.2rem);
+    font-weight: 700;
+}
+
+.database-backup-intro,
+.database-backup-panel p {
+    color: var(--color-text-secondary);
+    font-size: 1.6rem;
+    line-height: 1.6;
+}
+
+.database-backup-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.4rem;
+}
+
+.database-backup-panel {
+    padding: 3.2rem;
+    border: 1px solid var(--color-border-soft);
+    border-top: 0.5rem solid var(--color-brand);
+    border-radius: 0.8rem;
+    background: var(--color-surface-alt);
+    box-shadow: var(--shadow-card);
+}
+
+.restore-panel { border-top-color: var(--color-danger); }
+
+.database-backup-panel-icon {
+    display: grid;
+    width: 4.4rem;
+    height: 4.4rem;
+    margin-bottom: 2rem;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--color-brand-light);
+    color: var(--color-brand-strong);
+    font-size: 2.8rem;
+    font-weight: 700;
+}
+
+.restore-panel .database-backup-panel-icon { background: #fde2e2; color: var(--color-danger-strong); }
+
+.database-backup-panel h2 {
+    margin: 0 0 0.8rem;
+    color: var(--color-text-strong);
+    font-size: 2.2rem;
+}
+
+.database-backup-panel p { min-height: 7.8rem; margin: 0 0 2.4rem; }
+
+.database-backup-button {
+    display: inline-block;
+    padding: 1.2rem 1.8rem;
+    border: 0;
+    border-radius: 0.6rem;
+    color: var(--color-surface);
+    cursor: pointer;
+    font: inherit;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+}
+
+.database-backup-button.primary { background: var(--color-brand-strong); }
+.database-backup-button.danger { background: var(--color-danger-strong); }
+.database-backup-button:hover { filter: brightness(1.12); }
+
+.database-backup-file-label {
+    display: block;
+    margin-bottom: 0.8rem;
+    color: var(--color-text-strong);
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.database-backup-panel input[type="file"] {
+    width: 100%;
+    margin-bottom: 1.8rem;
+    color: var(--color-text-secondary);
+    font-size: 1.4rem;
+}
+
+.database-backup-messages { margin-bottom: 2.4rem; }
+.database-backup-message { padding: 1.2rem 1.6rem; border-radius: 0.6rem; font-size: 1.5rem; }
+.database-backup-message.success { background: #e6f7ed; color: #146c38; }
+.database-backup-message.error { background: #fde2e2; color: #9f1d1d; }
+
+.database-backup-note {
+    margin: 2.4rem 0 0;
+    color: var(--color-text-muted);
+    font-size: 1.4rem;
+    line-height: 1.5;
+}
+
+@media (max-width: 700px) {
+    .database-backup-page { width: min(100% - 3.2rem, 52rem); padding-top: 9rem; }
+    .database-backup-grid { grid-template-columns: 1fr; }
+    .database-backup-panel p { min-height: 0; }
+}

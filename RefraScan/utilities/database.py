@@ -264,7 +264,7 @@ def create_database():
             user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
             username VARCHAR(100),
             user_role VARCHAR(20),
-            action_type VARCHAR(20) NOT NULL CHECK (action_type IN ('VIEW', 'CREATE', 'EDIT', 'DELETE', 'DEACTIVATE', 'ACTIVATE' , 'LOGIN')),
+            action_type VARCHAR(20) NOT NULL CHECK (action_type IN ('VIEW', 'CREATE', 'EDIT', 'DELETE', 'DEACTIVATE', 'ACTIVATE' , 'LOGIN', 'RESTORE', 'BACKUP')),
             description TEXT NOT NULL,
             ip_address VARCHAR(45),
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP

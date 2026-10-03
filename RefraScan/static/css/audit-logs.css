@@ -28,6 +28,9 @@
     .badge-log.delete { background-color: var(--color-danger); }
     .badge-log.deactivate { background-color: var(--color-danger-strong); }
     .badge-log.activate { background-color: var(--color-success-strong); }
+    .badge-log.backup { background-color: var(--color-info-strong); }
+    .badge-log.restore { background-color: var(--color-warning); }
+
 
 
 /* Screen width <= 1080px: Center the header title container */
