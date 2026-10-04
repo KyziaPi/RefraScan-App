@@ -546,6 +546,49 @@ def postgres_arguments():
     ]
 
 
+def drop_foreign_key_constraints_for_restore():
+    """Remove user-schema foreign keys that can block pg_restore's clean phase."""
+    drop_constraints_sql = """
+DO $$
+DECLARE
+    foreign_key RECORD;
+BEGIN
+    FOR foreign_key IN
+        SELECT
+            namespace.nspname AS schema_name,
+            table_name.relname AS table_name,
+            constraint_name.conname AS constraint_name
+        FROM pg_constraint AS constraint_name
+        JOIN pg_class AS table_name
+            ON table_name.oid = constraint_name.conrelid
+        JOIN pg_namespace AS namespace
+            ON namespace.oid = table_name.relnamespace
+        WHERE constraint_name.contype = 'f'
+          AND namespace.nspname NOT IN ('pg_catalog', 'information_schema')
+    LOOP
+        EXECUTE format(
+            'ALTER TABLE %I.%I DROP CONSTRAINT %I',
+            foreign_key.schema_name,
+            foreign_key.table_name,
+            foreign_key.constraint_name
+        );
+    END LOOP;
+END
+$$;
+"""
+    result = subprocess.run(
+        [
+            postgres_utility('psql'), '--set', 'ON_ERROR_STOP=1',
+            *postgres_arguments(), '--command', drop_constraints_sql
+        ],
+        env=postgres_environment(), capture_output=True,
+        text=True, timeout=300, check=False
+    )
+    if result.returncode != 0:
+        error = (result.stderr or result.stdout or "Unable to prepare the database for restore.").strip()
+        raise RuntimeError(error)
+
+
 @app.route("/database-backup", methods=["GET", "POST"])
 @login_required
 @roles_required('superadmin')
@@ -568,8 +611,10 @@ def database_backup():
                 temporary_path = temporary_file.name
                 backup_file.save(temporary_path)
 
+            drop_foreign_key_constraints_for_restore()
             restore_command = [
-                postgres_utility('pg_restore'), '--exit-on-error', '--clean', '--if-exists',
+                postgres_utility('pg_restore'), '--exit-on-error', '--single-transaction',
+                '--clean', '--if-exists',
                 '--no-owner', '--no-acl', *postgres_arguments(), temporary_path
             ]
             result = subprocess.run(
@@ -581,8 +626,8 @@ def database_backup():
                 flash(f"Database restoration failed: {error[-500:]}", "error")
             else:
                 log_activity("RESTORE", "Restored the database from a backup.")
-                flash("Database restored successfully. Please refresh the page.", "success")
-        except (OSError, subprocess.TimeoutExpired) as error:
+                flash("Database restored successfully. Please log out and log back in with the credentials you had on the restored database if it is different from the current ones.", "success")
+        except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
             flash(f"Database restoration could not be completed: {error}", "error")
         finally:
             if temporary_path and os.path.exists(temporary_path):
