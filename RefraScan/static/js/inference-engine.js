@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchResults = document.getElementById('search-results');
     const summaryCard = document.getElementById('patient-summary-card');
     const clearBtn = document.getElementById('clear-selected-patient');
-    const ageInput = document.getElementById('age');
 
     if (user_id) {
         // Trigger file input when the main button is clicked
@@ -152,7 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
             patientIdInput.value = '';
             if (encounterIdInput) encounterIdInput.value = '';
             searchInput.value = '';
-            ageInput.value = '';
             summaryCard.classList.add('hidden');
             searchInput.parentElement.classList.remove('hidden');
             
@@ -169,11 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('summary-name').textContent = `${patient.last_name}, ${patient.first_name}`;
         document.getElementById('summary-id').textContent = patient.patient_code;
         document.getElementById('summary-phone').textContent = patient.phone || 'N/A';
-        
-        // Auto-fill shared age field based on DB value
-        if (patient.age) {
-            ageInput.value = patient.age;
-        }
 
         searchInput.parentElement.classList.add('hidden');
         searchResults.classList.add('hidden');
