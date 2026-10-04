@@ -44,14 +44,14 @@ def make_gradcam_heatmap(model, image, metadata=None, class_index=None, layer_na
             layer_name = conv_layers[-1].name
 
     grad_model = tf.keras.models.Model(
-        inputs=model.inputs,
+        inputs=model.input if len(model.inputs) == 1 else model.inputs,
         outputs=[model.get_layer(layer_name).output, model.output],
     )
 
     
     # Support both image-only and image+age models. For image+age, the caller
     # should provide the actual scaled age value for the selected record.
-    if isinstance(model.input, list):
+    if len(model.inputs) > 1:
         if metadata is None:
             raise ValueError("metadata is required for Grad-CAM on an image+metadata model.")
         model_inputs = {
@@ -60,13 +60,9 @@ def make_gradcam_heatmap(model, image, metadata=None, class_index=None, layer_na
         }
         
     else:
-        # Wrap image array into dictionary using the input tensor's name
-        # .split(':')[0] ensures we strip any trailing tensor indices like ':0'
-        input_key = model.input.name.split(':')[0]  
-        model_inputs = {input_key: image}
+        model_inputs = image
 
     with tf.GradientTape() as tape:
-        # Pass formatted model_inputs dictionary
         conv_outputs, predictions = grad_model(model_inputs, training=False)
         
         if class_index is None:

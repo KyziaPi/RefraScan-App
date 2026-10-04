@@ -25,7 +25,6 @@ RefraScan - Inference Results
 					<input type="hidden" name="first_name" value="{{ first_name if first_name else '' }}">
 					<input type="hidden" name="last_name" value="{{ last_name if last_name else '' }}">
 					<input type="hidden" name="middle_name" value="{{ middle_name if middle_name else '' }}">
-					<input type="hidden" name="age" value="{{ age if age else '' }}">
 					<input type="hidden" name="phone" value="{{ phone if phone else '' }}">
 					<input type="hidden" name="email" value="{{ email if email else '' }}">
 				{% endif %}
@@ -54,22 +53,15 @@ RefraScan - Inference Results
 			</div>
 			
 			<div class="screening-result-table-container">
-				<!-- ID row -->
-				<div class="screening-result-table-container-id-row">
-					<p class="screening-result-table-container-text-id">
-						<b class="bold">ID: </b> {{ inference_id }}
-					</p>
-				</div>
-
 
 				<!-- Row 1 -->
 				<div class="screening-result-table-container-container1">
 					<p class="screening-result-table-container-text screening-result-table-container-text-left">
-						<b class="bold">Name: </b> {{ name }}
+						<b class="bold">ID: </b> {{ inference_id }}
 					</p>
 
 					<p class="screening-result-table-container-text1 text3">
-						Age:  <span class="sub-text"> {{ age }}</span>
+						Name: <span class="sub-text">{{ name }}</span>
 					</p>
 
 					<p class="screening-result-table-container-text screening-result-table-container-text-right">

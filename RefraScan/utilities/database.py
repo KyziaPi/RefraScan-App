@@ -210,7 +210,6 @@ def create_database():
             first_name VARCHAR(100) NOT NULL,
             middle_name VARCHAR(100),
             phone VARCHAR(50) NOT NULL,
-            age INTEGER NOT NULL,
             email VARCHAR(255),
             
             eye_side VARCHAR(10) CHECK (eye_side IN ('Right', 'Left', 'OD', 'OS')),

@@ -95,11 +95,10 @@ os.makedirs(TEMP_DIR, exist_ok=True)
 # Refractive Error class labels
 CLASS_NAMES = ["Emmetropia", "Myopia", "Hyperopia"]
 
-# Load Model and Scaler
+# Load Model
 model = keras.models.load_model("static/models/resnet50.keras",
                                 compile=False  # Bypasses custom loss (SparseCategoricalFocalLoss) & optimizer loading
                                 )
-scaler = joblib.load("static/models/scaler.joblib")
 
 input_names = [inp.name for inp in model.inputs]
 print(f"Model's input names: {input_names}")
@@ -905,15 +904,9 @@ def submit_inference():
             return jsonify({'error': 'Invalid or missing file format. Allowed: png, jpg, jpeg'}), 400
         
         # Check if shared fields are present
-        required_fields = ['age', 'eye_side']
+        required_fields = ['eye_side']
         if not all(request.form.get(field) for field in required_fields):
             return jsonify({'error': 'Missing required fields'}), 400
-        
-        # Safely parse numeric fields
-        try:
-            age = int(request.form.get('age'))
-        except (ValueError, TypeError):
-            return jsonify({'error': 'Age must be a valid integer'}), 400
         
         eye_side = request.form.get('eye_side')
         
@@ -999,14 +992,11 @@ def submit_inference():
             # Ensure batch dimension: shape becomes (1, Height, Width, Channels)
             if len(processed_img.shape) == 3:
                 processed_img = np.expand_dims(processed_img, axis=0)
-                
-            # Preprocess Age for model input
-            age_array = np.array([[age]], dtype=np.float32)
-            scaled_age = scaler.transform(age_array)
-            age_input = scaled_age
         
             # 5. Run inference
-            raw_preds = model.predict({"image_input": processed_img, "meta_input": age_input}, verbose=0)                   
+            # This model has a single image input. Passing a dictionary here
+            # changes the input structure and triggers a Keras warning.
+            raw_preds = model.predict(processed_img, verbose=0)
             # 6. Extract predictions & probabilities
             pred_idx = int(np.argmax(raw_preds))
                         
@@ -1033,7 +1023,6 @@ def submit_inference():
                 display_img=display_img,     # Used as the background canvas
                 output_folder=HEATMAP_FOLDER,
                 filename=img_filename,
-                metadata=scaled_age,
                 class_index=pred_idx,
                 alpha=0.4
             )
@@ -1041,16 +1030,16 @@ def submit_inference():
             # 8. Insert Record into PostgreSQL via add_row()
             insert_sql = """
                 INSERT INTO inference_history (
-                    patient_id, encounter_id, last_name, first_name, middle_name, phone, age, email,
+                    patient_id, encounter_id, last_name, first_name, middle_name, phone, email,
                     eye_side, prediction_label, myopia_probability,
                     hyperopia_probability, normal_probability,
                     image_name, original_image_path, heatmap_image_path
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING inference_id;
             """
                         
             db_values = (
-                patient_id, encounter_id, last_name, first_name, middle_name, phone, age, email,
+                patient_id, encounter_id, last_name, first_name, middle_name, phone, email,
                 eye_side, CLASS_NAMES[pred_idx], myopia_prob,
                 hyperopia_prob, normal_prob,
                 img_filename, relative_img_filepath, relative_heatmap_filepath
@@ -1136,7 +1125,7 @@ def inference_results(inference_id):
         SELECT 
             id as inf_id, inference_id, patient_id, encounter_id, last_name, first_name, middle_name,
             last_name || ', ' || first_name || COALESCE(' ' || LEFT(NULLIF(middle_name, ''), 1) || '.', '') AS "FullName",
-            phone, age, email, eye_side, 
+            phone, email, eye_side, 
             TO_CHAR(screening_date, 'MM-DD-YYYY') AS screening_date, prediction_label, myopia_probability, 
             hyperopia_probability, normal_probability, original_image_path, heatmap_image_path
         FROM inference_history
@@ -1175,8 +1164,7 @@ def inference_results(inference_id):
         middle_name=record.get('middle_name', ''),
         date=record.get('screening_date'),
         phone=record.get('phone', ''),
-        email=record.get('email', ''),
-        age=record.get('age', ''),
+        email=record.get('email', '') or "N/A",
         eye_side=record.get('eye_side'),
         prediction=pred_label,
         confidence=f"{confidence:.2f}%",
@@ -1193,7 +1181,7 @@ def inference_history():
     """Inference History View"""
     select_sql = """
         SELECT
-            inference_id, age, eye_side, 
+            inference_id, eye_side, 
             TO_CHAR(screening_date, 'MM-DD-YYYY') AS screening_date, 
             prediction_label,
             last_name || ', ' || first_name || COALESCE(' ' || LEFT(NULLIF(middle_name, ''), 1) || '.', '') AS "FullName",
@@ -1234,7 +1222,6 @@ def inference_history():
             formatted_records.append({
                 'inference_id': record.get('inference_id'),
                 'name': record.get('fullname') or record.get('FullName') or 'N/A',
-                'age': record.get('age'),
                 'eye_side': record.get('eye_side'),
                 'date': formatted_date,
                 'prediction': record.get('prediction_label'),
@@ -1528,7 +1515,6 @@ def add_patient():
             "first_name": request.form.get("first_name", ""),
             "last_name": request.form.get("last_name", ""),
             "middle_name": request.form.get("middle_name", ""),
-            "age": request.form.get("age", ""),
             "phone": request.form.get("phone", ""),
             "email": request.form.get("email", "")
         }
