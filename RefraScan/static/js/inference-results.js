@@ -7,9 +7,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const barBgElement = document.querySelector(`.container-${cls}-bar-bg`) || document.querySelector(`.${cls} .container-${cls}-bar-bg`);
 
         if (probElement && barBgElement) {
-            let probValue = parseFloat(probElement.textContent.trim()) || 0;
+            const textContent = probElement.textContent.trim();
+            const hasPercentSign = textContent.includes('%');
+            let probValue = parseFloat(textContent) || 0;
 
-            if (probValue <= 1.0) {
+            // Only multiply by 100 if it's a decimal probability (0.0 to 1.0) and DOES NOT have a '%' sign
+            if (!hasPercentSign && probValue <= 1.0) {
                 probValue *= 100;
             }
 

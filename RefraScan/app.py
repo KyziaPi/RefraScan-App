@@ -955,9 +955,17 @@ def submit_inference():
         
         eye_side = request.form.get('eye_side')
         
-        # 3. Save Original Upload file
-        img_filename = secure_filename(file.filename)
+        # 3. Save Original Upload file with datetime prefix
+        original_name = secure_filename(file.filename)
+        name_only, ext = os.path.splitext(original_name)
+
+        # Generate timestamp string (e.g., 20261007_220147)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        # Combine timestamp with clean original filename
+        img_filename = f"{timestamp}_{name_only}{ext}"
         img_filepath = os.path.join(UPLOAD_FOLDER, img_filename)
+
         file.save(img_filepath)
         
         # Initialize variables
@@ -1238,7 +1246,7 @@ def inference_history():
                 ELSE 0
             END AS predicted_probability
         FROM inference_history
-        ORDER BY screening_date DESC;
+        ORDER BY inference_id DESC;
     """
     response, status_code = db.select_rows(query=select_sql, params=())
     
