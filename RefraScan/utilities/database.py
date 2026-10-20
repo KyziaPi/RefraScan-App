@@ -417,8 +417,6 @@ def delete_table():
         "clinical_encounters",
         "patients",
         "patient_diagnoses",
-        "users",
-        "account_activity_logs"
     ]
     
     try:

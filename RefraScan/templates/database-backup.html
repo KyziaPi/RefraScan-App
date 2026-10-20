@@ -27,17 +27,17 @@
         <section class="database-backup-panel">
             <div class="database-backup-panel-icon" aria-hidden="true">↓</div>
             <h2>Download a backup</h2>
-            <p>Creates a custom-format archive containing the current database, including patient records, inference history, and user accounts.</p>
+            <p>Creates an archive containing the current database, uploaded fundus images, heatmaps, and user accounts.</p>
             <a class="database-backup-button primary" href="{{ url_for('download_database_backup') }}">Download database backup</a>
         </section>
 
         <section class="database-backup-panel restore-panel">
             <div class="database-backup-panel-icon" aria-hidden="true">↑</div>
             <h2>Restore a backup</h2>
-            <p>Restoration replaces the current database contents with the selected archive. Use only a backup created for RefraScan.</p>
+            <p>Restoration replaces the current database contents and uploaded images with the selected archive. User accounts and activity logs are preserved.</p>
             <form method="post" enctype="multipart/form-data" onsubmit="return confirm('Restore this database backup? Current database contents will be replaced.');">
                 <label class="database-backup-file-label" for="backup-file">PostgreSQL backup file</label>
-                <input id="backup-file" name="backup_file" type="file" accept=".backup,.dump" required>
+                <input id="backup-file" name="backup_file" type="file" accept=".backup,.dump,.zip" required>
                 <button class="database-backup-button danger" type="submit">Restore database</button>
             </form>
         </section>

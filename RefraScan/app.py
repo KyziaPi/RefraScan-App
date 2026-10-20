@@ -24,6 +24,7 @@ import subprocess
 import tempfile
 import shutil
 import glob
+import zipfile
 from dotenv import load_dotenv
 import secrets
 from functools import wraps
@@ -34,7 +35,7 @@ from utilities.explainability import generate_and_save_gradcam
 
 
 # Create database 
-#db.delete_table()
+db.delete_table()
 db.create_database()
 #db.add_dummy_data()
 
@@ -547,7 +548,7 @@ def postgres_arguments():
 
 
 def drop_foreign_key_constraints_for_restore():
-    """Remove user-schema foreign keys that can block pg_restore's clean phase."""
+    """Remove restorable foreign keys that can block pg_restore's clean phase."""
     drop_constraints_sql = """
 DO $$
 DECLARE
@@ -565,6 +566,7 @@ BEGIN
             ON namespace.oid = table_name.relnamespace
         WHERE constraint_name.contype = 'f'
           AND namespace.nspname NOT IN ('pg_catalog', 'information_schema')
+          AND table_name.relname NOT IN ('users', 'account_activity_logs')
     LOOP
         EXECUTE format(
             'ALTER TABLE %I.%I DROP CONSTRAINT %I',
@@ -589,6 +591,61 @@ $$;
         raise RuntimeError(error)
 
 
+def create_restore_list(backup_path):
+    """Create a pg_restore list that omits the protected account tables."""
+    result = subprocess.run(
+        [postgres_utility('pg_restore'), '--list', backup_path],
+        env=postgres_environment(), capture_output=True,
+        text=True, timeout=300, check=False
+    )
+    if result.returncode != 0:
+        error = (result.stderr or result.stdout or "Unable to inspect the backup archive.").strip()
+        raise RuntimeError(error)
+
+    protected_objects = ('users', 'account_activity_logs', 'citext')
+    restore_entries = []
+    for entry in result.stdout.splitlines():
+        if entry.startswith(';'):
+            restore_entries.append(entry)
+            continue
+
+        description = entry.partition('; ')[2]
+        if any(re.search(rf'(^| ){re.escape(name)}($|[ _])', description)
+               for name in protected_objects):
+            continue
+        restore_entries.append(entry)
+
+    restore_list = tempfile.NamedTemporaryFile(
+        mode='w', suffix='.list', delete=False, encoding='utf-8'
+    )
+    try:
+        restore_list.write('\n'.join(restore_entries))
+    finally:
+        restore_list.close()
+    return restore_list.name
+
+
+def add_folder_to_archive(archive, folder_path, archive_folder):
+    if not os.path.isdir(folder_path):
+        return
+    for root, _, filenames in os.walk(folder_path):
+        for filename in filenames:
+            file_path = os.path.join(root, filename)
+            archive_name = os.path.join(
+                archive_folder, os.path.relpath(file_path, folder_path)
+            )
+            archive.write(file_path, archive_name)
+
+
+def extract_backup_archive(archive_path, extraction_path):
+    with zipfile.ZipFile(archive_path) as archive:
+        for member in archive.infolist():
+            member_path = os.path.abspath(os.path.join(extraction_path, member.filename))
+            if os.path.commonpath((os.path.abspath(extraction_path), member_path)) != os.path.abspath(extraction_path):
+                raise RuntimeError("The backup archive contains an unsafe file path.")
+        archive.extractall(extraction_path)
+
+
 @app.route("/database-backup", methods=["GET", "POST"])
 @login_required
 @roles_required('superadmin')
@@ -601,21 +658,41 @@ def database_backup():
             return redirect(url_for('database_backup'))
 
         filename = secure_filename(backup_file.filename)
-        if not filename.lower().endswith(('.backup', '.dump')):
-            flash("Only .backup or .dump PostgreSQL files can be restored.", "error")
+        if not filename.lower().endswith(('.backup', '.dump', '.zip')):
+            flash("Only .backup, .dump, or .zip backup files can be restored.", "error")
             return redirect(url_for('database_backup'))
 
         temporary_path = None
+        restore_list_path = None
+        backup_extraction_path = None
+        image_backup_path = None
         try:
-            with tempfile.NamedTemporaryFile(suffix='.dump', delete=False) as temporary_file:
+            archive_upload = filename.lower().endswith('.zip')
+            with tempfile.NamedTemporaryFile(
+                suffix='.zip' if archive_upload else '.dump', delete=False
+            ) as temporary_file:
                 temporary_path = temporary_file.name
                 backup_file.save(temporary_path)
 
+            if archive_upload:
+                backup_extraction_path = tempfile.mkdtemp(prefix='refrascan-restore-')
+                extract_backup_archive(temporary_path, backup_extraction_path)
+                database_dump_path = os.path.join(backup_extraction_path, 'database.dump')
+                image_backup_path = os.path.join(backup_extraction_path, 'images')
+                if not os.path.isfile(database_dump_path):
+                    raise RuntimeError("The backup archive does not contain database.dump.")
+                if not os.path.isdir(image_backup_path):
+                    raise RuntimeError("The backup archive does not contain uploaded images.")
+            else:
+                database_dump_path = temporary_path
+
             drop_foreign_key_constraints_for_restore()
+            restore_list_path = create_restore_list(database_dump_path)
             restore_command = [
                 postgres_utility('pg_restore'), '--exit-on-error', '--single-transaction',
                 '--clean', '--if-exists',
-                '--no-owner', '--no-acl', *postgres_arguments(), temporary_path
+                '--use-list', restore_list_path, '--no-owner', '--no-acl',
+                *postgres_arguments(), database_dump_path
             ]
             result = subprocess.run(
                 restore_command, env=postgres_environment(), capture_output=True,
@@ -625,13 +702,33 @@ def database_backup():
                 error = (result.stderr or result.stdout or "Unknown restore error.").strip()
                 flash(f"Database restoration failed: {error[-500:]}", "error")
             else:
+                if image_backup_path:
+                    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+                    os.makedirs(HEATMAP_FOLDER, exist_ok=True)
+                    for folder_path in (UPLOAD_FOLDER, HEATMAP_FOLDER):
+                        for entry in os.listdir(folder_path):
+                            entry_path = os.path.join(folder_path, entry)
+                            if os.path.isfile(entry_path):
+                                os.remove(entry_path)
+                    shutil.copytree(
+                        os.path.join(image_backup_path, 'images'),
+                        UPLOAD_FOLDER, dirs_exist_ok=True
+                    )
+                    shutil.copytree(
+                        os.path.join(image_backup_path, 'heatmaps'),
+                        HEATMAP_FOLDER, dirs_exist_ok=True
+                    )
                 log_activity("RESTORE", "Restored the database from a backup.")
-                flash("Database restored successfully. Please log out and log back in with the credentials you had on the restored database if it is different from the current ones.", "success")
+                flash("Database restored successfully.", "success")
         except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
             flash(f"Database restoration could not be completed: {error}", "error")
         finally:
             if temporary_path and os.path.exists(temporary_path):
                 os.remove(temporary_path)
+            if restore_list_path and os.path.exists(restore_list_path):
+                os.remove(restore_list_path)
+            if backup_extraction_path and os.path.exists(backup_extraction_path):
+                shutil.rmtree(backup_extraction_path)
 
         return redirect(url_for('database_backup'))
 
@@ -646,6 +743,7 @@ def download_database_backup():
     temporary_file = tempfile.NamedTemporaryFile(suffix='.dump', delete=False)
     temporary_path = temporary_file.name
     temporary_file.close()
+    archive_path = f"{temporary_path}.zip"
 
     def remove_temporary_backup(response):
         if os.path.exists(temporary_path):
@@ -667,15 +765,26 @@ def download_database_backup():
             return redirect(url_for('database_backup'))
 
         log_activity("BACKUP", "Downloaded a database backup.")
+        with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as archive:
+            archive.write(temporary_path, 'database.dump')
+            add_folder_to_archive(archive, UPLOAD_FOLDER, 'images/images')
+            add_folder_to_archive(archive, HEATMAP_FOLDER, 'images/heatmaps')
+
         response = send_file(
-            temporary_path, as_attachment=True,
-            download_name=f"refrascan-backup-{datetime.now().strftime('%Y%m%d-%H%M%S')}.dump",
-            mimetype='application/octet-stream'
+            archive_path, as_attachment=True,
+            download_name=f"refrascan-backup-{datetime.now().strftime('%Y%m%d-%H%M%S')}.zip",
+            mimetype='application/zip'
         )
-        response.call_on_close(lambda: remove_temporary_backup(response))
+        response.call_on_close(lambda: (
+            os.path.exists(temporary_path) and os.remove(temporary_path),
+            os.path.exists(archive_path) and os.remove(archive_path)
+        ))
         return response
     except (OSError, subprocess.TimeoutExpired) as error:
         flash(f"Database backup could not be completed: {error}", "error")
+        for path in (temporary_path, archive_path):
+            if os.path.exists(path):
+                os.remove(path)
         return redirect(url_for('database_backup'))
 
 # =========================================================
