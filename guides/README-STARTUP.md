@@ -3,6 +3,8 @@
 ## First Time Setup
 
 ### Step 1: Initial Setup (One-Time Only)
+Before running setup, install [Git LFS](https://git-lfs.com/).
+
 1. Double-click **SETUP.bat**
 2. Follow the prompts to create the virtual environment
 3. This will install all required dependencies from `requirements.txt` and create a `.env` file

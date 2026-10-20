@@ -64,7 +64,7 @@ RefraScan-App/
 
 ### 1. Initial Setup
 
-Run `tools\SETUP.bat` once to create the local Python virtual environment (`.venv`), install required packages from `requirements.txt` and create a `.env` file.
+Install [Git LFS](https://git-lfs.com/). Run `tools\SETUP.bat` once to create the local Python virtual environment (`.venv`), install required packages from `requirements.txt` and create a `.env` file.
 
 ### 2. Configuration
 

@@ -6,6 +6,10 @@ Allows multiple computers on your network to:
 - Access the same uploads folder (all images available to everyone)
 - Run the app independently on different machines
 
+## Prerequisites
+
+- [Git LFS](https://git-lfs.com/) installed on every computer that runs the app
+
 ## Quick Setup (5 Steps)
 
 ### Step 1: On Server Machine - Share Uploads Folder

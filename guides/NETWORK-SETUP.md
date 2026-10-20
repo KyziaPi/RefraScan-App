@@ -11,6 +11,7 @@ This guide enables multiple computers on the same network to:
 - Server machine: Has database and shared folders
 - Client machines: Can access server's shared resources
 - Windows/network sharing enabled on server
+- [Git LFS](https://git-lfs.com/) installed on every computer that runs the app;
 
 ---
 

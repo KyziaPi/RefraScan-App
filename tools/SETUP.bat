@@ -8,6 +8,26 @@ REM Get the directory where this batch file is located
 set "SCRIPT_DIR=%~dp0"
 cd /d "%SCRIPT_DIR%..\Refrascan"
 
+REM Ensure Git LFS is installed and hooked into Git
+git lfs install
+if errorlevel 1 (
+    echo ERROR: Git LFS is not installed or could not be initialized
+    echo Please install Git LFS from https://git-lfs.com/
+    echo.
+    pause
+    exit /b 1
+)
+
+REM Pull the actual large binary files from the GitHub repository
+git lfs pull
+if errorlevel 1 (
+    echo ERROR: Failed to pull Git LFS files
+    echo Please check your GitHub access and network connection
+    echo.
+    pause
+    exit /b 1
+)
+
 echo.
 echo ============================================================
 echo RefraScan App - First Time Setup

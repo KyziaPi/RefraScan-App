@@ -61,6 +61,7 @@ Multiple Client PCs (Read & Write same data)
 - All computers on same network (same WiFi/LAN)
 - Server machine: Runs database and shares upload folders
 - Client machines: Access server's data
+- [Git LFS](https://git-lfs.com/) installed on every computer that runs the app;
 
 ### Setup Overview (Detailed in NETWORK-QUICK-START.md)
 
