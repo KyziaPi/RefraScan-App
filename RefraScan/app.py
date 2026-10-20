@@ -35,7 +35,7 @@ from utilities.explainability import generate_and_save_gradcam
 
 
 # Create database 
-db.delete_table()
+#db.delete_table()
 db.create_database()
 #db.add_dummy_data()
 
