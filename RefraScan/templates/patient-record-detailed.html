@@ -39,8 +39,8 @@ RefraScan - Patient Record Details
 				data-popup="{{ 'delete-confirmation-popup' if patient.status|lower == 'active' else 'reactivate-confirmation-popup' }}"
 				data-item-type="Patient Record"
 				data-item-name="{{ patient.name }} ({{ patient.patient_code }})"
-				data-item-id="{{ patient.id }}"
-				data-delete-url="{{ '/api/delete-patient/' ~ patient.id if patient.status|lower == 'active' else '/api/reactivate-patient/' ~ patient.id }}"
+				data-item-id="{{ patient.patient_id }}"
+				data-delete-url="{{ '/api/delete-patient/' ~ patient.patient_id if patient.status|lower == 'active' else '/api/reactivate-patient/' ~ patient.patient_id }}"
                 type="button">
                 {% if patient.status|lower == 'active' %}
                     Deactivate Record

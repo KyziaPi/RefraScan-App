@@ -22,8 +22,19 @@ body {
         minmax(2rem, 0.4fr)
         minmax(12rem, 2fr)
 		minmax(4rem, 0.8fr)
-        minmax(8rem, 0.6fr);
+        minmax(8rem, 0.8fr);
 	column-gap: 1rem;
+}
+
+.table-row-buttons .btn-delete {
+	width: 2.5em;
+	height: 1.25em;
+	box-sizing: border-box;
+}
+
+.table-row-buttons .btn-delete img {
+	width: 2.5em;
+	height: 1.25em;
 }
 
 /* input-group-container-b */
